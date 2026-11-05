@@ -21,13 +21,13 @@ const Home = () => {
 
       <View style={styles.actions}>
         <Link href="/login" asChild>
-          <Pressable style={[styles.button, styles.loginButton]}>
+          <Pressable style={StyleSheet.flatten([styles.button, styles.loginButton])}>
             <Text style={styles.loginButtonText}>Log In</Text>
           </Pressable>
         </Link>
 
         <Link href="/register" asChild>
-          <Pressable style={[styles.button, styles.createButton]}>
+          <Pressable style={StyleSheet.flatten([styles.button, styles.createButton])}>
             <Text style={styles.createButtonText}>Create Account</Text>
           </Pressable>
         </Link>

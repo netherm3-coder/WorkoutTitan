@@ -2,6 +2,8 @@ import { StyleSheet, Text, View, Pressable, TextInput, Keyboard, KeyboardAvoidin
 import React, { useState } from 'react'
 import { Link, useRouter } from 'expo-router'
 import { useUser } from '../../hooks/useUser'
+import { sendPasswordResetEmail } from 'firebase/auth'
+import { auth } from '../../lib/firebaseConfig'
 import ScreenBackground from '../../components/ScreenBackground'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -9,12 +11,34 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [info, setInfo] = useState(null)
 
   const { login } = useUser()
   const router = useRouter()
 
+  const handleReset = async () => {
+    setError(null)
+    setInfo(null)
+    const trimmed = email.trim()
+    if (!trimmed) {
+      setError('Enter your email above first')
+      return
+    }
+    try {
+      await sendPasswordResetEmail(auth, trimmed)
+      setInfo('If this email is registered, a reset link has been sent. Check your inbox and spam.')
+    } catch (e) {
+      if (e.message.includes('auth/invalid-email')) {
+        setError('Email address is invalid')
+        return
+      }
+      setError('Could not send reset email. Try again later.')
+    }
+  }
+
   const handleSubmit = async () => {
     setError(null)
+    setInfo(null)
 
     try {
       await login(email, password)
@@ -94,9 +118,14 @@ const Login = () => {
                 />
 
                 {error ? <Text style={styles.error}>{error}</Text> : null}
+                {info ? <Text style={styles.info}>{info}</Text> : null}
 
                 <Pressable style={styles.primaryButton} onPress={handleSubmit}>
                   <Text style={styles.primaryButtonText}>Log In</Text>
+                </Pressable>
+
+                <Pressable style={styles.forgotButton} onPress={handleReset}>
+                  <Text style={styles.forgotText}>Forgot password?</Text>
                 </Pressable>
 
                 <Link href="/register" asChild>
@@ -185,6 +214,26 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 12,
     marginBottom: 14,
+  },
+  info: {
+    color: '#2f5a2a',
+    backgroundColor: '#dcefd5',
+    borderWidth: 1,
+    borderColor: '#a9cf9c',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
+  },
+  forgotButton: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  forgotText: {
+    color: '#723a45',
+    fontSize: 14,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   primaryButton: {
     backgroundColor: '#723a45',

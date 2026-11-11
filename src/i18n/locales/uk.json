@@ -29,7 +29,195 @@
     "title": "Досягнення",
     "subtitle": "Нагороди за рекорди",
     "emptyTitle": "Досягнень ще немає",
-    "emptyBody": "Тут з'являться нагороди за твої рекорди."
+    "emptyBody": "Тут з'являться нагороди за твої рекорди.",
+    "categories": {
+      "all": "Усі",
+      "strength": "Силові",
+      "speed": "Швидкість",
+      "endurance": "Витривалість",
+      "sober": "Тверезість",
+      "general": "Загальні",
+      "progress": "Прогресія"
+    },
+    "ladders": {
+      "pullups": "Підтягування",
+      "bench": "Жим лежачи",
+      "sober": "Тверезість",
+      "volume": "Обсяг записів",
+      "streak": "Серія днів",
+      "run1km": "1 км на час"
+    },
+    "items": {
+      "first_pullup": {
+        "name": "Перший Pull-up",
+        "description": "Перший запис у підтягуваннях"
+      },
+      "ten_pullups": {
+        "name": "10 підтягувань",
+        "description": "10 повторень в одному підході"
+      },
+      "twenty_pullups": {
+        "name": "20 підтягувань",
+        "description": "20 повторень в одному підході"
+      },
+      "fifty_pullups": {
+        "name": "50 підтягувань",
+        "description": "50 повторень в одному підході"
+      },
+      "century_pullups": {
+        "name": "100 підтягувань",
+        "description": "100 повторень в одному підході"
+      },
+      "strength_master": {
+        "name": "Силовий рекордсмен",
+        "description": "Записи в підтягуваннях, відтисканнях і на брусах"
+      },
+      "iron_will": {
+        "name": "Залізна воля",
+        "description": "Записи 7 днів поспіль"
+      },
+      "marathon_30": {
+        "name": "Марафон 30",
+        "description": "Записи 30 днів поспіль"
+      },
+      "month_titan": {
+        "name": "Титан місяця",
+        "description": "10 записів за один місяць"
+      },
+      "bench_100": {
+        "name": "Прощавай, пустий гриф",
+        "description": "Жим лежачи 100 кг"
+      },
+      "bench_150": {
+        "name": "Гриф починає гнутися",
+        "description": "Жим лежачи 150 кг"
+      },
+      "bench_200": {
+        "name": "Прощавай, легка атлетико",
+        "description": "Жим лежачи 200 кг"
+      },
+      "sprinter": {
+        "name": "Спринтер",
+        "description": "Перший запис у спринті"
+      },
+      "lightning": {
+        "name": "Блискавиця",
+        "description": "5 записів у спринті та човниковому бігу"
+      },
+      "marathoner": {
+        "name": "Марафонець",
+        "description": "Перший запис у бігу"
+      },
+      "iron_lungs": {
+        "name": "Залізні легені",
+        "description": "10 записів у бігу"
+      },
+      "odyssey": {
+        "name": "Одіссея",
+        "description": "1000 км сумарно"
+      },
+      "run1k_400": {
+        "name": "Замість кави",
+        "description": "1 км за 4:00"
+      },
+      "run1k_330": {
+        "name": "Сталеве серце",
+        "description": "1 км за 3:30"
+      },
+      "run1k_250": {
+        "name": "Анаеробний ліміт",
+        "description": "1 км за 2:50"
+      },
+      "run1k_235": {
+        "name": "Елітна каста",
+        "description": "1 км за 2:35"
+      },
+      "run3k_1100": {
+        "name": "Авангард",
+        "description": "3 км за 11:00"
+      },
+      "sober_7": {
+        "name": "7 днів тверезості",
+        "description": "Тиждень без алкоголю"
+      },
+      "sober_30": {
+        "name": "30 днів тверезості",
+        "description": "Місяць без алкоголю"
+      },
+      "sober_100": {
+        "name": "100 днів",
+        "description": "Сотня без зривів"
+      },
+      "sober_365": {
+        "name": "Рік тверезості",
+        "description": "365 днів без зривів"
+      },
+      "first_step": {
+        "name": "Перший крок",
+        "description": "Перший запис"
+      },
+      "collector": {
+        "name": "Колекціонер",
+        "description": "10 записів"
+      },
+      "archivist": {
+        "name": "Архіватор",
+        "description": "50 записів"
+      },
+      "historian": {
+        "name": "Історик",
+        "description": "Пів року між першим і останнім записом"
+      },
+      "comeback": {
+        "name": "Повернення",
+        "description": "Запис після перерви в 30 днів"
+      },
+      "diversity": {
+        "name": "Різноманітність",
+        "description": "Записи в 5 дисциплінах"
+      },
+      "polyglot": {
+        "name": "Поліглот",
+        "description": "5 власних вправ"
+      },
+      "night_shift": {
+        "name": "Нічна зміна",
+        "description": "Запис між північчю і п'ятою ранку"
+      },
+      "persistent": {
+        "name": "Завзятий",
+        "description": "Набрати {{points}} очок за досягнення"
+      },
+      "improvement": {
+        "name": "Поліпшення",
+        "description": "Побити свій рекорд"
+      },
+      "win_streak": {
+        "name": "Серія перемог",
+        "description": "Побити рекорд в одній дисципліні 3 рази"
+      },
+      "perfectionist": {
+        "name": "Перфекціоніст",
+        "description": "20 записів в одній дисципліні"
+      }
+    }
+  },
+  "exercises": {
+    "pullups": "Підтягування",
+    "pushups": "Відтискання",
+    "dips": "Бруси",
+    "benchPress": "Жим лежачи",
+    "run": "Біг",
+    "sprint": "Спринт",
+    "shuttle": "Човниковий біг"
+  },
+  "status": {
+    "levels": {
+      "recruit": "Рекрут",
+      "athlete": "Атлет",
+      "candidate": "КМС",
+      "elite": "Еліта"
+    }
   },
   "settings": {
     "title": "Налаштування",

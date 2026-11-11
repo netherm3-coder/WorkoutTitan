@@ -29,7 +29,195 @@
     "title": "Achievements",
     "subtitle": "Rewards for your records",
     "emptyTitle": "No achievements yet",
-    "emptyBody": "Rewards for your records will appear here."
+    "emptyBody": "Rewards for your records will appear here.",
+    "categories": {
+      "all": "All",
+      "strength": "Strength",
+      "speed": "Speed",
+      "endurance": "Endurance",
+      "sober": "Sobriety",
+      "general": "General",
+      "progress": "Progress"
+    },
+    "ladders": {
+      "pullups": "Pull-ups",
+      "bench": "Bench press",
+      "sober": "Sobriety",
+      "volume": "Entries logged",
+      "streak": "Days in a row",
+      "run1km": "1 km against the clock"
+    },
+    "items": {
+      "first_pullup": {
+        "name": "First pull-up",
+        "description": "Your first pull-up entry"
+      },
+      "ten_pullups": {
+        "name": "10 pull-ups",
+        "description": "10 reps in one set"
+      },
+      "twenty_pullups": {
+        "name": "20 pull-ups",
+        "description": "20 reps in one set"
+      },
+      "fifty_pullups": {
+        "name": "50 pull-ups",
+        "description": "50 reps in one set"
+      },
+      "century_pullups": {
+        "name": "100 pull-ups",
+        "description": "100 reps in one set"
+      },
+      "strength_master": {
+        "name": "Strength all-rounder",
+        "description": "Entries in pull-ups, push-ups and dips"
+      },
+      "iron_will": {
+        "name": "Iron will",
+        "description": "Entries 7 days in a row"
+      },
+      "marathon_30": {
+        "name": "Marathon 30",
+        "description": "Entries 30 days in a row"
+      },
+      "month_titan": {
+        "name": "Titan of the month",
+        "description": "10 entries in one month"
+      },
+      "bench_100": {
+        "name": "Goodbye, empty bar",
+        "description": "Bench press 100 kg"
+      },
+      "bench_150": {
+        "name": "The bar starts to bend",
+        "description": "Bench press 150 kg"
+      },
+      "bench_200": {
+        "name": "Goodbye, track and field",
+        "description": "Bench press 200 kg"
+      },
+      "sprinter": {
+        "name": "Sprinter",
+        "description": "Your first sprint entry"
+      },
+      "lightning": {
+        "name": "Lightning",
+        "description": "5 sprint and shuttle run entries"
+      },
+      "marathoner": {
+        "name": "Marathoner",
+        "description": "Your first run entry"
+      },
+      "iron_lungs": {
+        "name": "Iron lungs",
+        "description": "10 run entries"
+      },
+      "odyssey": {
+        "name": "Odyssey",
+        "description": "1000 km in total"
+      },
+      "run1k_400": {
+        "name": "Instead of coffee",
+        "description": "1 km in 4:00"
+      },
+      "run1k_330": {
+        "name": "Heart of steel",
+        "description": "1 km in 3:30"
+      },
+      "run1k_250": {
+        "name": "Anaerobic limit",
+        "description": "1 km in 2:50"
+      },
+      "run1k_235": {
+        "name": "Elite caste",
+        "description": "1 km in 2:35"
+      },
+      "run3k_1100": {
+        "name": "Vanguard",
+        "description": "3 km in 11:00"
+      },
+      "sober_7": {
+        "name": "7 days sober",
+        "description": "A week without alcohol"
+      },
+      "sober_30": {
+        "name": "30 days sober",
+        "description": "A month without alcohol"
+      },
+      "sober_100": {
+        "name": "100 days",
+        "description": "A hundred days without a slip"
+      },
+      "sober_365": {
+        "name": "A year sober",
+        "description": "365 days without a slip"
+      },
+      "first_step": {
+        "name": "First step",
+        "description": "Your first entry"
+      },
+      "collector": {
+        "name": "Collector",
+        "description": "10 entries"
+      },
+      "archivist": {
+        "name": "Archivist",
+        "description": "50 entries"
+      },
+      "historian": {
+        "name": "Historian",
+        "description": "Half a year between your first and last entry"
+      },
+      "comeback": {
+        "name": "Comeback",
+        "description": "An entry after a 30-day break"
+      },
+      "diversity": {
+        "name": "Variety",
+        "description": "Entries in 5 disciplines"
+      },
+      "polyglot": {
+        "name": "Polyglot",
+        "description": "5 exercises of your own"
+      },
+      "night_shift": {
+        "name": "Night shift",
+        "description": "An entry between midnight and 5 a.m."
+      },
+      "persistent": {
+        "name": "Relentless",
+        "description": "Earn {{points}} achievement points"
+      },
+      "improvement": {
+        "name": "Improvement",
+        "description": "Beat your own record"
+      },
+      "win_streak": {
+        "name": "Winning streak",
+        "description": "Beat the record in one discipline 3 times"
+      },
+      "perfectionist": {
+        "name": "Perfectionist",
+        "description": "20 entries in one discipline"
+      }
+    }
+  },
+  "exercises": {
+    "pullups": "Pull-ups",
+    "pushups": "Push-ups",
+    "dips": "Dips",
+    "benchPress": "Bench press",
+    "run": "Run",
+    "sprint": "Sprint",
+    "shuttle": "Shuttle run"
+  },
+  "status": {
+    "levels": {
+      "recruit": "Recruit",
+      "athlete": "Athlete",
+      "candidate": "Master candidate",
+      "elite": "Elite"
+    }
   },
   "settings": {
     "title": "Settings",

@@ -17,6 +17,9 @@
     "preset": "jest-expo/android",
     "setupFiles": [
       "<rootDir>/jest.setup.js"
+    ],
+    "testMatch": [
+      "**/*.test.[jt]s?(x)"
     ]
   },
   "dependencies": {

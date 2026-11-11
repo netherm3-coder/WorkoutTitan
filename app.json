@@ -1,20 +1,16 @@
 {
   "expo": {
-    "scheme": "workouttitan",
-    "name": "WorkoutTitan",
+    "scheme": "record",
+    "name": "Record",
     "slug": "WorkoutTitan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.netherm3.record"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,14 +18,27 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.WorkoutTitan"
+      "package": "com.netherm3.record"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-localization",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#373048"
+        }
+      ]
     ],
+    "experiments": {
+      "typedRoutes": true
+    },
     "extra": {
       "eas": {
         "projectId": "7ab7974a-0569-4ed6-b003-1d65dd6abe27"

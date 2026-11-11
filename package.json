@@ -1,17 +1,29 @@
 {
-  "name": "workouttitan",
+  "name": "record",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
     "start": "node scripts/expo-cli.cjs start",
     "android": "node scripts/expo-cli.cjs run:android",
     "ios": "node scripts/expo-cli.cjs run:ios",
-    "web": "node scripts/expo-cli.cjs start --web"
+    "web": "node scripts/expo-cli.cjs start --web",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "test": "jest",
+    "bundle": "node scripts/expo-cli.cjs export --platform android --output-dir dist",
+    "check": "npm run typecheck && npm run lint && npm run test"
+  },
+  "jest": {
+    "preset": "jest-expo/android",
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "dependencies": {
+    "@expo-google-fonts/nunito": "^0.4.2",
+    "@expo-google-fonts/shantell-sans": "^0.4.1",
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-native-community/slider": "5.2.1",
     "@shopify/react-native-skia": "2.14.0",
     "expo": "~58.0.23",
     "expo-constants": "~58.0.15",
@@ -19,18 +31,31 @@
     "expo-font": "~58.0.11",
     "expo-linear-gradient": "~58.0.3",
     "expo-linking": "~58.0.16",
-    "expo-location": "~58.0.20",
+    "expo-localization": "~58.0.5",
     "expo-router": "~58.0.30",
+    "expo-splash-screen": "~58.0.13",
     "expo-status-bar": "~58.0.4",
-    "expo-task-manager": "~58.0.13",
-    "firebase": "^12.9.0",
+    "i18next": "^27.1.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-i18next": "^18.0.1",
     "react-native": "0.88.1",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
     "react-native-worklets": "0.13.0"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@react-native/jest-preset": "^0.88.1",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/jest": "^30.0.0",
+    "@types/react": "~19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~58.0.4",
+    "jest": "^30.5.2",
+    "jest-expo": "~58.0.14",
+    "test-renderer": "^1.3.1",
+    "typescript": "~6.0.3"
+  }
 }

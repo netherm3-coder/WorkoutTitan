@@ -1,0 +1,68 @@
+{
+  "tabs": {
+    "home": "Home",
+    "workouts": "Workouts",
+    "body": "Body",
+    "achievements": "Awards",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Room of Records",
+    "subtitle": "Your best results",
+    "campAlt": "A knight resting by the campfire at camp",
+    "emptyTitle": "No records yet",
+    "emptyBody": "A podium of your best results will appear here."
+  },
+  "workouts": {
+    "title": "Workouts",
+    "subtitle": "Your results log",
+    "emptyTitle": "The log is empty",
+    "emptyBody": "Logging a result and your workout history will appear here."
+  },
+  "body": {
+    "title": "Body",
+    "subtitle": "Weight, measurements, photos",
+    "emptyTitle": "No measurements yet",
+    "emptyBody": "Weight, body measurements and progress photos will appear here."
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Rewards for your records",
+    "emptyTitle": "No achievements yet",
+    "emptyBody": "Rewards for your records will appear here."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "appearance": "Appearance",
+    "support": "Support the author",
+    "supportHint": "Tips and premium",
+    "version": "Version {{version}}"
+  },
+  "themes": {
+    "camp": {
+      "name": "Camp",
+      "description": "Dusk by the campfire"
+    },
+    "night": {
+      "name": "Night",
+      "description": "Dark and calm"
+    },
+    "day": {
+      "name": "Day",
+      "description": "Light and clean"
+    }
+  },
+  "support": {
+    "title": "Support the author",
+    "body": "You will be able to support development here with a tip or a premium subscription."
+  },
+  "notFound": {
+    "title": "This screen does not exist",
+    "action": "Go to Home"
+  },
+  "common": {
+    "back": "Back",
+    "selected": "Selected"
+  }
+}

@@ -7,14 +7,26 @@ import { minutes } from './support';
 const NOTES = customExercise({ id: 'notes', name: 'Нотатки', kind: 'text' });
 
 describe('isValidGoal', () => {
-  it('accepts positive numbers up to a million', () => {
-    expect(isValidGoal(20)).toBe(true);
-    expect(isValidGoal(0.5)).toBe(true);
-    expect(isValidGoal(MAX_GOAL)).toBe(true);
+  it('accepts positive numbers up to a million reps or kilograms', () => {
+    expect(isValidGoal(20, PULLUPS)).toBe(true);
+    expect(isValidGoal(0.5, PULLUPS)).toBe(true);
+    expect(isValidGoal(MAX_GOAL, PULLUPS)).toBe(true);
   });
 
-  it.each([0, -5, NaN, Infinity, MAX_GOAL + 1])('rejects %s', (goal) => {
-    expect(isValidGoal(goal)).toBe(false);
+  it.each([0, -5, NaN, Infinity, MAX_GOAL + 1])('rejects %s reps', (goal) => {
+    expect(isValidGoal(goal, PULLUPS)).toBe(false);
+  });
+
+  it('accepts times up to a million seconds, which are kept in milliseconds', () => {
+    expect(isValidGoal(minutes(20), RUN)).toBe(true);
+    expect(isValidGoal(minutes(3 * 60 + 30), RUN)).toBe(true);
+    expect(isValidGoal(minutes(2), customExercise({ id: 'plank', name: 'Планка', kind: 'duration' }))).toBe(true);
+    expect(isValidGoal(MAX_GOAL * 1000, RUN)).toBe(true);
+    expect(isValidGoal(MAX_GOAL * 1000 + 1, RUN)).toBe(false);
+  });
+
+  it('gives results in words no goals', () => {
+    expect(isValidGoal(1, NOTES)).toBe(false);
   });
 });
 

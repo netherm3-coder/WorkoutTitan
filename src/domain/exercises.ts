@@ -102,6 +102,11 @@ export function isRace(exercise: Exercise): boolean {
   return exercise.kind === 'distanceTime' || exercise.kind === 'shuttle';
 }
 
+/** Whether a result of this exercise is a time: a race, or a time on its own. */
+export function isTimed(exercise: Exercise): boolean {
+  return isRace(exercise) || exercise.kind === 'duration';
+}
+
 /**
  * Records are kept per discipline, not per exercise: a 5 km run and a 3 km run never compete.
  * The key is the exercise id, plus the distance or the shuttle scheme where there is one.

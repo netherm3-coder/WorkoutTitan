@@ -9,12 +9,21 @@ import { useTranslation } from 'react-i18next';
 import { StartupError } from '@/components';
 import { DatabaseProvider, DatabaseTooNewError, useOpenDatabase } from '@/db';
 import { initI18n, pickLanguage } from '@/i18n';
+import { RecordsProvider } from '@/records';
 import { loadSettings, saveThemeId, type StoredSettings } from '@/settings/storage';
 import { fontAssets, ThemeProvider, useTheme } from '@/theme';
 
-// Keep the splash screen up until fonts, saved settings and the database are in, so the first
-// frame is already in the right language and skin and has data behind it.
+// Keep the splash screen up until fonts, saved settings and the history are in, so the first
+// frame is already in the right language and skin and shows real data.
 void SplashScreen.preventAutoHideAsync();
+
+/** Takes the splash screen down. Drawn only once there is something to show under it. */
+function Ready() {
+  useEffect(() => {
+    void SplashScreen.hideAsync();
+  }, []);
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontAssets);
@@ -44,12 +53,6 @@ export default function RootLayout() {
   const { state: opened, retry } = useOpenDatabase();
   const ready = settings !== null && (fontsLoaded || fontError !== null) && opened.status !== 'opening';
 
-  useEffect(() => {
-    if (ready) {
-      void SplashScreen.hideAsync();
-    }
-  }, [ready]);
-
   if (!ready) {
     return null;
   }
@@ -58,7 +61,10 @@ export default function RootLayout() {
     <ThemeProvider initialThemeId={settings.themeId} onThemeChange={saveThemeId}>
       {opened.status === 'ready' ? (
         <DatabaseProvider value={opened.db}>
-          <RootStack />
+          <RecordsProvider renderFailure={(error, again) => <DatabaseFailure error={error} onRetry={again} retrying={false} />}>
+            <Ready />
+            <RootStack />
+          </RecordsProvider>
         </DatabaseProvider>
       ) : (
         <DatabaseFailure error={opened.error} onRetry={retry} retrying={opened.retrying} />
@@ -91,6 +97,7 @@ function DatabaseFailure({ error, onRetry, retrying }: { error: unknown; onRetry
 
   return (
     <>
+      <Ready />
       <StatusBar style={theme.isDark ? 'light' : 'dark'} />
       <StartupError
         action={tooNew ? undefined : { label: t('startup.retry'), onPress: onRetry, busy: retrying }}

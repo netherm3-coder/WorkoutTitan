@@ -87,15 +87,6 @@ export async function listEntries(db: Database): Promise<WorkoutEntry[]> {
   return rows.map(toEntry);
 }
 
-/** How many entries there are, not counting deleted ones. */
-export async function countEntries(db: Database): Promise<number> {
-  const row = await db.getFirstAsync<{ total: number }>(
-    'SELECT COUNT(*) AS total FROM entries WHERE deleted_at IS NULL',
-    [],
-  );
-  return row?.total ?? 0;
-}
-
 /** One entry by its id; `null` if there is none or it was deleted. */
 export async function getEntry(db: Database, id: string): Promise<WorkoutEntry | null> {
   const row = await db.getFirstAsync<EntryRow>(

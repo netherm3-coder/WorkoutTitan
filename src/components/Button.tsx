@@ -1,16 +1,23 @@
 import { Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
 
-import { radii, spacing, typeScale, useTheme } from '@/theme';
+import { radii, spacing, typeScale, useForeground, useTheme } from '@/theme';
 
 export type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   label: string;
-  /** `primary` is the main action on a screen; `accent` is the warm highlight colour. */
-  variant?: 'primary' | 'accent';
+  /**
+   * `primary` is the main action on a screen; `accent` is the warm highlight colour; `danger`
+   * is an outline for actions that take something away.
+   */
+  variant?: 'primary' | 'accent' | 'danger';
 };
 
 export function Button({ label, variant = 'primary', disabled, ...rest }: ButtonProps) {
   const { theme } = useTheme();
-  const colors = theme.button[variant];
+  const foreground = useForeground();
+  const colors =
+    variant === 'danger'
+      ? { background: 'transparent', border: foreground.danger, text: foreground.danger }
+      : theme.button[variant];
 
   return (
     <Pressable

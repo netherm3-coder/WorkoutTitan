@@ -21,7 +21,9 @@
     "oneRepMaxAdded": "1ПМ: +{{kg}} кг",
     "oneRepMax": "1ПМ: {{kg}} кг",
     "totals": "Зал слави",
-    "otherEntries": "Інші записи"
+    "otherEntries": "Інші записи",
+    "goal": "Ціль: {{goal}}",
+    "openGoal": "Відкрити ціль"
   },
   "workouts": {
     "title": "Тренування",
@@ -71,7 +73,76 @@
       "valueRequired": "Вкажи результат числом.",
       "textRequired": "Опиши результат.",
       "notANumber": "У полі «{{field}}» має бути число."
-    }
+    },
+    "ownExercises": "Свої вправи"
+  },
+  "goal": {
+    "title": "Ціль",
+    "best": "Найкращий результат: {{result}}",
+    "current": "Теперішня ціль: {{goal}}",
+    "save": "Зберегти ціль",
+    "clear": "Прибрати ціль",
+    "invalid": "Вкажи ціль числом, більшим за нуль.",
+    "gone": "Для цієї дисципліни ще немає результату.",
+    "saveFailed": "Не вдалося зберегти. Спробуй ще раз."
+  },
+  "own": {
+    "title": "Свої вправи",
+    "empty": "Своїх вправ ще немає.",
+    "new": "Нова вправа",
+    "name": "Назва",
+    "kind": "Що записується",
+    "kinds": {
+      "bodyweight": "Повтори",
+      "weight": "Вага і повтори",
+      "distanceTime": "Дистанція на час",
+      "duration": "Час",
+      "count": "Число",
+      "text": "Слова"
+    },
+    "distanceIn": "Дистанція в",
+    "kilometres": "кілометрах",
+    "metres": "метрах",
+    "better": "Краще, коли",
+    "higher": "більше",
+    "lower": "менше",
+    "unit": "Одиниця",
+    "add": "Додати вправу",
+    "delete": "Видалити вправу «{{name}}»",
+    "confirmDelete": "Видалити «{{name}}»? Її записи зникнуть з історії: {{count}}.",
+    "confirmDeleteUnused": "Видалити «{{name}}»? Записів у неї ще немає.",
+    "confirm": "Так, видалити",
+    "cancel": "Залишити",
+    "nameRequired": "Дай вправі назву.",
+    "nameTaken": "Вправа з такою назвою вже є.",
+    "saveFailed": "Не вдалося зберегти. Спробуй ще раз."
+  },
+  "counters": {
+    "title": "Лічильники",
+    "training": "Стаж тренувань",
+    "sober": "Тверезість",
+    "trainingSince": "Початок тренувань",
+    "soberSince": "Перший тверезий день",
+    "soberHint": "З датою з'являться досягнення тверезості.",
+    "day": "День",
+    "month": "Місяць",
+    "year": "Рік",
+    "save": "Зберегти",
+    "off": "Вимкнути",
+    "invalidDate": "Вкажи справжню дату, не пізнішу за сьогодні.",
+    "saveFailed": "Не вдалося зберегти. Спробуй ще раз.",
+    "years_one": "{{count}} рік",
+    "years_few": "{{count}} роки",
+    "years_many": "{{count}} років",
+    "years_other": "{{count}} року",
+    "months_one": "{{count}} місяць",
+    "months_few": "{{count}} місяці",
+    "months_many": "{{count}} місяців",
+    "months_other": "{{count}} місяця",
+    "days_one": "{{count}} день",
+    "days_few": "{{count}} дні",
+    "days_many": "{{count}} днів",
+    "days_other": "{{count}} дня"
   },
   "body": {
     "title": "Тіло",
@@ -343,7 +414,11 @@
     "support": "Підтримати автора",
     "supportHint": "Донати та преміум",
     "version": "Версія {{version}}",
-    "entriesOnPhone": "Записів на телефоні: {{total}}"
+    "entriesOnPhone": "Записів на телефоні: {{total}}",
+    "counters": "Лічильники",
+    "countersHint": "Стаж тренувань і тверезість",
+    "exercises": "Свої вправи",
+    "exercisesHint": "Додати або прибрати"
   },
   "themes": {
     "camp": {

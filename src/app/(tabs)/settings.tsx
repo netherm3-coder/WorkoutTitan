@@ -48,6 +48,21 @@ export default function SettingsScreen() {
         </View>
       </Card>
 
+      <Card>
+        <LinkRow
+          hint={t('settings.exercisesHint')}
+          icon="list"
+          label={t('settings.exercises')}
+          onPress={() => router.push('/exercises')}
+        />
+        <LinkRow
+          hint={t('settings.countersHint')}
+          icon="hourglass-outline"
+          label={t('settings.counters')}
+          onPress={() => router.push('/counters')}
+        />
+      </Card>
+
       <Card tone="cardAlt">
         <LinkRow
           hint={t('settings.supportHint')}

@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-import type { Exercise, Measures } from '@/domain';
+import { isTimed, type Exercise, type Measures } from '@/domain';
 import type { Language } from '@/i18n';
 
 import { formatNumber } from './numbers';
@@ -82,4 +82,13 @@ export function formatResult(measures: Measures, exercise: Exercise, t: TFunctio
     case 'text':
       return BLANK;
   }
+}
+
+/** A goal in the number its discipline is measured by: "20", "100 kg", "20:00". */
+export function formatGoal(goal: number, exercise: Exercise, t: TFunction, language: Language): string {
+  if (isTimed(exercise)) return formatDuration(goal);
+
+  const number = formatNumber(goal, language);
+  if (exercise.kind === 'weight') return `${number} ${t('units.kg')}`;
+  return exercise.kind === 'count' && exercise.unit ? `${number} ${exercise.unit}` : number;
 }

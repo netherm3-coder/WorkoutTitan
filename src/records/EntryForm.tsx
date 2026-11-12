@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Chip, DayStepper, TextField } from '@/components';
 import { dayOf, type Exercise, type Measures } from '@/domain';
@@ -16,6 +16,8 @@ export type EntryFormProps = {
   onSubmit: (result: { exerciseId: string; date: string; note: string; measures: Measures }) => Promise<void>;
   /** Given when an existing entry is being edited. */
   onDelete?: () => Promise<void>;
+  /** Opens the list of the person's own exercises, where one can be added. */
+  onManageExercises: () => void;
 };
 
 /** Rows of the form: fields that belong together sit side by side. */
@@ -28,7 +30,7 @@ const ROWS: readonly (readonly NumberField[])[] = [
 ];
 
 /** The form for a result: which exercise, which day, and the numbers that kind of exercise needs. */
-export function EntryForm({ initial, exercises, onSubmit, onDelete }: EntryFormProps) {
+export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExercises }: EntryFormProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
@@ -107,6 +109,11 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete }: EntryFormP
             />
           ))}
         </View>
+        <Pressable accessibilityRole="link" hitSlop={spacing.sm} onPress={onManageExercises}>
+          <AppText color="accent" strong variant="label">
+            {t('entry.ownExercises')}
+          </AppText>
+        </Pressable>
       </Card>
 
       <Card>

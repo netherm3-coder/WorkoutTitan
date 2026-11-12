@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-import { addDays, type Day } from '@/domain';
+import { addDays, type Day, type Elapsed } from '@/domain';
 
 const MONTHS = [
   'dates.months.1',
@@ -30,4 +30,14 @@ export function formatDay(day: Day, today: Day, t: TFunction): string {
   const withoutYear = `${Number(date)} ${t(monthKey)}`;
 
   return year === today.slice(0, 4) ? withoutYear : `${withoutYear} ${year}`;
+}
+
+/** A stretch of time in words: "3 years 9 months 22 days". Parts that are zero are left out. */
+export function formatElapsed(elapsed: Elapsed, t: TFunction): string {
+  const parts = [
+    elapsed.years > 0 ? t('counters.years', { count: elapsed.years }) : null,
+    elapsed.months > 0 ? t('counters.months', { count: elapsed.months }) : null,
+    elapsed.days > 0 || elapsed.totalDays === 0 ? t('counters.days', { count: elapsed.days }) : null,
+  ];
+  return parts.filter(Boolean).join(' ');
 }

@@ -1,7 +1,19 @@
 import { BENCH_PRESS, customExercise, NO_MEASURES, PULLUPS, RUN, SHUTTLE, SPRINT, type Measures } from '@/domain';
 import { i18n, initI18n } from '@/i18n';
 
-import { disciplineName, exerciseName, formatDay, formatDuration, formatNumber, formatResult, joinDuration, parseDecimal, splitDuration } from '../index';
+import {
+  disciplineName,
+  exerciseName,
+  formatDay,
+  formatDuration,
+  formatElapsed,
+  formatGoal,
+  formatNumber,
+  formatResult,
+  joinDuration,
+  parseDecimal,
+  splitDuration,
+} from '../index';
 
 initI18n('en');
 const en = i18n.getFixedT('en');
@@ -137,5 +149,33 @@ describe('formatResult', () => {
     expect(formatResult(m({}), PULLUPS, en, 'en')).toBe('—');
     expect(formatResult(m({ distanceM: 5000 }), RUN, en, 'en')).toBe('—');
     expect(formatResult(m({}), NOTES, en, 'en')).toBe('—');
+  });
+});
+
+describe('formatGoal', () => {
+  it('writes a goal in the number its discipline is measured by', () => {
+    expect(formatGoal(20, PULLUPS, uk, 'uk')).toBe('20');
+    expect(formatGoal(102.5, BENCH_PRESS, uk, 'uk')).toBe('102,5 кг');
+    expect(formatGoal(1_200_000, RUN, en, 'en')).toBe('20:00');
+    expect(formatGoal(12_500, SPRINT, en, 'en')).toBe('0:12.5');
+    expect(formatGoal(120, SQUATS, en, 'en')).toBe('120 кг');
+    expect(formatGoal(60, BURPEES, en, 'en')).toBe('60');
+  });
+});
+
+describe('formatElapsed', () => {
+  const span = (years: number, months: number, days: number, totalDays = 1) => ({ years, months, days, totalDays });
+
+  it('uses the plural forms of the language', () => {
+    expect(formatElapsed(span(3, 9, 22), uk)).toBe('3 роки 9 місяців 22 дні');
+    expect(formatElapsed(span(1, 1, 1), uk)).toBe('1 рік 1 місяць 1 день');
+    expect(formatElapsed(span(5, 2, 11), uk)).toBe('5 років 2 місяці 11 днів');
+    expect(formatElapsed(span(1, 2, 1), en)).toBe('1 year 2 months 1 day');
+  });
+
+  it('leaves out the parts that are zero, but not everything', () => {
+    expect(formatElapsed(span(2, 0, 0), en)).toBe('2 years');
+    expect(formatElapsed(span(0, 0, 12), en)).toBe('12 days');
+    expect(formatElapsed(span(0, 0, 0, 0), uk)).toBe('0 днів');
   });
 });

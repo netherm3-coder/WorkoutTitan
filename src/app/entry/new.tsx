@@ -19,6 +19,7 @@ export default function NewEntryScreen() {
     <Screen backLabel={t('common.back')} onBack={goBack} title={t('entry.newTitle')}>
       <EntryForm
         exercises={exercises}
+        onManageExercises={() => router.push('/exercises')}
         initial={emptyDraft(last?.exerciseId ?? PULLUPS.id, dayOf(new Date()))}
         onSubmit={async ({ exerciseId, date, note, measures }) => {
           await addEntry({ ...measures, exerciseId, date, note });

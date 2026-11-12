@@ -19,7 +19,9 @@
     "oneRepMaxAdded": "1RM: +{{kg}} kg",
     "oneRepMax": "1RM: {{kg}} kg",
     "totals": "Hall of fame",
-    "otherEntries": "Other entries"
+    "otherEntries": "Other entries",
+    "goal": "Goal: {{goal}}",
+    "openGoal": "Open the goal"
   },
   "workouts": {
     "title": "Workouts",
@@ -69,7 +71,70 @@
       "valueRequired": "Enter the result as a number.",
       "textRequired": "Describe the result.",
       "notANumber": "\"{{field}}\" has to be a number."
-    }
+    },
+    "ownExercises": "Your exercises"
+  },
+  "goal": {
+    "title": "Goal",
+    "best": "Best result: {{result}}",
+    "current": "Current goal: {{goal}}",
+    "save": "Save goal",
+    "clear": "Remove goal",
+    "invalid": "Enter the goal as a number above zero.",
+    "gone": "There is no result for this discipline yet.",
+    "saveFailed": "Could not save. Try again."
+  },
+  "own": {
+    "title": "Your exercises",
+    "empty": "No exercises of your own yet.",
+    "new": "New exercise",
+    "name": "Name",
+    "kind": "What is recorded",
+    "kinds": {
+      "bodyweight": "Reps",
+      "weight": "Weight and reps",
+      "distanceTime": "Distance against the clock",
+      "duration": "Time",
+      "count": "A number",
+      "text": "Words"
+    },
+    "distanceIn": "Distance in",
+    "kilometres": "kilometres",
+    "metres": "metres",
+    "better": "Better when",
+    "higher": "higher",
+    "lower": "lower",
+    "unit": "Unit",
+    "add": "Add exercise",
+    "delete": "Delete the exercise \"{{name}}\"",
+    "confirmDelete": "Delete \"{{name}}\"? Its entries will leave the history: {{count}}.",
+    "confirmDeleteUnused": "Delete \"{{name}}\"? It has no entries yet.",
+    "confirm": "Yes, delete",
+    "cancel": "Keep",
+    "nameRequired": "Give the exercise a name.",
+    "nameTaken": "There already is an exercise with this name.",
+    "saveFailed": "Could not save. Try again."
+  },
+  "counters": {
+    "title": "Counters",
+    "training": "Training experience",
+    "sober": "Sobriety",
+    "trainingSince": "Training started",
+    "soberSince": "First sober day",
+    "soberHint": "With a date the sobriety achievements appear.",
+    "day": "Day",
+    "month": "Month",
+    "year": "Year",
+    "save": "Save",
+    "off": "Turn off",
+    "invalidDate": "Enter a real date, not later than today.",
+    "saveFailed": "Could not save. Try again.",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years",
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
   },
   "body": {
     "title": "Body",
@@ -341,7 +406,11 @@
     "support": "Support the author",
     "supportHint": "Tips and premium",
     "version": "Version {{version}}",
-    "entriesOnPhone": "Entries on this phone: {{total}}"
+    "entriesOnPhone": "Entries on this phone: {{total}}",
+    "counters": "Counters",
+    "countersHint": "Training experience and sobriety",
+    "exercises": "Your exercises",
+    "exercisesHint": "Add or remove"
   },
   "themes": {
     "camp": {

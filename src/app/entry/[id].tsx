@@ -25,6 +25,7 @@ export default function EditEntryScreen() {
       {entry && exercise ? (
         <EntryForm
           exercises={exercises}
+          onManageExercises={() => router.push('/exercises')}
           initial={draftFrom(entry, exercise, language)}
           onDelete={async () => {
             await deleteEntry(entry.id);

@@ -2,16 +2,21 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import {
   addEntry as insertEntry,
+  clearGoal as removeGoal,
+  deleteExercise as markExerciseDeleted,
   deleteBodyWeight as markWeightDeleted,
   deleteEntry as markDeleted,
   listBodyMeasurements,
   listExercises,
+  listGoals,
   loadHistory,
   loadProfile,
   newId,
   restoreEntry,
   saveBodyMeasurements as writeMeasurements,
   saveBodyWeight as writeWeight,
+  saveExercise as writeExercise,
+  setGoal as writeGoal,
   saveProfile as writeProfile,
   updateEntry as replaceEntry,
   useDatabase,
@@ -39,6 +44,8 @@ export type Records = {
   exercises: readonly Exercise[];
   /** Tape measurements, oldest day first. Weigh-ins are part of the history. */
   measurements: readonly BodyMeasurement[];
+  /** Goals by discipline, in the number the discipline is measured by. */
+  goals: ReadonlyMap<string, number>;
   profile: Profile;
   /** The entry deleted last, while it can still be brought back. */
   lastDeleted: WorkoutEntry | null;
@@ -53,9 +60,15 @@ export type Records = {
   /** Records the measurements of a day: a number sets a body part, `null` clears it. */
   saveBodyMeasurements(date: Day, values: Readonly<Record<string, number | null>>): Promise<void>;
   saveProfile(changes: Partial<Profile>): Promise<void>;
+  setGoal(discipline: string, target: number): Promise<void>;
+  clearGoal(discipline: string): Promise<void>;
+  /** Adds one of the person's own exercises. */
+  addExercise(exercise: Omit<Exercise, 'id' | 'builtIn'>): Promise<void>;
+  /** Removes an own exercise. Its entries leave the history with it. */
+  deleteExercise(id: string): Promise<void>;
 };
 
-type Stored = Pick<Records, 'history' | 'exercises' | 'measurements' | 'profile'>;
+type Stored = Pick<Records, 'history' | 'exercises' | 'measurements' | 'goals' | 'profile'>;
 
 const RecordsContext = createContext<Records | null>(null);
 
@@ -65,13 +78,14 @@ type Loaded =
   | { status: 'failed'; error: unknown };
 
 async function read(db: Database): Promise<Stored> {
-  const [history, custom, measurements, profile] = await Promise.all([
+  const [history, custom, measurements, goals, profile] = await Promise.all([
     loadHistory(db),
     listExercises(db),
     listBodyMeasurements(db),
+    listGoals(db),
     loadProfile(db),
   ]);
-  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], measurements, profile };
+  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], measurements, goals, profile };
 }
 
 type RecordsProviderProps = {
@@ -119,13 +133,31 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
 
   const records = useMemo<Records | null>(() => {
     if (!ready) return null;
-    const { history, exercises, measurements, profile } = ready;
+    const { history, exercises, measurements, goals, profile } = ready;
 
     return {
       history,
       exercises,
       measurements,
+      goals,
       profile,
+      async setGoal(discipline, target) {
+        await writeGoal(db, discipline, target, Date.now());
+        await reload();
+      },
+      async clearGoal(discipline) {
+        await removeGoal(db, discipline, Date.now());
+        await reload();
+      },
+      async addExercise(exercise) {
+        const now = Date.now();
+        await writeExercise(db, { ...exercise, id: `own:${newId(now)}`, builtIn: false }, now);
+        await reload();
+      },
+      async deleteExercise(id) {
+        await markExerciseDeleted(db, id, Date.now());
+        await reload();
+      },
       lastDeleted,
       async saveBodyWeight(record) {
         await writeWeight(db, record, Date.now());

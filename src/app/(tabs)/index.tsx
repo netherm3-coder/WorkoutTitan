@@ -1,13 +1,15 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, CampScene, Card, EmptyState, ProgressBar, Screen } from '@/components';
 import {
   buildPedestal,
   daysStanding,
   dayOf,
+  elapsedSince,
+  goalProgress,
   lifetimeTotals,
   NO_MEASURES,
   PULLUPS,
@@ -22,7 +24,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const format = useFormat();
-  const { history, exercises } = useRecords();
+  const { history, exercises, goals, profile } = useRecords();
 
   const today = dayOf(new Date());
   const totals = useMemo(() => lifetimeTotals(history), [history]);
@@ -50,6 +52,14 @@ export default function HomeScreen() {
     return t(record.exercise.kind === 'weight' ? 'home.oneRepMax' : 'home.oneRepMaxAdded', { kg });
   };
 
+  /** The goal of a record and how far along it is, for screen readers; nothing without a goal. */
+  const goalWords = (record: PedestalRecord): string[] => {
+    const goal = goals.get(record.discipline);
+    return goal === undefined
+      ? []
+      : [t('home.goal', { goal: format.goal(goal, record.exercise) }), `${goalProgress(record, goal)}%`];
+  };
+
   const totalRows: [label: string, value: string][] = [
     [t('exercises.pullups'), format.number(totals.pullups)],
     [t('exercises.pushups'), format.number(totals.pushups)],
@@ -65,6 +75,26 @@ export default function HomeScreen() {
       </Card>
 
       <Button label={t('journal.add')} onPress={() => router.push('/entry/new')} />
+
+      {profile.trainingSince || profile.soberSince ? (
+        <Card>
+          {(
+            [
+              [t('counters.training'), profile.trainingSince],
+              [t('counters.sober'), profile.soberSince],
+            ] as const
+          ).map(([label, since]) =>
+            since ? (
+              <View accessibilityLabel={`${label}: ${format.elapsed(elapsedSince(since, today))}`} accessible key={label}>
+                <AppText color="muted" variant="label">
+                  {label}
+                </AppText>
+                <AppText strong>{format.elapsed(elapsedSince(since, today))}</AppText>
+              </View>
+            ) : null,
+          )}
+        </Card>
+      ) : null}
 
       {records.length === 0 ? (
         <Card tone="cardAlt">
@@ -123,15 +153,18 @@ export default function HomeScreen() {
           <Card tone="cardAlt">
             <AppText variant="heading">{t('home.pedestal')}</AppText>
             {records.map((record) => (
-              <View
+              <Pressable
+                accessibilityHint={t('home.openGoal')}
                 accessibilityLabel={[
                   format.discipline(record.exercise, record.entry),
                   format.result(record.entry, record.exercise),
                   standing(record),
+                  ...goalWords(record),
                 ].join(', ')}
-                accessible
+                accessibilityRole="button"
                 key={record.discipline}
-                style={styles.record}
+                onPress={() => router.push({ pathname: '/goal', params: { discipline: record.discipline } })}
+                style={({ pressed }) => [styles.record, pressed && styles.pressed]}
               >
                 <View style={styles.recordHead}>
                   <AppText color="muted" style={styles.grow} variant="label">
@@ -147,7 +180,8 @@ export default function HomeScreen() {
                     {oneRepMax(record)}
                   </AppText>
                 ) : null}
-              </View>
+                {goals.has(record.discipline) ? <GoalLine goal={goals.get(record.discipline) ?? 0} record={record} /> : null}
+              </Pressable>
             ))}
           </Card>
 
@@ -166,9 +200,32 @@ export default function HomeScreen() {
   );
 }
 
+/** How far the best result is from the goal of its discipline. */
+function GoalLine({ record, goal }: { record: PedestalRecord; goal: number }) {
+  const { t } = useTranslation();
+  const format = useFormat();
+  const label = t('home.goal', { goal: format.goal(goal, record.exercise) });
+
+  return (
+    <View style={styles.goal}>
+      <AppText color="muted" variant="label">
+        {label}
+      </AppText>
+      <ProgressBar label={label} value={goalProgress(record, goal) / 100} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   record: {
     gap: 2,
+  },
+  goal: {
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  pressed: {
+    opacity: 0.6,
   },
   recordHead: {
     flexDirection: 'row',

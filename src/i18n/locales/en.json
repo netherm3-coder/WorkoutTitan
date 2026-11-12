@@ -11,13 +11,65 @@
     "subtitle": "Your best results",
     "campAlt": "A knight resting by the campfire at camp",
     "emptyTitle": "No records yet",
-    "emptyBody": "A podium of your best results will appear here."
+    "emptyBody": "Log a result and the pedestal of your best ones will appear here.",
+    "pedestal": "Pedestal",
+    "setToday": "Set today",
+    "standing_one": "Standing for {{count}} day",
+    "standing_other": "Standing for {{count}} days",
+    "oneRepMaxAdded": "1RM: +{{kg}} kg",
+    "oneRepMax": "1RM: {{kg}} kg",
+    "totals": "Hall of fame",
+    "otherEntries": "Other entries"
   },
   "workouts": {
     "title": "Workouts",
     "subtitle": "Your results log",
     "emptyTitle": "The log is empty",
-    "emptyBody": "Logging a result and your workout history will appear here."
+    "emptyBody": "Log your first result and it will show up here."
+  },
+  "journal": {
+    "add": "Log a result",
+    "personalBest": "Personal best",
+    "deleted": "Entry deleted.",
+    "undo": "Bring back",
+    "showMore": "Show older"
+  },
+  "entry": {
+    "newTitle": "New result",
+    "editTitle": "Edit entry",
+    "exercise": "Exercise",
+    "day": "Day",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "reps": "Reps",
+    "extraWeight": "Extra weight, kg",
+    "barWeight": "Weight, kg",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "distanceKm": "Distance, km",
+    "distanceM": "Distance, m",
+    "segments": "Segments",
+    "segmentLength": "Segment length, m",
+    "value": "Result",
+    "valueIn": "Result, {{unit}}",
+    "words": "Result in words",
+    "note": "Note",
+    "optional": "optional",
+    "save": "Save",
+    "delete": "Delete entry",
+    "saveFailed": "Could not save. Try again.",
+    "gone": "This entry is gone.",
+    "problems": {
+      "repsRequired": "Enter the number of reps.",
+      "loadRequired": "Enter the weight.",
+      "negativeLoad": "The weight cannot be below zero.",
+      "durationRequired": "Enter the time: minutes, seconds or both.",
+      "distanceRequired": "Enter the distance.",
+      "segmentsRequired": "Enter the number of segments.",
+      "valueRequired": "Enter the result as a number.",
+      "textRequired": "Describe the result.",
+      "notANumber": "\"{{field}}\" has to be a number."
+    }
   },
   "body": {
     "title": "Body",
@@ -217,6 +269,30 @@
       "athlete": "Athlete",
       "candidate": "Master candidate",
       "elite": "Elite"
+    }
+  },
+  "units": {
+    "kg": "kg",
+    "km": "km",
+    "m": "m",
+    "s": "s"
+  },
+  "dates": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
     }
   },
   "settings": {

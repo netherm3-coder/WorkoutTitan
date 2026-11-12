@@ -47,7 +47,7 @@ export const SPRINT = builtIn('sprint', 'distanceTime', 'lower', 'm');
 export const SHUTTLE = builtIn('shuttle', 'shuttle', 'lower', 'm');
 
 /** In the order they are offered when logging a result. */
-export const BUILT_IN_EXERCISES: readonly Exercise[] = [PULLUPS, PUSHUPS, DIPS, RUN, SPRINT, SHUTTLE, BENCH_PRESS];
+export const BUILT_IN_EXERCISES: readonly Exercise[] = [PULLUPS, PUSHUPS, DIPS, BENCH_PRESS, RUN, SPRINT, SHUTTLE];
 
 export type BuiltInExerciseId = 'pullups' | 'pushups' | 'dips' | 'benchPress' | 'run' | 'sprint' | 'shuttle';
 

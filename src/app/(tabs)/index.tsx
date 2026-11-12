@@ -3,8 +3,17 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, Button, CampScene, Card, EmptyState, Screen } from '@/components';
-import { buildPedestal, daysStanding, dayOf, lifetimeTotals, type PedestalRecord } from '@/domain';
+import { AppText, Button, CampScene, Card, EmptyState, ProgressBar, Screen } from '@/components';
+import {
+  buildPedestal,
+  daysStanding,
+  dayOf,
+  lifetimeTotals,
+  NO_MEASURES,
+  PULLUPS,
+  sportStatus,
+  type PedestalRecord,
+} from '@/domain';
 import { useFormat } from '@/format';
 import { useRecords } from '@/records';
 import { spacing } from '@/theme';
@@ -17,6 +26,7 @@ export default function HomeScreen() {
 
   const today = dayOf(new Date());
   const totals = useMemo(() => lifetimeTotals(history), [history]);
+  const status = useMemo(() => sportStatus(history, today), [history, today]);
 
   // In the order of the exercise list, and within an exercise by distance or scheme.
   const records = useMemo(() => {
@@ -62,6 +72,54 @@ export default function HomeScreen() {
         </Card>
       ) : (
         <>
+          <Card>
+            <AppText variant="heading">{t('status.title')}</AppText>
+            {status.state === 'ranked' ? (
+              <>
+                <View
+                  accessibilityLabel={`${t('status.title')}: ${t(`status.levels.${status.level}`)}`}
+                  accessible
+                  style={styles.recordHead}
+                >
+                  <AppText style={styles.grow} variant="title">
+                    {t(`status.levels.${status.level}`)}
+                  </AppText>
+                  <AppText color="muted" variant="label">
+                    {t('status.coefficient', { value: format.number(status.coefficient) })}
+                  </AppText>
+                </View>
+                <ProgressBar label={t('status.title')} value={status.progressPercent / 100} />
+                <AppText variant="label">
+                  {status.nextLevel && status.kgToNextLevel !== null
+                    ? t('status.toNext', {
+                        kg: format.number(status.kgToNextLevel),
+                        level: t(`status.levels.${status.nextLevel}`),
+                      })
+                    : t('status.top')}
+                </AppText>
+                <View>
+                  <AppText color="muted" variant="label">
+                    {t('status.best', {
+                      result: format.result({ ...NO_MEASURES, reps: status.best.reps, loadKg: status.best.loadKg }, PULLUPS),
+                    })}
+                  </AppText>
+                  <AppText color="muted" variant="label">
+                    {format.day(status.best.date, today)}
+                  </AppText>
+                  {status.best.repsCapped ? (
+                    <AppText color="muted" variant="label">
+                      {t('status.capped')}
+                    </AppText>
+                  ) : null}
+                </View>
+              </>
+            ) : (
+              <AppText color="muted">
+                {t(status.state === 'needsBodyWeight' ? 'status.needsBodyWeight' : 'status.needsPullups')}
+              </AppText>
+            )}
+          </Card>
+
           <Card tone="cardAlt">
             <AppText variant="heading">{t('home.pedestal')}</AppText>
             {records.map((record) => (

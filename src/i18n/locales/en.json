@@ -73,15 +73,45 @@
   },
   "body": {
     "title": "Body",
-    "subtitle": "Weight, measurements, photos",
-    "emptyTitle": "No measurements yet",
-    "emptyBody": "Weight, body measurements and progress photos will appear here."
+    "subtitle": "Weight and measurements",
+    "weight": "Weight",
+    "weightKg": "Weight, kg",
+    "saveWeight": "Record weight",
+    "noWeight": "No weight yet. It is needed for the one-rep max and the sport status.",
+    "sincePrevious": "{{change}} kg since the previous weigh-in",
+    "recent": "Recent weigh-ins",
+    "deleteWeight": "Delete the weight of {{day}}",
+    "heightCm": "Height, cm",
+    "saveHeight": "Save height",
+    "bmi": "Body mass index: {{value}}",
+    "measurements": "Measurements",
+    "noMeasurements": "No measurements yet.",
+    "measure": "Record measurements",
+    "measureTitle": "Body measurements",
+    "measureHint": "In centimetres. An empty field means that body part was not measured.",
+    "saveMeasurements": "Save measurements",
+    "invalidWeight": "Enter the weight as a number above zero.",
+    "invalidHeight": "Enter the height as a number above zero.",
+    "invalidMeasurement": "\"{{field}}\" has to be a number above zero.",
+    "saveFailed": "Could not save. Try again.",
+    "parts": {
+      "neck": "Neck",
+      "shoulders": "Shoulders",
+      "chest": "Chest",
+      "waist": "Waist",
+      "bicep": "Bicep",
+      "forearm": "Forearm",
+      "thigh": "Thigh",
+      "calf": "Calf"
+    }
   },
   "achievements": {
     "title": "Achievements",
     "subtitle": "Rewards for your records",
-    "emptyTitle": "No achievements yet",
-    "emptyBody": "Rewards for your records will appear here.",
+    "points": "Points: {{earned}} of {{available}}",
+    "unlocked": "earned",
+    "locked": "not yet",
+    "progress": "{{percent}}% done",
     "categories": {
       "all": "All",
       "strength": "Strength",
@@ -269,13 +299,22 @@
       "athlete": "Athlete",
       "candidate": "Master candidate",
       "elite": "Elite"
-    }
+    },
+    "title": "Sport status",
+    "needsBodyWeight": "Record your weight on the Body tab and your level will show here.",
+    "needsPullups": "The level comes from the pull-ups of the last 90 days. Log a set.",
+    "coefficient": "Coefficient {{value}}",
+    "toNext": "{{kg}} kg to go to \"{{level}}\"",
+    "top": "This is the top level.",
+    "best": "Strongest set: {{result}}",
+    "capped": "Reps above 10 count as 10."
   },
   "units": {
     "kg": "kg",
     "km": "km",
     "m": "m",
-    "s": "s"
+    "s": "s",
+    "cm": "cm"
   },
   "dates": {
     "today": "Today",

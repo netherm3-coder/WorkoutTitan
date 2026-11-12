@@ -59,8 +59,8 @@ describe('tabs', () => {
 
   it.each([
     ['Workouts', '/workouts', 'The log is empty'],
-    ['Body', '/body', 'No measurements yet'],
-    ['Awards', '/achievements', 'No achievements yet'],
+    ['Body', '/body', 'No measurements yet.'],
+    ['Awards', '/achievements', 'Points: 0 of 2170'],
     ['Settings', '/settings', 'Language'],
   ])('opens %s', async (name, pathname, content) => {
     const user = userEvent.setup();

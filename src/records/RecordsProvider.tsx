@@ -2,16 +2,32 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import {
   addEntry as insertEntry,
+  deleteBodyWeight as markWeightDeleted,
   deleteEntry as markDeleted,
+  listBodyMeasurements,
   listExercises,
   loadHistory,
+  loadProfile,
   newId,
   restoreEntry,
+  saveBodyMeasurements as writeMeasurements,
+  saveBodyWeight as writeWeight,
+  saveProfile as writeProfile,
   updateEntry as replaceEntry,
   useDatabase,
   type Database,
+  type Profile,
 } from '@/db';
-import { BUILT_IN_EXERCISES, type Day, type Exercise, type History, type Measures, type WorkoutEntry } from '@/domain';
+import {
+  BUILT_IN_EXERCISES,
+  type BodyMeasurement,
+  type Day,
+  type Exercise,
+  type History,
+  type Measures,
+  type WeightRecord,
+  type WorkoutEntry,
+} from '@/domain';
 
 /** What the form hands over for a new entry; the id and the moment of writing are added here. */
 export type NewEntry = Measures & { exerciseId: string; date: Day; note: string };
@@ -21,6 +37,9 @@ export type Records = {
   history: History;
   /** Every exercise a result can be logged for: the built-in ones, then the person's own. */
   exercises: readonly Exercise[];
+  /** Tape measurements, oldest day first. Weigh-ins are part of the history. */
+  measurements: readonly BodyMeasurement[];
+  profile: Profile;
   /** The entry deleted last, while it can still be brought back. */
   lastDeleted: WorkoutEntry | null;
   addEntry(entry: NewEntry): Promise<void>;
@@ -28,18 +47,31 @@ export type Records = {
   deleteEntry(id: string): Promise<void>;
   /** Brings back the entry deleted last. */
   undoDelete(): Promise<void>;
+  /** Records the weight of a day, replacing the one it had. */
+  saveBodyWeight(record: WeightRecord): Promise<void>;
+  deleteBodyWeight(date: Day): Promise<void>;
+  /** Records the measurements of a day: a number sets a body part, `null` clears it. */
+  saveBodyMeasurements(date: Day, values: Readonly<Record<string, number | null>>): Promise<void>;
+  saveProfile(changes: Partial<Profile>): Promise<void>;
 };
+
+type Stored = Pick<Records, 'history' | 'exercises' | 'measurements' | 'profile'>;
 
 const RecordsContext = createContext<Records | null>(null);
 
 type Loaded =
   | { status: 'loading' }
-  | { status: 'ready'; history: History; exercises: readonly Exercise[] }
+  | ({ status: 'ready' } & Stored)
   | { status: 'failed'; error: unknown };
 
-async function read(db: Database): Promise<{ history: History; exercises: readonly Exercise[] }> {
-  const [history, custom] = await Promise.all([loadHistory(db), listExercises(db)]);
-  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom] };
+async function read(db: Database): Promise<Stored> {
+  const [history, custom, measurements, profile] = await Promise.all([
+    loadHistory(db),
+    listExercises(db),
+    listBodyMeasurements(db),
+    loadProfile(db),
+  ]);
+  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], measurements, profile };
 }
 
 type RecordsProviderProps = {
@@ -87,12 +119,31 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
 
   const records = useMemo<Records | null>(() => {
     if (!ready) return null;
-    const { history, exercises } = ready;
+    const { history, exercises, measurements, profile } = ready;
 
     return {
       history,
       exercises,
+      measurements,
+      profile,
       lastDeleted,
+      async saveBodyWeight(record) {
+        await writeWeight(db, record, Date.now());
+        await reload();
+      },
+      async deleteBodyWeight(date) {
+        await markWeightDeleted(db, date, Date.now());
+        await reload();
+      },
+      async saveBodyMeasurements(date, values) {
+        // All the body parts of one form are saved together or not at all.
+        await db.withExclusiveTransactionAsync((transaction) => writeMeasurements(transaction, date, values, Date.now()));
+        await reload();
+      },
+      async saveProfile(changes) {
+        await writeProfile(db, changes, Date.now());
+        await reload();
+      },
       async addEntry(entry) {
         const now = Date.now();
         await insertEntry(db, { ...entry, id: newId(now), createdAt: now, videoUrl: '', resultUrl: '' }, now);

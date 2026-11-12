@@ -1,12 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { AppText, Button, Card, Chip, TextField } from '@/components';
-import { addDays, dayOf, type Exercise, type Measures } from '@/domain';
+import { AppText, Button, Card, Chip, DayStepper, TextField } from '@/components';
+import { dayOf, type Exercise, type Measures } from '@/domain';
 import { useFormat } from '@/format';
-import { minTouchTarget, spacing, useForeground } from '@/theme';
+import { spacing } from '@/theme';
 
 import { fieldsOf, readDraft, type Draft, type DraftProblem, type NumberField } from './entryDraft';
 
@@ -32,7 +31,6 @@ const ROWS: readonly (readonly NumberField[])[] = [
 export function EntryForm({ initial, exercises, onSubmit, onDelete }: EntryFormProps) {
   const { t } = useTranslation();
   const format = useFormat();
-  const foreground = useForeground();
 
   const [draft, setDraft] = useState(initial);
   const [problems, setProblems] = useState<DraftProblem[]>([]);
@@ -112,29 +110,7 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete }: EntryFormP
       </Card>
 
       <Card>
-        <View style={styles.day}>
-          <Pressable
-            accessibilityLabel={t('entry.previousDay')}
-            accessibilityRole="button"
-            onPress={() => set({ date: addDays(draft.date, -1) })}
-            style={({ pressed }) => [styles.step, pressed && styles.pressed]}
-          >
-            <Ionicons color={foreground.accent} name="chevron-back" size={24} />
-          </Pressable>
-          <AppText align="center" strong style={styles.dayLabel}>
-            {format.day(draft.date, today)}
-          </AppText>
-          <Pressable
-            accessibilityLabel={t('entry.nextDay')}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: draft.date >= today }}
-            disabled={draft.date >= today}
-            onPress={() => set({ date: addDays(draft.date, 1) })}
-            style={({ pressed }) => [styles.step, pressed && styles.pressed, draft.date >= today && styles.disabled]}
-          >
-            <Ionicons color={foreground.accent} name="chevron-forward" size={24} />
-          </Pressable>
-        </View>
+        <DayStepper day={draft.date} onChange={(date) => set({ date })} today={today} />
 
         {ROWS.map((row) => row.filter((field) => shown.includes(field)))
           .filter((row) => row.length > 0)
@@ -189,27 +165,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  day: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dayLabel: {
-    flex: 1,
-  },
-  step: {
-    width: minTouchTarget,
-    height: minTouchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   row: {
     flexDirection: 'row',
     gap: spacing.md,
-  },
-  pressed: {
-    opacity: 0.6,
-  },
-  disabled: {
-    opacity: 0.3,
   },
 });

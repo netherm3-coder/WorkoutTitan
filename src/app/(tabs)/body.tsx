@@ -1,14 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Button, Card, DayStepper, Screen, TextField } from '@/components';
+import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
 import { BODY_PARTS, dayOf, type BodyPart } from '@/domain';
 import { parseDecimal, useFormat } from '@/format';
 import { useRecords } from '@/records';
-import { minTouchTarget, spacing, useForeground } from '@/theme';
+import { minTouchTarget, spacing } from '@/theme';
 
 /** How many of the latest weigh-ins are listed. */
 const RECENT = 7;
@@ -19,7 +18,6 @@ export default function BodyScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const format = useFormat();
-  const foreground = useForeground();
   const { history, measurements, profile, saveBodyWeight, deleteBodyWeight, saveProfile } = useRecords();
 
   const today = dayOf(new Date());
@@ -124,7 +122,7 @@ export default function BodyScreen() {
                   onPress={() => attempt(deleteBodyWeight(record.date))}
                   style={({ pressed }) => [styles.remove, pressed && styles.pressed]}
                 >
-                  <Ionicons color={foreground.muted} name="close" size={20} />
+                  <Icon name="close" />
                 </Pressable>
               </View>
             ))}

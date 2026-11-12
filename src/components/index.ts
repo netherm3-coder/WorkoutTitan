@@ -5,6 +5,7 @@ export { Card, type CardProps } from './Card';
 export { Chip, type ChipProps } from './Chip';
 export { DayStepper, type DayStepperProps } from './DayStepper';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
+export { Icon, type IconProps } from './Icon';
 export { LinkRow, type LinkRowProps } from './LinkRow';
 export { OptionRow, type OptionRowProps } from './OptionRow';
 export { ProgressBar, type ProgressBarProps } from './ProgressBar';

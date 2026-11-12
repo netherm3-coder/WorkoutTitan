@@ -5,6 +5,7 @@
  */
 
 export * from './achievements';
+export * from './body';
 export * from './bodyWeight';
 export * from './counters';
 export * from './dates';

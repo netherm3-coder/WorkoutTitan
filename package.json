@@ -9,7 +9,7 @@
     "web": "node scripts/expo-cli.cjs start --web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
-    "test": "jest",
+    "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning jest",
     "bundle": "node scripts/expo-cli.cjs export --platform android --output-dir dist",
     "check": "npm run typecheck && npm run lint && npm run test"
   },
@@ -37,6 +37,7 @@
     "expo-localization": "~58.0.5",
     "expo-router": "~58.0.30",
     "expo-splash-screen": "~58.0.13",
+    "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
     "i18next": "^27.1.1",
     "react": "19.3.0",

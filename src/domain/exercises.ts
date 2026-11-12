@@ -65,6 +65,13 @@ const DEFAULT_DIRECTION: Record<ExerciseKind, Direction | null> = {
   text: null,
 };
 
+/** Every kind there is, for checking stored values and for pickers. */
+export const EXERCISE_KINDS = Object.keys(DEFAULT_DIRECTION) as ExerciseKind[];
+
+export function isExerciseKind(value: unknown): value is ExerciseKind {
+  return typeof value === 'string' && (EXERCISE_KINDS as readonly string[]).includes(value);
+}
+
 export type CustomExerciseInput = {
   id: string;
   name: string;

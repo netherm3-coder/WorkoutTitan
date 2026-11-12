@@ -6,5 +6,6 @@ export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { LinkRow, type LinkRowProps } from './LinkRow';
 export { OptionRow, type OptionRowProps } from './OptionRow';
 export { Screen, type ScreenProps } from './Screen';
+export { StartupError, type StartupErrorProps } from './StartupError';
 export { TabBar } from './TabBar';
 export { ThemeSwatch } from './ThemeSwatch';

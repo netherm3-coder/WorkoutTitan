@@ -225,7 +225,8 @@
     "appearance": "Appearance",
     "support": "Support the author",
     "supportHint": "Tips and premium",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "entriesOnPhone": "Entries on this phone: {{total}}"
   },
   "themes": {
     "camp": {
@@ -244,6 +245,13 @@
   "support": {
     "title": "Support the author",
     "body": "You will be able to support development here with a tip or a premium subscription."
+  },
+  "startup": {
+    "failedTitle": "Data did not open",
+    "failedBody": "The app could not open the database with your records and has not changed anything in it. Try again; if that does not help, close the app and open it again.",
+    "tooNewBody": "This data was saved by a newer version of the app than this one. Update the app to open it.",
+    "details": "Technical details: {{message}}",
+    "retry": "Try again"
   },
   "notFound": {
     "title": "This screen does not exist",

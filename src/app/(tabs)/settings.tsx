@@ -1,9 +1,11 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { AppText, Card, LinkRow, OptionRow, Screen, ThemeSwatch } from '@/components';
+import { countEntries, useDatabase } from '@/db';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage } from '@/i18n';
 import { themes, useTheme } from '@/theme';
 
@@ -13,6 +15,7 @@ export default function SettingsScreen() {
   const { theme, setThemeId } = useTheme();
   const { language, setLanguage } = useLanguage();
   const version = Constants.expoConfig?.version;
+  const entryCount = useEntryCount();
 
   return (
     <Screen title={t('settings.title')}>
@@ -55,13 +58,41 @@ export default function SettingsScreen() {
         />
       </Card>
 
-      {version ? (
-        <Card>
+      <Card>
+        {version ? (
           <AppText color="muted" variant="label">
             {t('settings.version', { version })}
           </AppText>
-        </Card>
-      ) : null}
+        ) : null}
+        {entryCount !== null ? (
+          <AppText color="muted" variant="label">
+            {t('settings.entriesOnPhone', { total: entryCount })}
+          </AppText>
+        ) : null}
+      </Card>
     </Screen>
   );
+}
+
+/** How many entries the database holds; `null` until it has answered. */
+function useEntryCount(): number | null {
+  const db = useDatabase();
+  const [total, setTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    countEntries(db).then(
+      (found) => {
+        if (!cancelled) setTotal(found);
+      },
+      (error: unknown) => console.warn('Could not count entries', error),
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [db]);
+
+  return total;
 }

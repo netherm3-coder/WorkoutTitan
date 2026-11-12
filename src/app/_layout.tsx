@@ -4,13 +4,16 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { StartupError } from '@/components';
+import { DatabaseProvider, DatabaseTooNewError, useOpenDatabase } from '@/db';
 import { initI18n, pickLanguage } from '@/i18n';
 import { loadSettings, saveThemeId, type StoredSettings } from '@/settings/storage';
 import { fontAssets, ThemeProvider, useTheme } from '@/theme';
 
-// Keep the splash screen up until fonts and saved settings are in, so the first frame is
-// already in the right language and skin.
+// Keep the splash screen up until fonts, saved settings and the database are in, so the first
+// frame is already in the right language and skin and has data behind it.
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -38,7 +41,8 @@ export default function RootLayout() {
     }
   }, [fontError]);
 
-  const ready = settings !== null && (fontsLoaded || fontError !== null);
+  const { state: opened, retry } = useOpenDatabase();
+  const ready = settings !== null && (fontsLoaded || fontError !== null) && opened.status !== 'opening';
 
   useEffect(() => {
     if (ready) {
@@ -52,7 +56,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider initialThemeId={settings.themeId} onThemeChange={saveThemeId}>
-      <RootStack />
+      {opened.status === 'ready' ? (
+        <DatabaseProvider value={opened.db}>
+          <RootStack />
+        </DatabaseProvider>
+      ) : (
+        <DatabaseFailure error={opened.error} onRetry={retry} retrying={opened.retrying} />
+      )}
     </ThemeProvider>
   );
 }
@@ -66,6 +76,28 @@ function RootStack() {
     <>
       <StatusBar style={theme.isDark ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: underlay } }} />
+    </>
+  );
+}
+
+/** Without its data the app has nothing to show, so it says what went wrong instead. */
+function DatabaseFailure({ error, onRetry, retrying }: { error: unknown; onRetry: () => void; retrying: boolean }) {
+  const { t } = useTranslation();
+  const { theme } = useTheme();
+
+  // Trying again cannot help with data from a newer version; only an update can.
+  const tooNew = error instanceof DatabaseTooNewError;
+  const message = error instanceof Error ? error.message : String(error);
+
+  return (
+    <>
+      <StatusBar style={theme.isDark ? 'light' : 'dark'} />
+      <StartupError
+        action={tooNew ? undefined : { label: t('startup.retry'), onPress: onRetry, busy: retrying }}
+        body={t(tooNew ? 'startup.tooNewBody' : 'startup.failedBody')}
+        details={tooNew ? undefined : t('startup.details', { message })}
+        title={t('startup.failedTitle')}
+      />
     </>
   );
 }

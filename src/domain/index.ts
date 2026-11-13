@@ -7,6 +7,7 @@
 export * from './achievements';
 export * from './body';
 export * from './bodyWeight';
+export * from './cosmetics';
 export * from './counters';
 export * from './dates';
 export * from './duration';

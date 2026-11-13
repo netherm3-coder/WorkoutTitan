@@ -223,6 +223,39 @@
     "byPremium": "Part of the premium set. The app has no subscription yet.",
     "saveFailed": "Could not save. Try again."
   },
+  "backup": {
+    "title": "Backup",
+    "saveTitle": "Save to a file",
+    "saveBody": "The file holds everything you entered: results, your own exercises, weight and measurements, goals, counters and the look of the camp. Language and skin stay on the phone.",
+    "saveButton": "Save a copy",
+    "saving": "Preparing the file…",
+    "saved": "The file {{name}} is ready. Keep it somewhere that will not be lost with the phone.",
+    "saveFailed": "Could not save the file. Try again.",
+    "restoreTitle": "Restore from a file",
+    "restoreBody": "What is in the file is added to what is already here. Nothing is deleted. If the same entry is both on the phone and in the file, the one from the file stays.",
+    "chooseButton": "Choose a file",
+    "reading": "Reading the file…",
+    "problems": {
+      "notJson": "This file does not look like a Record backup.",
+      "notBackup": "This is a data file, but not a Record backup.",
+      "newerVersion": "This copy was made by a newer version of the app. Update the app and try again.",
+      "damaged": "The file is damaged, so nothing was taken from it. Where it goes wrong: {{where}}",
+      "unreadable": "Could not read the file."
+    },
+    "found": "Copy \"{{name}}\"",
+    "made": "Made: {{day}}",
+    "entries": "Entries: {{total}}",
+    "newEntries": "New to this phone: {{total}}",
+    "exercises": "Own exercises: {{total}}",
+    "weights": "Weigh-ins: {{total}}",
+    "measurements": "Measurements: {{total}}",
+    "goals": "Goals: {{total}}",
+    "restoreButton": "Add the data from the file",
+    "cancel": "Do not add",
+    "restoring": "Adding…",
+    "restored": "Done. Entries on the phone now: {{total}}",
+    "restoreFailed": "Could not add the data. Nothing on the phone has changed."
+  },
   "body": {
     "title": "Body",
     "subtitle": "Weight and measurements",
@@ -499,7 +532,9 @@
     "exercises": "Your exercises",
     "exercisesHint": "Add or remove",
     "camp": "Camp look",
-    "campHint": "Knight, tent, sky"
+    "campHint": "Knight, tent, sky",
+    "backup": "Backup",
+    "backupHint": "Save your data to a file or restore it from one"
   },
   "themes": {
     "camp": {

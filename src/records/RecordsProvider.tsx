@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import type { BackupData } from '@/backup/format';
 import {
   addEntry as insertEntry,
   clearGoal as removeGoal,
@@ -11,6 +12,7 @@ import {
   listGoals,
   loadHistory,
   loadLook,
+  restoreBackup as writeBackup,
   loadProfile,
   newId,
   restoreEntry,
@@ -67,6 +69,8 @@ export type Records = {
   saveProfile(changes: Partial<Profile>): Promise<void>;
   /** Changes the given slots of the camp's look. */
   saveLook(changes: Partial<Look>): Promise<void>;
+  /** Adds the contents of a backup to what is here, all of it or none. */
+  restoreBackup(data: BackupData): Promise<void>;
   setGoal(discipline: string, target: number): Promise<void>;
   clearGoal(discipline: string): Promise<void>;
   /** Adds one of the person's own exercises. */
@@ -152,6 +156,10 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
       look,
       async saveLook(changes) {
         await writeLook(db, changes, Date.now());
+        await reload();
+      },
+      async restoreBackup(data) {
+        await db.withExclusiveTransactionAsync((transaction) => writeBackup(transaction, data, Date.now()));
         await reload();
       },
       async setGoal(discipline, target) {

@@ -67,6 +67,12 @@ export default function SettingsScreen() {
           label={t('settings.counters')}
           onPress={() => router.push('/counters')}
         />
+        <LinkRow
+          hint={t('settings.backupHint')}
+          icon="save-outline"
+          label={t('settings.backup')}
+          onPress={() => router.push('/backup')}
+        />
       </Card>
 
       <Card tone="cardAlt">

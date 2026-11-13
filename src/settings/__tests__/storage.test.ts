@@ -37,13 +37,16 @@ describe('saved settings', () => {
   });
 
   it('fall back to defaults when the store cannot be read', async () => {
-    jest.spyOn(AsyncStorage, 'getItem').mockRejectedValue(new Error('disk failure'));
+    // Once only: AsyncStorage's stand-in is a jest.fn already, so spyOn hands back the shared
+    // function itself and restoreAllMocks would not undo a lasting change to it.
+    jest.mocked(AsyncStorage.getItem).mockRejectedValueOnce(new Error('disk failure'));
     await expect(loadSettings()).resolves.toEqual({ themeId: null, language: null });
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
   it('do not throw when a save fails', async () => {
-    jest.spyOn(AsyncStorage, 'setItem').mockRejectedValue(new Error('disk full'));
+    const full = new Error('disk full');
+    jest.mocked(AsyncStorage.setItem).mockRejectedValueOnce(full).mockRejectedValueOnce(full);
     await expect(saveThemeId('camp')).resolves.toBeUndefined();
     await expect(saveLanguage('en')).resolves.toBeUndefined();
     expect(warn).toHaveBeenCalledTimes(2);

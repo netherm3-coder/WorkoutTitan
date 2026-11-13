@@ -1,4 +1,5 @@
 import {
+  achievementWeightKg,
   ACHIEVEMENT_CATEGORIES,
   ACHIEVEMENT_LADDERS,
   ACHIEVEMENTS,
@@ -351,3 +352,28 @@ describe('the "persistent" achievement', () => {
     expect(persistent).toMatchObject({ unlocked: true, progress: 1 });
   });
 });
+
+describe('achievements set in kilograms', () => {
+  it('are the three bench presses, at the weights their names promise', () => {
+    const weighed = ACHIEVEMENTS.map((achievement) => [achievement.id, achievementWeightKg(achievement.id)]).filter(([, kg]) => kg !== null);
+
+    expect(weighed).toEqual([
+      ['bench_100', 100],
+      ['bench_150', 150],
+      ['bench_200', 200],
+    ]);
+  });
+
+  it('unlock at exactly the weight they show', () => {
+    for (const kg of [100, 150, 200]) {
+      const id = `bench_${kg}` as const;
+      const at = (loadKg: number) =>
+        evaluateAchievements(history([entry(BENCH_PRESS, '2026-03-01', { reps: 1, loadKg })]), { soberDays: null }).find(
+          (state) => state.id === id,
+        )?.unlocked;
+
+      expect([at(kg - 0.5), at(kg)]).toEqual([false, true]);
+    }
+  });
+});
+

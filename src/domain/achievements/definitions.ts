@@ -16,6 +16,8 @@ export type AchievementDefinition = {
   progress: (facts: Facts, points: Points) => number;
   /** Depends on points earned from the others, so it is worked out after them. */
   meta?: true;
+  /** The weight it asks for, for achievements set in kilograms; shown in the person's unit. */
+  weightKg?: number;
 };
 
 /** Points from the achievements that do not depend on points themselves. */
@@ -57,9 +59,9 @@ export const ACHIEVEMENTS = [
   { id: 'iron_will', category: 'strength', icon: '🛡️', reward: 30, progress: (f) => toward(f.longestStreakDays, 7) },
   { id: 'marathon_30', category: 'strength', icon: '🌟', reward: 75, progress: (f) => toward(f.longestStreakDays, 30) },
   { id: 'month_titan', category: 'strength', icon: '👑', reward: 40, progress: (f) => toward(f.maxEntriesInMonth, 10) },
-  { id: 'bench_100', category: 'strength', icon: '🏋️', reward: 40, progress: (f) => toward(f.maxBenchKg, 100) },
-  { id: 'bench_150', category: 'strength', icon: '💥', reward: 80, progress: (f) => toward(f.maxBenchKg, 150) },
-  { id: 'bench_200', category: 'strength', icon: '🦍', reward: 150, progress: (f) => toward(f.maxBenchKg, 200) },
+  { id: 'bench_100', category: 'strength', icon: '🏋️', reward: 40, weightKg: 100, progress: (f) => toward(f.maxBenchKg, 100) },
+  { id: 'bench_150', category: 'strength', icon: '💥', reward: 80, weightKg: 150, progress: (f) => toward(f.maxBenchKg, 150) },
+  { id: 'bench_200', category: 'strength', icon: '🦍', reward: 150, weightKg: 200, progress: (f) => toward(f.maxBenchKg, 200) },
 
   // Speed
   { id: 'sprinter', category: 'speed', icon: '⚡', reward: 10, progress: (f) => done(f.sprintEntries > 0) },
@@ -121,3 +123,10 @@ export const ACHIEVEMENT_LADDERS = {
 } as const satisfies Record<string, readonly AchievementId[]>;
 
 export type AchievementLadder = keyof typeof ACHIEVEMENT_LADDERS;
+
+/** The weight an achievement asks for, or `null` for one that is not set in kilograms. */
+export function achievementWeightKg(id: AchievementId): number | null {
+  const definition: AchievementDefinition | undefined = ACHIEVEMENTS.find((achievement) => achievement.id === id);
+  return definition?.weightKg ?? null;
+}
+

@@ -14,6 +14,7 @@ import { gatherFacts } from './facts';
 export {
   ACHIEVEMENT_CATEGORIES,
   ACHIEVEMENT_LADDERS,
+  achievementWeightKg,
   ACHIEVEMENTS,
   PERSISTENT_SHARE,
   type AchievementCategory,

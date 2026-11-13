@@ -68,6 +68,15 @@ const DEFAULT_DIRECTION: Record<ExerciseKind, Direction | null> = {
 /** Every kind there is, for checking stored values and for pickers. */
 export const EXERCISE_KINDS = Object.keys(DEFAULT_DIRECTION) as ExerciseKind[];
 
+/**
+ * Whether the person picks which way is better. Only a bare time or a bare number can go
+ * either way: a plank is held as long as possible, a lap is run as fast as possible. The other
+ * kinds have one natural direction.
+ */
+export function choosesDirection(kind: ExerciseKind): boolean {
+  return kind === 'duration' || kind === 'count';
+}
+
 export function isExerciseKind(value: unknown): value is ExerciseKind {
   return typeof value === 'string' && (EXERCISE_KINDS as readonly string[]).includes(value);
 }
@@ -135,3 +144,35 @@ export function disciplineKey(
 export function roundMetres(metres: number): number {
   return Math.round(metres * 100) / 100;
 }
+
+/** What can be changed about one of the person's own exercises once it exists. */
+export type ExerciseChanges = {
+  name?: string;
+  /** Taken only where the kind lets the person choose (`choosesDirection`). */
+  better?: Direction;
+  /** Taken only for a `count`. Empty means no unit. */
+  unit?: string | null;
+  /** Taken only for distances against the clock. */
+  distanceUnit?: 'km' | 'm';
+};
+
+/**
+ * An own exercise with the given changes. The id and the kind stay: entries are stored as
+ * numbers of that kind, and goals and records are kept under that id. A change that does not
+ * apply to the kind is ignored, the way the form to add an exercise ignores it.
+ */
+export function changeExercise(exercise: Exercise, changes: ExerciseChanges): Exercise {
+  if (exercise.builtIn) {
+    throw new Error(`"${exercise.id}" is a built-in exercise and cannot be changed`);
+  }
+
+  return customExercise({
+    id: exercise.id,
+    kind: exercise.kind,
+    name: changes.name ?? exercise.name ?? '',
+    better: (choosesDirection(exercise.kind) ? changes.better : undefined) ?? exercise.better ?? undefined,
+    unit: changes.unit === undefined ? exercise.unit : changes.unit,
+    distanceUnit: changes.distanceUnit ?? exercise.distanceUnit ?? undefined,
+  });
+}
+

@@ -2,9 +2,12 @@ import {
   BENCH_PRESS,
   BODYWEIGHT_CLASSICS,
   BUILT_IN_EXERCISES,
+  changeExercise,
+  choosesDirection,
   customExercise,
   DIPS,
   disciplineKey,
+  EXERCISE_KINDS,
   exerciseLookup,
   isRace,
   PULLUPS,
@@ -133,5 +136,65 @@ describe('roundMetres', () => {
     expect(roundMetres(0.1 + 0.2)).toBe(0.3);
     expect(roundMetres(21097.5)).toBe(21097.5);
     expect(roundMetres(2.4 * 1000)).toBe(2400);
+  });
+});
+
+describe('choosesDirection', () => {
+  it('lets a bare time or a bare number go either way, and nothing else', () => {
+    expect(EXERCISE_KINDS.filter(choosesDirection)).toEqual(['duration', 'count']);
+  });
+});
+
+describe('changeExercise', () => {
+  const plank = customExercise({ id: 'custom:планка', name: 'Планка', kind: 'duration' });
+
+  it('renames, and keeps the id and the kind', () => {
+    expect(changeExercise(plank, { name: '  Планка на ліктях ' })).toEqual({ ...plank, name: 'Планка на ліктях' });
+  });
+
+  it('turns the direction of a time around', () => {
+    expect(plank.better).toBe('lower');
+    expect(changeExercise(plank, { better: 'higher' }).better).toBe('higher');
+  });
+
+  it('keeps what is not changed', () => {
+    const held = changeExercise(plank, { better: 'higher' });
+
+    expect(changeExercise(held, { name: 'Plank' })).toEqual({ ...held, name: 'Plank' });
+  });
+
+  it('sets and clears the unit of a number', () => {
+    const stairs = customExercise({ id: 'own:1', name: 'Сходи', kind: 'count', unit: 'поверхів' });
+
+    expect(changeExercise(stairs, { unit: ' прольотів ' }).unit).toBe('прольотів');
+    expect(changeExercise(stairs, { unit: '' }).unit).toBeNull();
+    expect(changeExercise(stairs, { unit: null }).unit).toBeNull();
+    expect(changeExercise(stairs, {}).unit).toBe('поверхів');
+  });
+
+  it('switches a distance between kilometres and metres', () => {
+    const swim = customExercise({ id: 'own:2', name: 'Плавання', kind: 'distanceTime', distanceUnit: 'km' });
+
+    expect(changeExercise(swim, { distanceUnit: 'm' }).distanceUnit).toBe('m');
+  });
+
+  it('ignores a change that does not apply to the kind', () => {
+    const march = customExercise({ id: 'own:3', name: 'Марш-кидок', kind: 'distanceTime' });
+    const squat = customExercise({ id: 'own:4', name: 'Присідання', kind: 'weight' });
+    const diary = customExercise({ id: 'own:5', name: 'Щоденник', kind: 'text' });
+
+    expect(changeExercise(march, { better: 'higher', unit: 'kg' })).toEqual(march);
+    expect(changeExercise(squat, { better: 'lower', distanceUnit: 'm' })).toEqual(squat);
+    expect(changeExercise(diary, { better: 'higher' })).toEqual(diary);
+  });
+
+  it('keeps a direction it was given some other way, such as in a backup', () => {
+    const odd = { ...customExercise({ id: 'own:6', name: 'Odd', kind: 'distanceTime' }), better: 'higher' as const };
+
+    expect(changeExercise(odd, { name: 'Still odd' }).better).toBe('higher');
+  });
+
+  it('refuses a built-in exercise', () => {
+    expect(() => changeExercise(PULLUPS, { name: 'Chin-ups' })).toThrow('built-in');
   });
 });

@@ -115,6 +115,24 @@ export async function addEntries(db: Database, entries: readonly WorkoutEntry[],
   }
 }
 
+/**
+ * Adds entries, and where an id is already taken puts the given entry in its place: the way a
+ * backup comes back. An entry that had been deleted returns. Call inside a transaction.
+ */
+export async function putEntries(db: Database, entries: readonly WorkoutEntry[], now: number): Promise<void> {
+  const row = `(${COLUMNS.map(() => '?').join(', ')}, ?)`;
+  const replaced = COLUMNS.filter((column) => column !== 'id').map((column) => `${column} = excluded.${column}`);
+
+  for (let start = 0; start < entries.length; start += ROWS_PER_INSERT) {
+    const chunk = entries.slice(start, start + ROWS_PER_INSERT);
+    await db.runAsync(
+      `INSERT INTO entries (${COLUMNS.join(', ')}, updated_at) VALUES ${chunk.map(() => row).join(', ')}
+       ON CONFLICT (id) DO UPDATE SET ${replaced.join(', ')}, updated_at = excluded.updated_at, deleted_at = NULL`,
+      chunk.flatMap((entry) => [...toParams(entry), now]),
+    );
+  }
+}
+
 export async function addEntry(db: Database, entry: WorkoutEntry, now: number): Promise<void> {
   await addEntries(db, [entry], now);
 }

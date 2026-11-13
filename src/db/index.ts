@@ -4,6 +4,7 @@
  * module loads.
  */
 
+export * from './backup';
 export * from './body';
 export { DatabaseProvider, useDatabase, useOpenDatabase, type OpenDatabase } from './DatabaseContext';
 export * from './entries';

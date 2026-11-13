@@ -12,7 +12,7 @@ import { makeRecordHistory } from '@/domain/__tests__/recordDataset';
 import { entry, resetSequence } from '@/domain/__tests__/support';
 
 import { addEntries, deleteEntry, listEntries, updateEntry } from '../entries';
-import { listExercises, saveExercise } from '../exercises';
+import { deleteExercise, listDeletedExercises, listExercises, saveExercise } from '../exercises';
 import { loadHistory } from '../history';
 import { importRecord, planRecordImport } from '../recordImport';
 
@@ -126,6 +126,27 @@ describe("bringing Record's file in", () => {
 
     expect((await listExercises(db)).map((exercise) => exercise.id)).toEqual(['own:1']);
     expect((await loadHistory(db)).entries.filter((item) => item.exerciseId === 'own:1')).toHaveLength(2);
+  });
+
+  it('keeps a deleted exercise deleted when the file has nothing new for it', async () => {
+    await bringIn(db, fromFile(FILE));
+    await deleteExercise(db, 'custom:планка', 2);
+
+    await bringIn(db, fromFile(FILE), 200);
+
+    expect(await listDeletedExercises(db)).toEqual([expect.objectContaining({ entries: 2 })]);
+    expect((await loadHistory(db)).entries).toHaveLength(1);
+  });
+
+  it('brings a deleted exercise back with its old entries when the file has new rows for it', async () => {
+    await bringIn(db, fromFile(FILE));
+    await deleteExercise(db, 'custom:планка', 2);
+    const later = writeRecordCsv([{ date: '2026-03-06', exercise: 'Планка', count: '4:00' }]) + FILE.split('\n').slice(1).join('\n');
+
+    await bringIn(db, fromFile(later), 200);
+
+    expect(await listDeletedExercises(db)).toEqual([]);
+    expect((await loadHistory(db)).entries.filter((item) => item.exerciseId === 'custom:планка')).toHaveLength(3);
   });
 
   it('adds all of it or none of it', async () => {

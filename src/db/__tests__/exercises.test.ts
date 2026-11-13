@@ -1,6 +1,8 @@
 import { customExercise, PULLUPS } from '@/domain';
+import { entry } from '@/domain/__tests__/support';
 
-import { deleteExercise, listExercises, restoreExercise, saveExercise } from '../exercises';
+import { addEntries, deleteEntry } from '../entries';
+import { deleteExercise, listDeletedExercises, listExercises, restoreExercise, saveExercise } from '../exercises';
 
 import { openTestDatabase, type TestDatabase } from './testDatabase';
 
@@ -75,3 +77,39 @@ describe("the person's own exercises", () => {
     await expect(saveExercise(db, { ...PLANK, name: null }, 1000)).rejects.toThrow(/CHECK/);
   });
 });
+
+describe('deleted exercises', () => {
+  it('are listed apart, the most recently deleted first, with the entries they took with them', async () => {
+    await saveExercise(db, PLANK, 1);
+    await saveExercise(db, SQUATS, 1);
+    await saveExercise(db, MARCH, 1);
+    const held = entry(PLANK, '2026-03-01', { durationMs: 60_000 });
+    await addEntries(
+      db,
+      [held, entry(PLANK, '2026-03-02', { durationMs: 90_000 }), entry(PLANK, '2026-03-03', { durationMs: 95_000 }), entry(SQUATS, '2026-03-01', { value: 5 })],
+      1,
+    );
+    // An entry deleted on its own does not count: it is not coming back with the exercise.
+    await deleteEntry(db, held.id, 2);
+
+    await deleteExercise(db, PLANK.id, 10);
+    await deleteExercise(db, SQUATS.id, 20);
+
+    expect(await listDeletedExercises(db)).toEqual([
+      { exercise: SQUATS, entries: 1 },
+      { exercise: PLANK, entries: 2 },
+    ]);
+    expect(await listExercises(db)).toEqual([MARCH]);
+  });
+
+  it('leave the list once brought back', async () => {
+    await saveExercise(db, PLANK, 1);
+    await deleteExercise(db, PLANK.id, 2);
+
+    await restoreExercise(db, PLANK.id, 3);
+
+    expect(await listDeletedExercises(db)).toEqual([]);
+    expect(await listExercises(db)).toEqual([PLANK]);
+  });
+});
+

@@ -30,6 +30,22 @@ export async function listExercises(db: Database): Promise<Exercise[]> {
   return rows.map(toExercise);
 }
 
+/** An own exercise that was deleted, with the entries that left the history with it. */
+export type DeletedExercise = { exercise: Exercise; entries: number };
+
+/** The person's deleted exercises, the most recently deleted first. */
+export async function listDeletedExercises(db: Database): Promise<DeletedExercise[]> {
+  const rows = await db.getAllAsync<ExerciseRow & { entries: number }>(
+    `SELECT x.id, x.kind, x.better, x.name, x.unit, x.distance_unit,
+       (SELECT COUNT(*) FROM entries e WHERE e.exercise_id = x.id AND e.deleted_at IS NULL) AS entries
+     FROM exercises x
+     WHERE x.deleted_at IS NOT NULL
+     ORDER BY x.deleted_at DESC, x.id`,
+    [],
+  );
+  return rows.map(({ entries, ...row }) => ({ exercise: toExercise(row), entries }));
+}
+
 /**
  * Adds one of the person's own exercises, or replaces it if it is already there. Saving a
  * deleted exercise brings it back. Built-in exercises live in code and cannot be saved.

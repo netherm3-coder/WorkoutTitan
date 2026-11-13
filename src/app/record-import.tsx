@@ -6,7 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { pickTextFile, readRecordCsv, type RecordCsv, type RecordImport } from '@/backup';
 import { AppText, Button, Card, Screen } from '@/components';
 import { newId, planRecordImport, useDatabase } from '@/db';
-import { convertLegacyWorkouts, type Conversion, type ConversionIssue, type ExerciseKind } from '@/domain';
+import { convertLegacyWorkouts, type Conversion, type ConversionIssue } from '@/domain';
 import { useFormat } from '@/format';
 import { useRecords } from '@/records';
 import { spacing } from '@/theme';
@@ -92,9 +92,12 @@ export default function RecordImportScreen() {
             <AppText>{t('recordImport.newExercises', { total: number(plan.exercises.length) })}</AppText>
             {plan.exercises.map((exercise) => (
               <AppText key={exercise.id} color="muted" variant="label">
-                {`${exercise.name}: ${t(`own.kinds.${exercise.kind as Exclude<ExerciseKind, 'shuttle'>}`)}`}
+                {`${exercise.name}: ${format.kind(exercise)}`}
               </AppText>
             ))}
+            <AppText color="muted" variant="label">
+              {t('recordImport.exercisesHint', { screen: t('own.title') })}
+            </AppText>
           </View>
         ) : null}
 

@@ -2,6 +2,6 @@
 
 export { formatDay, formatElapsed } from './dates';
 export { formatNumber, parseDecimal } from './numbers';
-export { disciplineName, exerciseName, formatGoal, formatResult } from './results';
+export { disciplineName, exerciseKind, exerciseName, formatGoal, formatResult } from './results';
 export { formatDuration, joinDuration, splitDuration } from './time';
 export { useFormat } from './useFormat';

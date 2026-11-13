@@ -5,28 +5,31 @@ import type { RecordImport } from '@/backup/recordImport';
 import {
   addEntry as insertEntry,
   clearGoal as removeGoal,
-  importRecord as writeRecordImport,
-  deleteExercise as markExerciseDeleted,
   deleteBodyWeight as markWeightDeleted,
   deleteEntry as markDeleted,
+  deleteExercise as markExerciseDeleted,
+  importRecord as writeRecordImport,
   listBodyMeasurements,
+  listDeletedExercises,
   listExercises,
   listGoals,
   loadHistory,
   loadLook,
-  restoreBackup as writeBackup,
   loadProfile,
   newId,
+  restoreBackup as writeBackup,
   restoreEntry,
+  restoreExercise as reviveExercise,
   saveBodyMeasurements as writeMeasurements,
   saveBodyWeight as writeWeight,
   saveExercise as writeExercise,
   saveLook as writeLook,
-  setGoal as writeGoal,
   saveProfile as writeProfile,
+  setGoal as writeGoal,
   updateEntry as replaceEntry,
   useDatabase,
   type Database,
+  type DeletedExercise,
   type Profile,
 } from '@/db';
 import {
@@ -79,11 +82,17 @@ export type Records = {
   clearGoal(discipline: string): Promise<void>;
   /** Adds one of the person's own exercises. */
   addExercise(exercise: Omit<Exercise, 'id' | 'builtIn'>): Promise<void>;
+  /** Changes the name, direction or units of an own exercise; its kind stays (`changeExercise`). */
+  updateExercise(exercise: Exercise): Promise<void>;
   /** Removes an own exercise. Its entries leave the history with it. */
   deleteExercise(id: string): Promise<void>;
+  /** Own exercises that were deleted, the most recent first. */
+  deletedExercises: readonly DeletedExercise[];
+  /** Brings a deleted exercise back, with its entries. */
+  restoreExercise(id: string): Promise<void>;
 };
 
-type Stored = Pick<Records, 'history' | 'exercises' | 'measurements' | 'goals' | 'profile' | 'look'>;
+type Stored = Pick<Records, 'history' | 'exercises' | 'deletedExercises' | 'measurements' | 'goals' | 'profile' | 'look'>;
 
 const RecordsContext = createContext<Records | null>(null);
 
@@ -93,15 +102,16 @@ type Loaded =
   | { status: 'failed'; error: unknown };
 
 async function read(db: Database): Promise<Stored> {
-  const [history, custom, measurements, goals, profile, look] = await Promise.all([
+  const [history, custom, deletedExercises, measurements, goals, profile, look] = await Promise.all([
     loadHistory(db),
     listExercises(db),
+    listDeletedExercises(db),
     listBodyMeasurements(db),
     listGoals(db),
     loadProfile(db),
     loadLook(db),
   ]);
-  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], measurements, goals, profile, look };
+  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], deletedExercises, measurements, goals, profile, look };
 }
 
 type RecordsProviderProps = {
@@ -149,7 +159,7 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
 
   const records = useMemo<Records | null>(() => {
     if (!ready) return null;
-    const { history, exercises, measurements, goals, profile, look } = ready;
+    const { history, exercises, deletedExercises, measurements, goals, profile, look } = ready;
 
     return {
       history,
@@ -183,8 +193,17 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
         await writeExercise(db, { ...exercise, id: `own:${newId(now)}`, builtIn: false }, now);
         await reload();
       },
+      async updateExercise(exercise) {
+        await writeExercise(db, exercise, Date.now());
+        await reload();
+      },
       async deleteExercise(id) {
         await markExerciseDeleted(db, id, Date.now());
+        await reload();
+      },
+      deletedExercises,
+      async restoreExercise(id) {
+        await reviveExercise(db, id, Date.now());
         await reload();
       },
       lastDeleted,

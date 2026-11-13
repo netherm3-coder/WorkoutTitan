@@ -6,7 +6,7 @@ import { useLanguage } from '@/i18n';
 
 import { formatDay, formatElapsed } from './dates';
 import { formatNumber } from './numbers';
-import { disciplineName, exerciseName, formatGoal, formatResult } from './results';
+import { disciplineName, exerciseKind, exerciseName, formatGoal, formatResult } from './results';
 
 /** The formatting functions bound to the current language, for use in screens. */
 export function useFormat() {
@@ -18,6 +18,7 @@ export function useFormat() {
       number: (value: number) => formatNumber(value, language),
       day: (day: Day, today: Day) => formatDay(day, today, t),
       exercise: (exercise: Exercise) => exerciseName(exercise, t),
+      kind: (exercise: Exercise) => exerciseKind(exercise, t),
       discipline: (exercise: Exercise, measures: Pick<Measures, 'distanceM' | 'segments'>) =>
         disciplineName(exercise, measures, t, language),
       result: (measures: Measures, exercise: Exercise) => formatResult(measures, exercise, t, language),

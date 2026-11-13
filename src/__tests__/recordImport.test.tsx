@@ -73,7 +73,8 @@ describe('bringing entries over from Record', () => {
     expect(screen.getByText('New entries: 5')).toBeOnTheScreen();
     expect(screen.queryByText(/Brought over before/)).not.toBeOnTheScreen();
     expect(screen.getByText('New exercises of your own: 1')).toBeOnTheScreen();
-    expect(screen.getByText('Планка: Time')).toBeOnTheScreen();
+    expect(screen.getByText('Планка: Time, less is better')).toBeOnTheScreen();
+    expect(screen.getByText('The name and which way is better can be changed later in "Your exercises".')).toBeOnTheScreen();
     expect(screen.getByText('Will stay as text, because no numbers could be read: 1')).toBeOnTheScreen();
     expect(screen.getByText('For example, Підтягування: "багато"')).toBeOnTheScreen();
     expect(screen.getByText('A bench press with a weight only, taken as one rep: 1')).toBeOnTheScreen();

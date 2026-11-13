@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Chip, Icon, Screen, TextField } from '@/components';
-import { customExercise, type Direction, type Exercise, type ExerciseKind } from '@/domain';
+import { choosesDirection, customExercise, type Direction, type Exercise, type ExerciseKind } from '@/domain';
 import { useFormat } from '@/format';
-import { useRecords } from '@/records';
+import { toRouteParam } from '@/navigation';
+import { namesakeOf, useRecords } from '@/records';
 import { minTouchTarget, spacing } from '@/theme';
 
 /** The kinds a person can pick. Shuttle runs are covered by the built-in exercise. */
@@ -16,7 +17,7 @@ export default function ExercisesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const format = useFormat();
-  const { history, exercises, addExercise, deleteExercise } = useRecords();
+  const { history, exercises, deletedExercises, addExercise, deleteExercise, restoreExercise } = useRecords();
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/settings'));
 
@@ -27,12 +28,12 @@ export default function ExercisesScreen() {
   const [unit, setUnit] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [restoreProblem, setRestoreProblem] = useState<string | null>(null);
 
   const own = exercises.filter((exercise) => !exercise.builtIn);
   const entriesOf = (exercise: Exercise) => history.entries.filter((entry) => entry.exerciseId === exercise.id).length;
 
-  // Only a time or a number can go either way; the rest have one natural direction.
-  const choosesDirection = kind === 'duration' || kind === 'count';
+  const direction = choosesDirection(kind);
 
   const pickKind = (next: (typeof KINDS)[number]) => {
     setKind(next);
@@ -54,7 +55,7 @@ export default function ExercisesScreen() {
       setProblem(t('own.nameRequired'));
       return;
     }
-    if (exercises.some((exercise) => format.exercise(exercise).toLowerCase() === trimmed.toLowerCase())) {
+    if (namesakeOf(trimmed, exercises, format.exercise)) {
       setProblem(t('own.nameTaken'));
       return;
     }
@@ -63,13 +64,26 @@ export default function ExercisesScreen() {
       id: '',
       name: trimmed,
       kind,
-      better: choosesDirection ? better : undefined,
+      better: direction ? better : undefined,
       unit,
       distanceUnit,
     });
     attempt(addExercise(exercise), () => {
       setName('');
       setUnit('');
+    });
+  };
+
+  const restore = (exercise: Exercise) => {
+    const name = exercise.name ?? '';
+    if (namesakeOf(name, exercises, format.exercise)) {
+      setRestoreProblem(t('own.restoreTaken', { name }));
+      return;
+    }
+    setRestoreProblem(null);
+    restoreExercise(exercise.id).catch((error: unknown) => {
+      console.warn('Could not bring the exercise back', error);
+      setRestoreProblem(t('own.saveFailed'));
     });
   };
 
@@ -94,12 +108,20 @@ export default function ExercisesScreen() {
             </View>
           ) : (
             <View key={exercise.id} style={styles.row}>
-              <View style={styles.grow}>
-                <AppText strong>{exercise.name}</AppText>
-                <AppText color="muted" variant="label">
-                  {t(`own.kinds.${exercise.kind === 'shuttle' ? 'distanceTime' : exercise.kind}`)}
-                </AppText>
-              </View>
+              <Pressable
+                accessibilityLabel={t('own.edit', { name: exercise.name })}
+                accessibilityRole="button"
+                onPress={() => router.push({ pathname: '/exercise/[id]', params: { id: toRouteParam(exercise.id) } })}
+                style={({ pressed }) => [styles.grow, styles.edit, pressed && styles.pressed]}
+              >
+                <View style={styles.grow}>
+                  <AppText strong>{exercise.name}</AppText>
+                  <AppText color="muted" variant="label">
+                    {format.kind(exercise)}
+                  </AppText>
+                </View>
+                <Icon name="chevron-forward" />
+              </Pressable>
               <Pressable
                 accessibilityLabel={t('own.delete', { name: exercise.name })}
                 accessibilityRole="button"
@@ -112,6 +134,36 @@ export default function ExercisesScreen() {
           ),
         )}
       </Card>
+
+      {deletedExercises.length > 0 ? (
+        <Card>
+          <AppText variant="heading">{t('own.deleted')}</AppText>
+          {deletedExercises.map(({ exercise, entries }) => (
+            <View key={exercise.id} style={styles.row}>
+              <View style={styles.grow}>
+                <AppText strong>{exercise.name}</AppText>
+                <AppText color="muted" variant="label">
+                  {format.kind(exercise)}
+                </AppText>
+                <AppText color="muted" variant="label">
+                  {t('own.deletedEntries', { count: entries })}
+                </AppText>
+              </View>
+              <Button
+                accessibilityLabel={t('own.restoreLabel', { name: exercise.name })}
+                label={t('own.restore')}
+                onPress={() => restore(exercise)}
+                variant="accent"
+              />
+            </View>
+          ))}
+          {restoreProblem ? (
+            <AppText accessibilityLiveRegion="polite" accessibilityRole="alert" color="danger">
+              {restoreProblem}
+            </AppText>
+          ) : null}
+        </Card>
+      ) : null}
 
       <Card>
         <AppText variant="heading">{t('own.new')}</AppText>
@@ -134,7 +186,7 @@ export default function ExercisesScreen() {
           </>
         ) : null}
 
-        {choosesDirection ? (
+        {direction ? (
           <>
             <AppText variant="label">{t('own.better')}</AppText>
             <View accessibilityRole="radiogroup" style={styles.chips}>
@@ -170,6 +222,12 @@ const styles = StyleSheet.create({
   },
   grow: {
     flex: 1,
+  },
+  edit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: minTouchTarget,
   },
   chips: {
     flexDirection: 'row',

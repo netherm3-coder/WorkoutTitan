@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-import { isTimed, type Exercise, type Measures } from '@/domain';
+import { choosesDirection, isTimed, type Exercise, type Measures } from '@/domain';
 import type { Language } from '@/i18n';
 
 import { formatNumber } from './numbers';
@@ -22,6 +22,17 @@ const isBuiltInId = (id: string): id is keyof typeof BUILT_IN_NAMES =>
 /** What an exercise is called: built-in ones in the current language, own ones as they were named. */
 export function exerciseName(exercise: Exercise, t: TFunction): string {
   return isBuiltInId(exercise.id) ? t(BUILT_IN_NAMES[exercise.id]) : (exercise.name ?? exercise.id);
+}
+
+/**
+ * What an exercise records, and which way is better where the person chose it: "Time, more
+ * is better". Shuttle runs are named as distances against the clock, which is what they are.
+ */
+export function exerciseKind(exercise: Exercise, t: TFunction): string {
+  const kind = t(`own.kinds.${exercise.kind === 'shuttle' ? 'distanceTime' : exercise.kind}`);
+  if (!choosesDirection(exercise.kind) || exercise.better === null) return kind;
+
+  return `${kind}, ${t(exercise.better === 'higher' ? 'own.moreIsBetter' : 'own.lessIsBetter')}`;
 }
 
 /**

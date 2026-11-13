@@ -104,6 +104,8 @@
     "better": "Better when",
     "higher": "higher",
     "lower": "lower",
+    "moreIsBetter": "more is better",
+    "lessIsBetter": "less is better",
     "unit": "Unit",
     "add": "Add exercise",
     "delete": "Delete the exercise \"{{name}}\"",
@@ -113,7 +115,18 @@
     "cancel": "Keep",
     "nameRequired": "Give the exercise a name.",
     "nameTaken": "There already is an exercise with this name.",
-    "saveFailed": "Could not save. Try again."
+    "saveFailed": "Could not save. Try again.",
+    "edit": "Change the exercise \"{{name}}\"",
+    "editTitle": "Change exercise",
+    "kindFixed": "This does not change: the exercise's entries are already stored this way. To record something else, add a new exercise.",
+    "directionHint": "The records and goals of this exercise will be judged by the new rule at once.",
+    "save": "Save changes",
+    "gone": "This exercise no longer exists.",
+    "deleted": "Deleted exercises",
+    "deletedEntries": "Entries: {{count}}",
+    "restore": "Bring back",
+    "restoreLabel": "Bring back the exercise \"{{name}}\"",
+    "restoreTaken": "There is already an exercise \"{{name}}\". Rename it to bring this one back."
   },
   "counters": {
     "title": "Counters",
@@ -272,6 +285,7 @@
     "newEntries": "New entries: {{total}}",
     "alreadyHere": "Brought over before: {{total}}",
     "newExercises": "New exercises of your own: {{total}}",
+    "exercisesHint": "The name and which way is better can be changed later in \"{{screen}}\".",
     "reservations": "Read with reservations",
     "issues": {
       "keptAsText": "Will stay as text, because no numbers could be read: {{total}}",

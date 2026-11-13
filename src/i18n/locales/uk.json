@@ -18,8 +18,8 @@
     "standing_few": "Тримається {{count}} дні",
     "standing_many": "Тримається {{count}} днів",
     "standing_other": "Тримається {{count}} дня",
-    "oneRepMaxAdded": "1ПМ: +{{kg}} кг",
-    "oneRepMax": "1ПМ: {{kg}} кг",
+    "oneRepMaxAdded": "1ПМ: +{{weight}}",
+    "oneRepMax": "1ПМ: {{weight}}",
     "totals": "Зал слави",
     "otherEntries": "Інші записи",
     "goal": "Ціль: {{goal}}",
@@ -46,8 +46,8 @@
     "previousDay": "Попередній день",
     "nextDay": "Наступний день",
     "reps": "Повторення",
-    "extraWeight": "Обтяження, кг",
-    "barWeight": "Вага, кг",
+    "extraWeight": "Обтяження, {{unit}}",
+    "barWeight": "Вага, {{unit}}",
     "minutes": "Хвилини",
     "seconds": "Секунди",
     "distanceKm": "Дистанція, км",
@@ -317,20 +317,24 @@
     "title": "Тіло",
     "subtitle": "Вага і заміри",
     "weight": "Вага",
-    "weightKg": "Вага, кг",
+    "weightField": "Вага, {{unit}}",
     "saveWeight": "Записати вагу",
     "noWeight": "Ваги ще немає. Вона потрібна для 1ПМ і спортивного статусу.",
-    "sincePrevious": "{{change}} кг від попереднього зважування",
+    "sincePrevious": "{{change}} від попереднього зважування",
     "recent": "Останні зважування",
     "deleteWeight": "Видалити вагу за {{day}}",
-    "heightCm": "Зріст, см",
+    "heightField": "Зріст, {{unit}}",
     "saveHeight": "Зберегти зріст",
     "bmi": "Індекс маси тіла: {{value}}",
     "measurements": "Заміри",
     "noMeasurements": "Замірів ще немає.",
     "measure": "Записати заміри",
     "measureTitle": "Заміри тіла",
-    "measureHint": "У сантиметрах. Порожнє поле означає, що цю частину тіла не міряли.",
+    "measureIn": {
+      "cm": "У сантиметрах.",
+      "in": "У дюймах."
+    },
+    "measureHint": "Порожнє поле означає, що цю частину тіла не міряли.",
     "saveMeasurements": "Зберегти заміри",
     "invalidWeight": "Вкажи вагу числом, більшим за нуль.",
     "invalidHeight": "Вкажи зріст числом, більшим за нуль.",
@@ -410,15 +414,15 @@
       },
       "bench_100": {
         "name": "Прощавай, пустий гриф",
-        "description": "Жим лежачи 100 кг"
+        "description": "Жим лежачи {{weight}}"
       },
       "bench_150": {
         "name": "Гриф починає гнутися",
-        "description": "Жим лежачи 150 кг"
+        "description": "Жим лежачи {{weight}}"
       },
       "bench_200": {
         "name": "Прощавай, легка атлетико",
-        "description": "Жим лежачи 200 кг"
+        "description": "Жим лежачи {{weight}}"
       },
       "sprinter": {
         "name": "Спринтер",
@@ -546,7 +550,7 @@
     "needsBodyWeight": "Запиши вагу на вкладці «Тіло», і тут з'явиться твій рівень.",
     "needsPullups": "Рівень рахується за підтягуваннями останніх 90 днів. Запиши підхід.",
     "coefficient": "Коефіцієнт {{value}}",
-    "toNext": "Ще {{kg}} кг до рівня «{{level}}»",
+    "toNext": "Ще {{weight}} до рівня «{{level}}»",
     "top": "Це найвищий рівень.",
     "best": "Найсильніший підхід: {{result}}",
     "capped": "Повтори понад 10 рахуються як 10."
@@ -556,7 +560,19 @@
     "km": "км",
     "m": "м",
     "s": "с",
-    "cm": "см"
+    "cm": "см",
+    "lb": "фунти",
+    "in": "дюйми",
+    "kgValue": "{{value}} кг",
+    "lbValue_one": "{{value}} фунт",
+    "lbValue_few": "{{value}} фунти",
+    "lbValue_many": "{{value}} фунтів",
+    "lbValue_other": "{{value}} фунта",
+    "cmValue": "{{value}} см",
+    "inValue_one": "{{value}} дюйм",
+    "inValue_few": "{{value}} дюйми",
+    "inValue_many": "{{value}} дюймів",
+    "inValue_other": "{{value}} дюйма"
   },
   "dates": {
     "today": "Сьогодні",
@@ -579,6 +595,10 @@
   "settings": {
     "title": "Налаштування",
     "language": "Мова",
+    "units": "Одиниці",
+    "weightUnit": "Вага",
+    "lengthUnit": "Заміри тіла і зріст",
+    "unitsHint": "Дистанції завжди в кілометрах і метрах: так названо дисципліни бігу.",
     "appearance": "Оформлення",
     "support": "Підтримати автора",
     "supportHint": "Донати та преміум",

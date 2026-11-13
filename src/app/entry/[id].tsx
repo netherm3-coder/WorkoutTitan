@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppText, Card, Screen } from '@/components';
+import { useUnits } from '@/format';
 import { useLanguage } from '@/i18n';
 import { fromRouteParam } from '@/navigation';
 import { draftFrom, EntryForm, useRecords } from '@/records';
@@ -10,6 +11,7 @@ import { draftFrom, EntryForm, useRecords } from '@/records';
 export default function EditEntryScreen() {
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const { units } = useUnits();
   const router = useRouter();
   const id = fromRouteParam(useLocalSearchParams<{ id: string }>().id);
   const { history, exercises, updateEntry, deleteEntry } = useRecords();
@@ -27,7 +29,7 @@ export default function EditEntryScreen() {
         <EntryForm
           exercises={exercises}
           onManageExercises={() => router.push('/exercises')}
-          initial={draftFrom(entry, exercise, language)}
+          initial={draftFrom(entry, exercise, language, units)}
           onDelete={async () => {
             await deleteEntry(entry.id);
             goBack();

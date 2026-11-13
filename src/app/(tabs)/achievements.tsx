@@ -6,7 +6,6 @@ import {
   ACHIEVEMENT_CATEGORIES,
   availablePoints,
   earnedPoints,
-  persistentPoints,
   type AchievementState,
 } from '@/domain';
 import { useFormat } from '@/format';
@@ -20,8 +19,7 @@ export default function AchievementsScreen() {
   const earned = earnedPoints(states);
   const available = availablePoints(states);
 
-  const describe = (state: AchievementState) =>
-    t(`achievements.items.${state.id}.description`, { points: format.number(persistentPoints({ soberDays })) });
+  const describe = (state: AchievementState) => format.achievement(state.id, soberDays);
 
   return (
     <Screen subtitle={t('achievements.subtitle')} title={t('achievements.title')}>

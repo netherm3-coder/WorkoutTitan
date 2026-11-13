@@ -15,7 +15,7 @@ import {
   Tile,
   useWardrobe,
 } from '@/cosmetics';
-import { isOpen, LOOK_OPTIONS, persistentPoints, unlockOf, wardrobeCount, type Look, type LookItem, type Slot } from '@/domain';
+import { isOpen, LOOK_OPTIONS, unlockOf, wardrobeCount, type Look, type LookItem, type Slot } from '@/domain';
 import { useFormat } from '@/format';
 import { useAchievements } from '@/records';
 import { radii, spacing, useTheme } from '@/theme';
@@ -85,9 +85,7 @@ export default function CampLookScreen() {
             <>
               <AppText>{t('camp.byAchievement', { achievement: t(`achievements.items.${unlock.achievement}.name`) })}</AppText>
               <AppText color="muted" variant="label">
-                {t(`achievements.items.${unlock.achievement}.description`, {
-                  points: format.number(persistentPoints({ soberDays })),
-                })}
+                {format.achievement(unlock.achievement, soberDays)}
               </AppText>
             </>
           ) : (

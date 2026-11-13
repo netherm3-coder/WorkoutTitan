@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { isLengthUnit, isWeightUnit, type LengthUnit, type WeightUnit } from '@/format/units';
 import { isLanguage, type Language } from '@/i18n/languages';
 import { isThemeId } from '@/theme/themes';
 import type { ThemeId } from '@/theme/types';
@@ -8,11 +9,17 @@ import type { ThemeId } from '@/theme/types';
 export type StoredSettings = {
   themeId: ThemeId | null;
   language: Language | null;
+  weightUnit: WeightUnit | null;
+  lengthUnit: LengthUnit | null;
 };
+
+const NOTHING_CHOSEN: StoredSettings = { themeId: null, language: null, weightUnit: null, lengthUnit: null };
 
 const KEYS = {
   themeId: 'record.settings.themeId',
   language: 'record.settings.language',
+  weightUnit: 'record.settings.weightUnit',
+  lengthUnit: 'record.settings.lengthUnit',
 } as const;
 
 /**
@@ -21,17 +28,21 @@ const KEYS = {
  */
 export async function loadSettings(): Promise<StoredSettings> {
   try {
-    const [themeId, language] = await Promise.all([
+    const [themeId, language, weightUnit, lengthUnit] = await Promise.all([
       AsyncStorage.getItem(KEYS.themeId),
       AsyncStorage.getItem(KEYS.language),
+      AsyncStorage.getItem(KEYS.weightUnit),
+      AsyncStorage.getItem(KEYS.lengthUnit),
     ]);
     return {
       themeId: isThemeId(themeId) ? themeId : null,
       language: isLanguage(language) ? language : null,
+      weightUnit: isWeightUnit(weightUnit) ? weightUnit : null,
+      lengthUnit: isLengthUnit(lengthUnit) ? lengthUnit : null,
     };
   } catch (error) {
     console.warn('Could not read saved settings', error);
-    return { themeId: null, language: null };
+    return NOTHING_CHOSEN;
   }
 }
 
@@ -41,6 +52,14 @@ export async function saveThemeId(themeId: ThemeId): Promise<void> {
 
 export async function saveLanguage(language: Language): Promise<void> {
   await save(KEYS.language, language);
+}
+
+export async function saveWeightUnit(unit: WeightUnit): Promise<void> {
+  await save(KEYS.weightUnit, unit);
+}
+
+export async function saveLengthUnit(unit: LengthUnit): Promise<void> {
+  await save(KEYS.lengthUnit, unit);
 }
 
 /** A failed save only costs the choice on next launch, so it is logged rather than thrown. */

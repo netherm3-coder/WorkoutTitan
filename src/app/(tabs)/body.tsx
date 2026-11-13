@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
 import { BODY_PARTS, dayOf, type BodyPart } from '@/domain';
-import { parseDecimal, useFormat } from '@/format';
+import { decimalsOf, lengthFrom, parseDecimal, roundTo, useFormat, weightFrom, weightIn } from '@/format';
 import { useRecords } from '@/records';
 import { minTouchTarget, spacing } from '@/theme';
 
@@ -23,14 +23,13 @@ export default function BodyScreen() {
   const today = dayOf(new Date());
   const [day, setDay] = useState(today);
   const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState(profile.heightCm === null ? '' : format.number(profile.heightCm));
   const [problem, setProblem] = useState<string | null>(null);
 
   // Weigh-ins come oldest first.
   const { weights } = history;
   const latest = weights[weights.length - 1];
   const previous = weights[weights.length - 2];
-  const change = latest && previous ? Math.round((latest.kg - previous.kg) * 10) / 10 : null;
+  const change = latest && previous ? latest.kg - previous.kg : null;
   const bmi = latest && profile.heightCm ? latest.kg / (profile.heightCm / 100) ** 2 : null;
 
   // The latest value of every body part that was ever measured, in the order of the form.
@@ -54,32 +53,28 @@ export default function BodyScreen() {
   };
 
   const submitWeight = () => {
-    const kg = parseDecimal(weight);
-    if (kg === null || kg <= 0) {
+    const typed = parseDecimal(weight);
+    if (typed === null || typed <= 0) {
       setProblem(t('body.invalidWeight'));
       return;
     }
-    attempt(saveBodyWeight({ date: day, kg }).then(() => setWeight('')));
+    attempt(saveBodyWeight({ date: day, kg: weightFrom(typed, format.units.weight) }).then(() => setWeight('')));
   };
 
-  const submitHeight = () => {
-    const cm = height.trim() === '' ? null : parseDecimal(height);
-    if (height.trim() !== '' && (cm === null || cm <= 0)) {
-      setProblem(t('body.invalidHeight'));
-      return;
-    }
-    attempt(saveProfile({ heightCm: cm }));
+  /** A change of weight with its sign, unless it rounds to nothing in the chosen unit. */
+  const signed = (kg: number) => {
+    const unit = format.units.weight;
+    const visible = roundTo(weightIn(Math.abs(kg), unit), decimalsOf(unit)) > 0;
+    return `${visible ? (kg > 0 ? '+' : '−') : ''}${format.weight(Math.abs(kg))}`;
   };
-
-  const signed = (value: number) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${format.number(Math.abs(value))}`;
 
   return (
     <Screen subtitle={t('body.subtitle')} title={t('body.title')}>
       <Card tone="cardAlt">
         <AppText variant="heading">{t('body.weight')}</AppText>
         {latest ? (
-          <View accessibilityLabel={`${t('body.weight')}: ${format.number(latest.kg)} ${t('units.kg')}`} accessible>
-            <AppText variant="display">{`${format.number(latest.kg)} ${t('units.kg')}`}</AppText>
+          <View accessibilityLabel={`${t('body.weight')}: ${format.weight(latest.kg)}`} accessible>
+            <AppText variant="display">{format.weight(latest.kg)}</AppText>
             <AppText color="muted" variant="label">
               {format.day(latest.date, today)}
             </AppText>
@@ -97,7 +92,12 @@ export default function BodyScreen() {
 
       <Card>
         <DayStepper day={day} onChange={setDay} today={today} />
-        <TextField keyboardType="decimal-pad" label={t('body.weightKg')} onChangeText={setWeight} value={weight} />
+        <TextField
+          keyboardType="decimal-pad"
+          label={t('body.weightField', { unit: format.weightUnit })}
+          onChangeText={setWeight}
+          value={weight}
+        />
         <Button label={t('body.saveWeight')} onPress={submitWeight} />
         {problem ? (
           <AppText accessibilityLiveRegion="polite" accessibilityRole="alert" color="danger">
@@ -115,7 +115,7 @@ export default function BodyScreen() {
             .map((record) => (
               <View key={record.date} style={styles.row}>
                 <AppText style={styles.grow}>{format.day(record.date, today)}</AppText>
-                <AppText strong>{`${format.number(record.kg)} ${t('units.kg')}`}</AppText>
+                <AppText strong>{format.weight(record.kg)}</AppText>
                 <Pressable
                   accessibilityLabel={t('body.deleteWeight', { day: format.day(record.date, today) })}
                   accessibilityRole="button"
@@ -129,10 +129,13 @@ export default function BodyScreen() {
         </Card>
       ) : null}
 
-      <Card>
-        <TextField keyboardType="decimal-pad" label={t('body.heightCm')} onChangeText={setHeight} value={height} />
-        <Button label={t('body.saveHeight')} onPress={submitHeight} variant="accent" />
-      </Card>
+      {/* Filled again in the new unit when the unit changes. */}
+      <HeightCard
+        key={format.units.length}
+        heightCm={profile.heightCm}
+        onSave={(heightCm) => attempt(saveProfile({ heightCm }))}
+        onInvalid={() => setProblem(t('body.invalidHeight'))}
+      />
 
       <Card>
         <AppText variant="heading">{t('body.measurements')}</AppText>
@@ -140,20 +143,63 @@ export default function BodyScreen() {
         {latestParts.map(([part, { cm, date }]) => {
           const name = isBuiltInPart(part) ? t(`body.parts.${part}`) : part;
           return (
-            <View accessibilityLabel={`${name}: ${format.number(cm)} ${t('units.cm')}`} accessible key={part} style={styles.row}>
+            <View accessibilityLabel={`${name}: ${format.length(cm)}`} accessible key={part} style={styles.row}>
               <View style={styles.grow}>
                 <AppText>{name}</AppText>
                 <AppText color="muted" variant="caption">
                   {format.day(date, today)}
                 </AppText>
               </View>
-              <AppText strong>{`${format.number(cm)} ${t('units.cm')}`}</AppText>
+              <AppText strong>{format.length(cm)}</AppText>
             </View>
           );
         })}
         <Button label={t('body.measure')} onPress={() => router.push('/measurements')} variant="accent" />
       </Card>
     </Screen>
+  );
+}
+
+type HeightCardProps = {
+  heightCm: number | null;
+  onSave: (heightCm: number | null) => Promise<void> | void;
+  onInvalid: () => void;
+};
+
+/** Height in the chosen unit. Saved back untouched, it keeps the exact value it was filled with. */
+function HeightCard({ heightCm, onSave, onInvalid }: HeightCardProps) {
+  const { t } = useTranslation();
+  const format = useFormat();
+  const [filled, setFilled] = useState(() => (heightCm === null ? null : { text: format.lengthField(heightCm), cm: heightCm }));
+  const [height, setHeight] = useState(filled?.text ?? '');
+
+  const submit = () => {
+    const typed = height.trim();
+    if (typed === '') {
+      setFilled(null);
+      void onSave(null);
+      return;
+    }
+    const value = parseDecimal(typed);
+    if (value === null || value <= 0) {
+      onInvalid();
+      return;
+    }
+    const cm = filled && typed === filled.text ? filled.cm : lengthFrom(value, format.units.length);
+    setFilled({ text: typed, cm });
+    void onSave(cm);
+  };
+
+  return (
+    <Card>
+      <TextField
+        keyboardType="decimal-pad"
+        label={t('body.heightField', { unit: format.lengthUnit })}
+        onChangeText={setHeight}
+        value={height}
+      />
+      <Button label={t('body.saveHeight')} onPress={submit} variant="accent" />
+    </Card>
   );
 }
 

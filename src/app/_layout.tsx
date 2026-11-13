@@ -8,9 +8,10 @@ import { useTranslation } from 'react-i18next';
 
 import { StartupError } from '@/components';
 import { DatabaseProvider, DatabaseTooNewError, useOpenDatabase } from '@/db';
+import { defaultUnits, UnitsProvider } from '@/format';
 import { initI18n, pickLanguage } from '@/i18n';
 import { RecordsProvider } from '@/records';
-import { loadSettings, saveThemeId, type StoredSettings } from '@/settings/storage';
+import { loadSettings, saveLengthUnit, saveThemeId, saveWeightUnit, type StoredSettings } from '@/settings/storage';
 import { fontAssets, ThemeProvider, useTheme } from '@/theme';
 
 // Keep the splash screen up until fonts, saved settings and the history are in, so the first
@@ -57,18 +58,24 @@ export default function RootLayout() {
     return null;
   }
 
+  // A unit never chosen follows what the phone says about its measurement system.
+  const phoneUnits = defaultUnits(getLocales());
+  const units = { weight: settings.weightUnit ?? phoneUnits.weight, length: settings.lengthUnit ?? phoneUnits.length };
+
   return (
     <ThemeProvider initialThemeId={settings.themeId} onThemeChange={saveThemeId}>
-      {opened.status === 'ready' ? (
-        <DatabaseProvider value={opened.db}>
-          <RecordsProvider renderFailure={(error, again) => <DatabaseFailure error={error} onRetry={again} retrying={false} />}>
-            <Ready />
-            <RootStack />
-          </RecordsProvider>
-        </DatabaseProvider>
-      ) : (
-        <DatabaseFailure error={opened.error} onRetry={retry} retrying={opened.retrying} />
-      )}
+      <UnitsProvider initial={units} onLengthUnitChange={saveLengthUnit} onWeightUnitChange={saveWeightUnit}>
+        {opened.status === 'ready' ? (
+          <DatabaseProvider value={opened.db}>
+            <RecordsProvider renderFailure={(error, again) => <DatabaseFailure error={error} onRetry={again} retrying={false} />}>
+              <Ready />
+              <RootStack />
+            </RecordsProvider>
+          </DatabaseProvider>
+        ) : (
+          <DatabaseFailure error={opened.error} onRetry={retry} retrying={opened.retrying} />
+        )}
+      </UnitsProvider>
     </ThemeProvider>
   );
 }

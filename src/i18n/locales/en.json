@@ -16,8 +16,8 @@
     "setToday": "Set today",
     "standing_one": "Standing for {{count}} day",
     "standing_other": "Standing for {{count}} days",
-    "oneRepMaxAdded": "1RM: +{{kg}} kg",
-    "oneRepMax": "1RM: {{kg}} kg",
+    "oneRepMaxAdded": "1RM: +{{weight}}",
+    "oneRepMax": "1RM: {{weight}}",
     "totals": "Hall of fame",
     "otherEntries": "Other entries",
     "goal": "Goal: {{goal}}",
@@ -44,8 +44,8 @@
     "previousDay": "Previous day",
     "nextDay": "Next day",
     "reps": "Reps",
-    "extraWeight": "Extra weight, kg",
-    "barWeight": "Weight, kg",
+    "extraWeight": "Extra weight, {{unit}}",
+    "barWeight": "Weight, {{unit}}",
     "minutes": "Minutes",
     "seconds": "Seconds",
     "distanceKm": "Distance, km",
@@ -309,20 +309,24 @@
     "title": "Body",
     "subtitle": "Weight and measurements",
     "weight": "Weight",
-    "weightKg": "Weight, kg",
+    "weightField": "Weight, {{unit}}",
     "saveWeight": "Record weight",
     "noWeight": "No weight yet. It is needed for the one-rep max and the sport status.",
-    "sincePrevious": "{{change}} kg since the previous weigh-in",
+    "sincePrevious": "{{change}} since the previous weigh-in",
     "recent": "Recent weigh-ins",
     "deleteWeight": "Delete the weight of {{day}}",
-    "heightCm": "Height, cm",
+    "heightField": "Height, {{unit}}",
     "saveHeight": "Save height",
     "bmi": "Body mass index: {{value}}",
     "measurements": "Measurements",
     "noMeasurements": "No measurements yet.",
     "measure": "Record measurements",
     "measureTitle": "Body measurements",
-    "measureHint": "In centimetres. An empty field means that body part was not measured.",
+    "measureIn": {
+      "cm": "In centimetres.",
+      "in": "In inches."
+    },
+    "measureHint": "An empty field means that body part was not measured.",
     "saveMeasurements": "Save measurements",
     "invalidWeight": "Enter the weight as a number above zero.",
     "invalidHeight": "Enter the height as a number above zero.",
@@ -402,15 +406,15 @@
       },
       "bench_100": {
         "name": "Goodbye, empty bar",
-        "description": "Bench press 100 kg"
+        "description": "Bench press {{weight}}"
       },
       "bench_150": {
         "name": "The bar starts to bend",
-        "description": "Bench press 150 kg"
+        "description": "Bench press {{weight}}"
       },
       "bench_200": {
         "name": "Goodbye, track and field",
-        "description": "Bench press 200 kg"
+        "description": "Bench press {{weight}}"
       },
       "sprinter": {
         "name": "Sprinter",
@@ -538,7 +542,7 @@
     "needsBodyWeight": "Record your weight on the Body tab and your level will show here.",
     "needsPullups": "The level comes from the pull-ups of the last 90 days. Log a set.",
     "coefficient": "Coefficient {{value}}",
-    "toNext": "{{kg}} kg to go to \"{{level}}\"",
+    "toNext": "{{weight}} to go to \"{{level}}\"",
     "top": "This is the top level.",
     "best": "Strongest set: {{result}}",
     "capped": "Reps above 10 count as 10."
@@ -548,7 +552,15 @@
     "km": "km",
     "m": "m",
     "s": "s",
-    "cm": "cm"
+    "cm": "cm",
+    "lb": "lb",
+    "in": "in",
+    "kgValue": "{{value}} kg",
+    "lbValue_one": "{{value}} lb",
+    "lbValue_other": "{{value}} lb",
+    "cmValue": "{{value}} cm",
+    "inValue_one": "{{value}} in",
+    "inValue_other": "{{value}} in"
   },
   "dates": {
     "today": "Today",
@@ -571,6 +583,10 @@
   "settings": {
     "title": "Settings",
     "language": "Language",
+    "units": "Units",
+    "weightUnit": "Weight",
+    "lengthUnit": "Body measurements and height",
+    "unitsHint": "Distances are always in kilometres and metres: that is how the running disciplines are named.",
     "appearance": "Appearance",
     "support": "Support the author",
     "supportHint": "Tips and premium",

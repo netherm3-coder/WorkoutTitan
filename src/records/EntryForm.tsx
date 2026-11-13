@@ -51,7 +51,7 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
       case 'reps':
         return t('entry.reps');
       case 'load':
-        return t(exercise.kind === 'weight' ? 'entry.barWeight' : 'entry.extraWeight');
+        return t(exercise.kind === 'weight' ? 'entry.barWeight' : 'entry.extraWeight', { unit: format.weightUnit });
       case 'minutes':
         return t('entry.minutes');
       case 'seconds':
@@ -88,7 +88,7 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
   };
 
   const submit = () => {
-    const { measures, problems: found } = readDraft(draft, exercise);
+    const { measures, problems: found } = readDraft(draft, exercise, format.units);
     setProblems(found);
     if (found.length > 0) return;
 

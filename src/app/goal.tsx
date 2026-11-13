@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Screen, TextField } from '@/components';
 import { buildPedestal, isTimed, isValidGoal } from '@/domain';
-import { joinDuration, parseDecimal, splitDuration, useFormat } from '@/format';
+import { joinDuration, parseDecimal, splitDuration, useFormat, weightFrom } from '@/format';
 import { fromRouteParam } from '@/navigation';
 import { useRecords } from '@/records';
 import { spacing } from '@/theme';
@@ -22,13 +22,18 @@ export default function GoalScreen() {
   const record = useMemo(() => buildPedestal(history).get(discipline), [history, discipline]);
   const current = goals.get(discipline) ?? null;
   const timed = record ? isTimed(record.exercise) : false;
+  // A goal for a barbell lift is a weight, typed in the chosen unit.
+  const isWeight = record?.exercise.kind === 'weight';
 
-  const [first, setFirst] = useState(() => {
+  // What the field was filled with, so an untouched goal is kept exactly as it was.
+  const [filled] = useState(() => {
     if (current === null) return '';
+    if (isWeight) return format.weightField(current);
     if (!timed) return format.number(current);
     const { minutes } = splitDuration(current);
     return minutes > 0 ? format.number(minutes) : '';
   });
+  const [first, setFirst] = useState(filled);
   const [seconds, setSeconds] = useState(() => (current !== null && timed ? format.number(splitDuration(current).seconds) : ''));
   const [problem, setProblem] = useState<string | null>(null);
 
@@ -45,7 +50,7 @@ export default function GoalScreen() {
   const { exercise } = record;
   const numberLabel =
     exercise.kind === 'weight'
-      ? t('entry.barWeight')
+      ? t('entry.barWeight', { unit: format.weightUnit })
       : exercise.kind === 'bodyweight'
         ? t('entry.reps')
         : exercise.unit
@@ -62,7 +67,14 @@ export default function GoalScreen() {
 
   const submit = () => {
     const read = (text: string) => (text.trim() === '' ? null : parseDecimal(text));
-    const target = timed ? joinDuration(read(first), read(seconds)) : read(first);
+    const typed = read(first);
+    const target = timed
+      ? joinDuration(typed, read(seconds))
+      : isWeight && current !== null && first.trim() === filled
+        ? current
+        : isWeight && typed !== null
+          ? weightFrom(typed, format.units.weight)
+          : typed;
     const unreadable = [first, ...(timed ? [seconds] : [])].some((text) => text.trim() !== '' && parseDecimal(text) === null);
 
     if (unreadable || target === null || !isValidGoal(target, exercise)) {

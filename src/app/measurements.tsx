@@ -5,8 +5,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, DayStepper, Screen, TextField } from '@/components';
 import { BODY_PARTS, dayOf, type BodyMeasurement, type BodyPart, type Day } from '@/domain';
-import { formatNumber, parseDecimal } from '@/format';
-import { useLanguage } from '@/i18n';
+import { lengthFrom, parseDecimal, useFormat } from '@/format';
 import { useRecords } from '@/records';
 import { spacing } from '@/theme';
 
@@ -22,7 +21,7 @@ const ROWS: readonly (readonly BodyPart[])[] = [
 
 export default function MeasurementsScreen() {
   const { t } = useTranslation();
-  const { language } = useLanguage();
+  const format = useFormat();
   const router = useRouter();
   const { measurements, saveBodyMeasurements } = useRecords();
 
@@ -32,7 +31,7 @@ export default function MeasurementsScreen() {
   const typedFor = (date: Day, stored: readonly BodyMeasurement[]): Typed => {
     const typed = Object.fromEntries(BODY_PARTS.map((part) => [part, ''])) as Typed;
     for (const item of stored) {
-      if (item.date === date && item.part in typed) typed[item.part as BodyPart] = formatNumber(item.cm, language);
+      if (item.date === date && item.part in typed) typed[item.part as BodyPart] = format.lengthField(item.cm);
     }
     return typed;
   };
@@ -54,17 +53,19 @@ export default function MeasurementsScreen() {
 
     for (const part of BODY_PARTS) {
       const text = typed[part].trim();
+      // An untouched field is skipped: read back from inches it would come out a hair off.
+      if (text === had[part]) continue;
       if (text === '') {
-        // Emptying a field that had a value clears that measurement; an untouched one is skipped.
-        if (had[part] !== '') values[part] = null;
+        // Emptying a field that had a value clears that measurement.
+        values[part] = null;
         continue;
       }
-      const cm = parseDecimal(text);
-      if (cm === null || cm <= 0) {
+      const value = parseDecimal(text);
+      if (value === null || value <= 0) {
         setProblem(t('body.invalidMeasurement', { field: t(`body.parts.${part}`) }));
         return;
       }
-      values[part] = cm;
+      values[part] = lengthFrom(value, format.units.length);
     }
 
     setProblem(null);
@@ -79,7 +80,7 @@ export default function MeasurementsScreen() {
       <Card>
         <DayStepper day={day} onChange={changeDay} today={today} />
         <AppText color="muted" variant="label">
-          {t('body.measureHint')}
+          {`${t(`body.measureIn.${format.units.length}`)} ${t('body.measureHint')}`}
         </AppText>
         {ROWS.map((row) => (
           <View key={row.join()} style={styles.row}>

@@ -8,7 +8,7 @@ import {
   type Measures,
   type WorkoutEntry,
 } from '@/domain';
-import { formatNumber, joinDuration, parseDecimal, splitDuration } from '@/format';
+import { formatNumber, joinDuration, parseDecimal, splitDuration, weightField, weightFrom, type Units } from '@/format';
 import type { Language } from '@/i18n';
 
 /** The number fields of the form. Which of them are shown depends on the kind of exercise. */
@@ -21,6 +21,11 @@ export type Draft = Record<NumberField, string> & {
   date: Day;
   words: string;
   note: string;
+  /**
+   * The load as the form was filled with it. Shown in pounds, 82.5 kg reads "181.9"; saved back
+   * untouched it must stay 82.5 kg, not become 181.9 lb = 82.51 kg.
+   */
+  loadAsFilled: { text: string; kg: number } | null;
 };
 
 export type DraftProblem = EntryProblem | { notANumber: NumberField };
@@ -37,7 +42,7 @@ const BLANK_FIELDS: Record<NumberField, string> = {
 };
 
 export function emptyDraft(exerciseId: string, date: Day): Draft {
-  return { ...BLANK_FIELDS, exerciseId, date, words: '', note: '' };
+  return { ...BLANK_FIELDS, exerciseId, date, words: '', note: '', loadAsFilled: null };
 }
 
 /** The fields a kind of exercise is entered with, in the order of the form. */
@@ -60,17 +65,18 @@ export function fieldsOf(exercise: Exercise): readonly NumberField[] {
   }
 }
 
-/** Fills the form with an entry that is about to be edited. */
-export function draftFrom(entry: WorkoutEntry, exercise: Exercise, language: Language): Draft {
+/** Fills the form with an entry that is about to be edited, weights in the chosen unit. */
+export function draftFrom(entry: WorkoutEntry, exercise: Exercise, language: Language, units: Units): Draft {
   const text = (value: number | null) => (value === null ? '' : formatNumber(value, language));
   const time = entry.durationMs === null ? null : splitDuration(entry.durationMs);
   const inKm = exercise.kind === 'distanceTime' && exercise.distanceUnit !== 'm';
+  const load = entry.loadKg === null ? '' : weightField(entry.loadKg, units.weight, language);
 
   return {
     exerciseId: entry.exerciseId,
     date: entry.date,
     reps: text(entry.reps),
-    load: text(entry.loadKg),
+    load,
     minutes: time && time.minutes > 0 ? text(time.minutes) : '',
     seconds: time ? text(time.seconds) : '',
     distance: exercise.kind === 'shuttle' ? '' : text(entry.distanceM === null ? null : inKm ? entry.distanceM / 1000 : entry.distanceM),
@@ -79,6 +85,7 @@ export function draftFrom(entry: WorkoutEntry, exercise: Exercise, language: Lan
     value: text(entry.value),
     words: exercise.kind === 'text' ? (entry.text ?? '') : '',
     note: entry.note,
+    loadAsFilled: entry.loadKg === null ? null : { text: load, kg: entry.loadKg },
   };
 }
 
@@ -86,7 +93,7 @@ export function draftFrom(entry: WorkoutEntry, exercise: Exercise, language: Lan
  * Turns what was typed into the numbers of a result and says what is wrong with it, if
  * anything. Only the fields that belong to the kind of exercise are read.
  */
-export function readDraft(draft: Draft, exercise: Exercise): { measures: Measures; problems: DraftProblem[] } {
+export function readDraft(draft: Draft, exercise: Exercise, units: Units): { measures: Measures; problems: DraftProblem[] } {
   const shown = fieldsOf(exercise);
   const values: Partial<Record<NumberField, number>> = {};
   const unreadable: DraftProblem[] = [];
@@ -110,10 +117,13 @@ export function readDraft(draft: Draft, exercise: Exercise): { measures: Measure
           ? values.distance
           : values.distance * 1000;
 
+  const untouchedLoad = draft.loadAsFilled !== null && draft.load.trim() === draft.loadAsFilled.text;
+  const loadKg = values.load === undefined ? null : untouchedLoad && draft.loadAsFilled ? draft.loadAsFilled.kg : weightFrom(values.load, units.weight);
+
   const measures: Measures = {
     ...NO_MEASURES,
     reps: values.reps ?? null,
-    loadKg: values.load ?? null,
+    loadKg,
     durationMs: has('minutes') ? joinDuration(values.minutes ?? null, values.seconds ?? null) : null,
     distanceM: distance === undefined ? null : roundMetres(distance),
     segments: values.segments ?? null,

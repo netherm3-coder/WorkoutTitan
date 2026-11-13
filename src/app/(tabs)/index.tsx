@@ -52,8 +52,8 @@ export default function HomeScreen() {
 
   const oneRepMax = (record: PedestalRecord) => {
     if (record.oneRepMaxKg === null) return null;
-    const kg = format.number(record.oneRepMaxKg);
-    return t(record.exercise.kind === 'weight' ? 'home.oneRepMax' : 'home.oneRepMaxAdded', { kg });
+    const weight = format.weight(record.oneRepMaxKg);
+    return t(record.exercise.kind === 'weight' ? 'home.oneRepMax' : 'home.oneRepMaxAdded', { weight });
   };
 
   /** The goal of a record and how far along it is, for screen readers; nothing without a goal. */
@@ -134,7 +134,7 @@ export default function HomeScreen() {
                 <AppText variant="label">
                   {status.nextLevel && status.kgToNextLevel !== null
                     ? t('status.toNext', {
-                        kg: format.number(status.kgToNextLevel),
+                        weight: format.weight(status.kgToNextLevel),
                         level: t(`status.levels.${status.nextLevel}`),
                       })
                     : t('status.top')}

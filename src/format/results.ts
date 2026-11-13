@@ -3,8 +3,10 @@ import type { TFunction } from 'i18next';
 import { choosesDirection, isTimed, type Exercise, type Measures } from '@/domain';
 import type { Language } from '@/i18n';
 
+import { formatWeight } from './amounts';
 import { formatNumber } from './numbers';
 import { formatDuration } from './time';
+import type { Units } from './units';
 
 const BUILT_IN_NAMES = {
   pullups: 'exercises.pullups',
@@ -66,21 +68,22 @@ const BLANK = '—';
  * A result in one line: "12 (+20 kg) (0:41)", "100 kg × 5", "24:30". An entry carried over
  * from Record whose wording says more than its numbers is shown as it was written.
  */
-export function formatResult(measures: Measures, exercise: Exercise, t: TFunction, language: Language): string {
+export function formatResult(measures: Measures, exercise: Exercise, t: TFunction, language: Language, units: Units): string {
   if (measures.text !== null) return measures.text;
 
   const number = (value: number) => formatNumber(value, language);
+  const weight = (kg: number) => formatWeight(kg, units.weight, t, language);
   const { reps, loadKg, durationMs, value } = measures;
   const time = durationMs === null ? '' : ` (${formatDuration(durationMs)})`;
 
   switch (exercise.kind) {
     case 'bodyweight': {
       if (reps === null) return BLANK;
-      const load = loadKg ? ` (+${number(loadKg)} ${t('units.kg')})` : '';
+      const load = loadKg ? ` (+${weight(loadKg)})` : '';
       return `${number(reps)}${load}${time}`;
     }
     case 'weight':
-      return loadKg === null || reps === null ? BLANK : `${number(loadKg)} ${t('units.kg')} × ${number(reps)}`;
+      return loadKg === null || reps === null ? BLANK : `${weight(loadKg)} × ${number(reps)}`;
     case 'distanceTime':
     case 'shuttle':
     case 'duration':
@@ -96,10 +99,10 @@ export function formatResult(measures: Measures, exercise: Exercise, t: TFunctio
 }
 
 /** A goal in the number its discipline is measured by: "20", "100 kg", "20:00". */
-export function formatGoal(goal: number, exercise: Exercise, t: TFunction, language: Language): string {
+export function formatGoal(goal: number, exercise: Exercise, t: TFunction, language: Language, units: Units): string {
   if (isTimed(exercise)) return formatDuration(goal);
 
   const number = formatNumber(goal, language);
-  if (exercise.kind === 'weight') return `${number} ${t('units.kg')}`;
+  if (exercise.kind === 'weight') return formatWeight(goal, units.weight, t, language);
   return exercise.kind === 'count' && exercise.unit ? `${number} ${exercise.unit}` : number;
 }

@@ -10,9 +10,15 @@ import {
   formatGoal,
   formatNumber,
   formatResult,
+  formatLength,
+  formatWeight,
   joinDuration,
+  lengthField,
+  METRIC,
   parseDecimal,
   splitDuration,
+  US_UNITS,
+  weightField,
 } from '../index';
 
 initI18n('en');
@@ -134,32 +140,116 @@ describe('formatResult', () => {
     ['a number with a time', m({ value: 50, durationMs: 221_200 }), BURPEES, '50 (3:41.2)'],
     ['words', m({ text: 'шпагат майже' }), NOTES, 'шпагат майже'],
   ])('writes %s', (_label, measures, exercise, expected) => {
-    expect(formatResult(measures, exercise, uk, 'uk')).toBe(expected);
+    expect(formatResult(measures, exercise, uk, 'uk', METRIC)).toBe(expected);
   });
 
   it('shows an imported result as it was written when the numbers do not hold all of it', () => {
-    expect(formatResult(m({ reps: 12, text: '12 (вузький хват)' }), PULLUPS, uk, 'uk')).toBe('12 (вузький хват)');
+    expect(formatResult(m({ reps: 12, text: '12 (вузький хват)' }), PULLUPS, uk, 'uk', METRIC)).toBe('12 (вузький хват)');
   });
 
   it('uses the units of the language', () => {
-    expect(formatResult(m({ reps: 12, loadKg: 7.5 }), PULLUPS, en, 'en')).toBe('12 (+7.5 kg)');
+    expect(formatResult(m({ reps: 12, loadKg: 7.5 }), PULLUPS, en, 'en', METRIC)).toBe('12 (+7.5 kg)');
   });
 
   it('shows a dash when the numbers are missing', () => {
-    expect(formatResult(m({}), PULLUPS, en, 'en')).toBe('—');
-    expect(formatResult(m({ distanceM: 5000 }), RUN, en, 'en')).toBe('—');
-    expect(formatResult(m({}), NOTES, en, 'en')).toBe('—');
+    expect(formatResult(m({}), PULLUPS, en, 'en', METRIC)).toBe('—');
+    expect(formatResult(m({ distanceM: 5000 }), RUN, en, 'en', METRIC)).toBe('—');
+    expect(formatResult(m({}), NOTES, en, 'en', METRIC)).toBe('—');
   });
 });
 
 describe('formatGoal', () => {
   it('writes a goal in the number its discipline is measured by', () => {
-    expect(formatGoal(20, PULLUPS, uk, 'uk')).toBe('20');
-    expect(formatGoal(102.5, BENCH_PRESS, uk, 'uk')).toBe('102,5 кг');
-    expect(formatGoal(1_200_000, RUN, en, 'en')).toBe('20:00');
-    expect(formatGoal(12_500, SPRINT, en, 'en')).toBe('0:12.5');
-    expect(formatGoal(120, SQUATS, en, 'en')).toBe('120 кг');
-    expect(formatGoal(60, BURPEES, en, 'en')).toBe('60');
+    expect(formatGoal(20, PULLUPS, uk, 'uk', METRIC)).toBe('20');
+    expect(formatGoal(102.5, BENCH_PRESS, uk, 'uk', METRIC)).toBe('102,5 кг');
+    expect(formatGoal(1_200_000, RUN, en, 'en', METRIC)).toBe('20:00');
+    expect(formatGoal(12_500, SPRINT, en, 'en', METRIC)).toBe('0:12.5');
+    expect(formatGoal(120, SQUATS, en, 'en', METRIC)).toBe('120 кг');
+    expect(formatGoal(60, BURPEES, en, 'en', METRIC)).toBe('60');
+  });
+});
+
+describe('in pounds', () => {
+  it('writes loads and lifts in pounds, declined in Ukrainian', () => {
+    expect(formatResult(m({ reps: 12, loadKg: 20 }), PULLUPS, en, 'en', US_UNITS)).toBe('12 (+44.1 lb)');
+    expect(formatResult(m({ reps: 5, loadKg: 100 }), BENCH_PRESS, en, 'en', US_UNITS)).toBe('220.5 lb × 5');
+    expect(formatResult(m({ reps: 5, loadKg: 100 }), BENCH_PRESS, uk, 'uk', US_UNITS)).toBe('220,5 фунта × 5');
+  });
+
+  it('shows a load typed in pounds as the round number it was', () => {
+    expect(formatResult(m({ reps: 5, loadKg: 225 * 0.45359237 }), BENCH_PRESS, en, 'en', US_UNITS)).toBe('225 lb × 5');
+  });
+
+  it('leaves a number of the person’s own in the unit they gave it', () => {
+    expect(formatResult(m({ value: 100 }), SQUATS, en, 'en', US_UNITS)).toBe('100 кг');
+  });
+
+  it('writes a weight goal in pounds and the rest as before', () => {
+    expect(formatGoal(102.5, BENCH_PRESS, en, 'en', US_UNITS)).toBe('226 lb');
+    expect(formatGoal(20, PULLUPS, en, 'en', US_UNITS)).toBe('20');
+    expect(formatGoal(1_200_000, RUN, en, 'en', US_UNITS)).toBe('20:00');
+  });
+});
+
+describe('formatWeight', () => {
+  it('writes kilograms with up to two decimals', () => {
+    expect(formatWeight(81.25, 'kg', uk, 'uk')).toBe('81,25 кг');
+    expect(formatWeight(78.4, 'kg', en, 'en')).toBe('78.4 kg');
+  });
+
+  it.each([
+    [1, '1 фунт'],
+    [2, '2 фунти'],
+    [4, '4 фунти'],
+    [5, '5 фунтів'],
+    [11, '11 фунтів'],
+    [12, '12 фунтів'],
+    [21, '21 фунт'],
+    [22, '22 фунти'],
+    [100, '100 фунтів'],
+    [1.5, '1,5 фунта'],
+    [181.9, '181,9 фунта'],
+  ])('declines %s pounds in Ukrainian', (pounds, text) => {
+    expect(formatWeight(pounds * 0.45359237, 'lb', uk, 'uk')).toBe(text);
+  });
+
+  it('picks the form from the number as shown, after rounding', () => {
+    // 0.99996 lb shows as "1", so it is "1 фунт", not "1 фунта".
+    expect(formatWeight(0.99996 * 0.45359237, 'lb', uk, 'uk')).toBe('1 фунт');
+  });
+
+  it('writes pounds with one decimal in English', () => {
+    expect(formatWeight(82.5, 'lb', en, 'en')).toBe('181.9 lb');
+    expect(formatWeight(0.45359237, 'lb', en, 'en')).toBe('1 lb');
+  });
+});
+
+describe('formatLength', () => {
+  it('writes centimetres as they are', () => {
+    expect(formatLength(81.5, 'cm', uk, 'uk')).toBe('81,5 см');
+  });
+
+  it.each([
+    [32, '32 дюйми'],
+    [31, '31 дюйм'],
+    [35, '35 дюймів'],
+    [31.9, '31,9 дюйма'],
+  ])('declines %s inches in Ukrainian', (inches, text) => {
+    expect(formatLength(inches * 2.54, 'in', uk, 'uk')).toBe(text);
+  });
+
+  it('writes inches with one decimal in English', () => {
+    expect(formatLength(81, 'in', en, 'en')).toBe('31.9 in');
+  });
+});
+
+describe('fields', () => {
+  it('hold the number alone, in the chosen unit', () => {
+    expect(weightField(82.5, 'kg', 'uk')).toBe('82,5');
+    expect(weightField(82.5, 'lb', 'en')).toBe('181.9');
+    expect(weightField(20.4116655, 'lb', 'en')).toBe('45');
+    expect(lengthField(81.28, 'in', 'uk')).toBe('32');
+    expect(lengthField(181, 'cm', 'en')).toBe('181');
   });
 });
 

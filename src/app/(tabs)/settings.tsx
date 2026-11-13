@@ -1,18 +1,20 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { AppText, Card, LinkRow, OptionRow, Screen, ThemeSwatch } from '@/components';
+import { AppText, Card, Chip, LinkRow, OptionRow, Screen, ThemeSwatch } from '@/components';
+import { LENGTH_UNITS, useUnits, WEIGHT_UNITS } from '@/format';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage } from '@/i18n';
 import { useRecords } from '@/records';
-import { themes, useTheme } from '@/theme';
+import { spacing, themes, useTheme } from '@/theme';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { theme, setThemeId } = useTheme();
   const { language, setLanguage } = useLanguage();
+  const { units, setWeightUnit, setLengthUnit } = useUnits();
   const version = Constants.expoConfig?.version;
   const entryCount = useRecords().history.entries.length;
 
@@ -30,6 +32,29 @@ export default function SettingsScreen() {
             />
           ))}
         </View>
+      </Card>
+
+      <Card>
+        <AppText variant="heading">{t('settings.units')}</AppText>
+        <View style={styles.units}>
+          <AppText variant="label">{t('settings.weightUnit')}</AppText>
+          <View accessibilityLabel={t('settings.weightUnit')} accessibilityRole="radiogroup" style={styles.chips}>
+            {WEIGHT_UNITS.map((unit) => (
+              <Chip key={unit} label={t(`units.${unit}`)} onPress={() => setWeightUnit(unit)} selected={units.weight === unit} />
+            ))}
+          </View>
+        </View>
+        <View style={styles.units}>
+          <AppText variant="label">{t('settings.lengthUnit')}</AppText>
+          <View accessibilityLabel={t('settings.lengthUnit')} accessibilityRole="radiogroup" style={styles.chips}>
+            {LENGTH_UNITS.map((unit) => (
+              <Chip key={unit} label={t(`units.${unit}`)} onPress={() => setLengthUnit(unit)} selected={units.length === unit} />
+            ))}
+          </View>
+        </View>
+        <AppText color="muted" variant="label">
+          {t('settings.unitsHint')}
+        </AppText>
       </Card>
 
       <Card>
@@ -103,3 +128,14 @@ export default function SettingsScreen() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  units: {
+    gap: spacing.sm,
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+});

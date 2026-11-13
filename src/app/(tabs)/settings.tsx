@@ -50,6 +50,12 @@ export default function SettingsScreen() {
 
       <Card>
         <LinkRow
+          hint={t('settings.campHint')}
+          icon="color-palette-outline"
+          label={t('settings.camp')}
+          onPress={() => router.push('/camp')}
+        />
+        <LinkRow
           hint={t('settings.exercisesHint')}
           icon="list"
           label={t('settings.exercises')}

@@ -1,9 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Button, CampScene, Card, EmptyState, ProgressBar, Screen } from '@/components';
+import { AppText, Button, Card, EmptyState, ProgressBar, Screen } from '@/components';
+import { CampScene, useWardrobe } from '@/cosmetics';
 import {
   buildPedestal,
   daysStanding,
@@ -18,13 +20,14 @@ import {
 } from '@/domain';
 import { useFormat } from '@/format';
 import { useRecords } from '@/records';
-import { spacing } from '@/theme';
+import { minTouchTarget, radii, spacing } from '@/theme';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const format = useFormat();
   const { history, exercises, goals, profile } = useRecords();
+  const { shown } = useWardrobe();
 
   const today = dayOf(new Date());
   const totals = useMemo(() => lifetimeTotals(history), [history]);
@@ -71,7 +74,15 @@ export default function HomeScreen() {
   return (
     <Screen subtitle={t('home.subtitle')} title={t('home.title')}>
       <Card flush>
-        <CampScene label={t('home.campAlt')} />
+        <CampScene label={t('home.campAlt')} look={shown} />
+        <Pressable
+          accessibilityLabel={t('camp.open')}
+          accessibilityRole="button"
+          onPress={() => router.push('/camp')}
+          style={({ pressed }) => [styles.dress, pressed && styles.pressed]}
+        >
+          <Ionicons color="#ffffff" name="color-palette-outline" size={24} />
+        </Pressable>
       </Card>
 
       <Button label={t('journal.add')} onPress={() => router.push('/entry/new')} />
@@ -217,6 +228,18 @@ function GoalLine({ record, goal }: { record: PedestalRecord; goal: number }) {
 }
 
 const styles = StyleSheet.create({
+  dress: {
+    // On the picture itself, so it has its own dark backing whatever the sky behind it.
+    position: 'absolute',
+    right: spacing.sm,
+    bottom: spacing.sm,
+    width: minTouchTarget,
+    height: minTouchTarget,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  },
   record: {
     gap: 2,
   },

@@ -1,6 +1,5 @@
 export { AppText, type AppTextProps } from './AppText';
 export { Button, type ButtonProps } from './Button';
-export { CampScene } from './CampScene';
 export { Card, type CardProps } from './Card';
 export { Chip, type ChipProps } from './Chip';
 export { DayStepper, type DayStepperProps } from './DayStepper';

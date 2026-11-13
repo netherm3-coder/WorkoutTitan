@@ -136,6 +136,93 @@
     "days_one": "{{count}} day",
     "days_other": "{{count}} days"
   },
+  "camp": {
+    "title": "Camp look",
+    "subtitle": "Knight, tent, sky",
+    "open": "Change how the camp looks",
+    "opened": "Items opened: {{open}} of {{total}}",
+    "groups": {
+      "knight": "Knight",
+      "tent": "Tent",
+      "world": "Sky and season"
+    },
+    "slots": {
+      "armour": "Armour colour",
+      "hat": "Hat",
+      "tent": "Tent colour",
+      "pattern": "Pattern",
+      "patternColour": "Pattern colour",
+      "sky": "Sky",
+      "season": "Season"
+    },
+    "items": {
+      "colour": {
+        "canvas": "canvas",
+        "gray": "gray",
+        "brown": "brown",
+        "green": "green",
+        "blue": "blue",
+        "lightBlue": "light blue",
+        "orange": "orange",
+        "yellow": "yellow",
+        "red": "red",
+        "white": "white",
+        "black": "black",
+        "pink": "pink",
+        "purple": "purple"
+      },
+      "hat": {
+        "none": "no hat",
+        "sprout": "sprout",
+        "beanie": "beanie",
+        "baseballCap": "baseball cap",
+        "beret": "beret",
+        "bucketHat": "bucket hat",
+        "cowboy": "cowboy hat",
+        "ushanka": "ushanka",
+        "raccoon": "raccoon hat",
+        "flowerCrown": "flower crown",
+        "partyHat": "party hat",
+        "propeller": "propeller cap",
+        "paperBoat": "paper boat",
+        "bucket": "bucket",
+        "pot": "pot",
+        "egg": "fried egg",
+        "crown": "crown",
+        "topHat": "top hat",
+        "headphones": "headphones",
+        "catEars": "cat ears",
+        "duck": "duck"
+      },
+      "pattern": {
+        "none": "no pattern",
+        "dots": "dots",
+        "stripes": "stripes",
+        "waves": "waves",
+        "flowers": "flowers",
+        "stars": "stars",
+        "hearts": "hearts"
+      },
+      "sky": {
+        "sunny": "sunny",
+        "cloudy": "cloudy",
+        "rain": "rainy",
+        "starry": "starry",
+        "sunset": "sunset"
+      },
+      "season": {
+        "bare": "bare trees",
+        "summer": "summer",
+        "autumn": "autumn",
+        "winter": "winter",
+        "cherry": "cherry blossom"
+      }
+    },
+    "locked": "locked",
+    "byAchievement": "The achievement \"{{achievement}}\" opens it.",
+    "byPremium": "Part of the premium set. The app has no subscription yet.",
+    "saveFailed": "Could not save. Try again."
+  },
   "body": {
     "title": "Body",
     "subtitle": "Weight and measurements",
@@ -410,7 +497,9 @@
     "counters": "Counters",
     "countersHint": "Training experience and sobriety",
     "exercises": "Your exercises",
-    "exercisesHint": "Add or remove"
+    "exercisesHint": "Add or remove",
+    "camp": "Camp look",
+    "campHint": "Knight, tent, sky"
   },
   "themes": {
     "camp": {

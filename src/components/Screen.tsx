@@ -18,6 +18,11 @@ export type ScreenProps = {
   onBack?: () => void;
   /** What a screen reader says for the back button. Required together with `onBack`. */
   backLabel?: string;
+  /**
+   * Keeps the first child in view at the top while the rest scrolls under it: a preview that
+   * the controls below it change.
+   */
+  pinFirst?: boolean;
   children: ReactNode;
 };
 
@@ -25,8 +30,11 @@ export type ScreenProps = {
  * The frame every screen shares: the skin's backdrop, a centred title, and scrolling content.
  * The Titan layout this replaces is `AppShell`.
  */
-export function Screen({ title, subtitle, onBack, backLabel, children }: ScreenProps) {
+export function Screen({ title, subtitle, onBack, backLabel, pinFirst = false, children }: ScreenProps) {
   const { theme } = useTheme();
+  // The scroll view counts its children without the empty ones: the back button, when there is
+  // one, then the header, then the first child of the screen.
+  const firstChild = onBack ? 2 : 1;
 
   return (
     <View style={styles.root}>
@@ -39,6 +47,7 @@ export function Screen({ title, subtitle, onBack, backLabel, children }: ScreenP
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            stickyHeaderIndices={pinFirst ? [firstChild] : undefined}
           >
             {onBack ? (
               <Pressable

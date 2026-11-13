@@ -10,12 +10,14 @@ import {
   listExercises,
   listGoals,
   loadHistory,
+  loadLook,
   loadProfile,
   newId,
   restoreEntry,
   saveBodyMeasurements as writeMeasurements,
   saveBodyWeight as writeWeight,
   saveExercise as writeExercise,
+  saveLook as writeLook,
   setGoal as writeGoal,
   saveProfile as writeProfile,
   updateEntry as replaceEntry,
@@ -29,6 +31,7 @@ import {
   type Day,
   type Exercise,
   type History,
+  type Look,
   type Measures,
   type WeightRecord,
   type WorkoutEntry,
@@ -47,6 +50,8 @@ export type Records = {
   /** Goals by discipline, in the number the discipline is measured by. */
   goals: ReadonlyMap<string, number>;
   profile: Profile;
+  /** The look chosen for the camp. What is drawn is this with the closed items put back (`wearable`). */
+  look: Look;
   /** The entry deleted last, while it can still be brought back. */
   lastDeleted: WorkoutEntry | null;
   addEntry(entry: NewEntry): Promise<void>;
@@ -60,6 +65,8 @@ export type Records = {
   /** Records the measurements of a day: a number sets a body part, `null` clears it. */
   saveBodyMeasurements(date: Day, values: Readonly<Record<string, number | null>>): Promise<void>;
   saveProfile(changes: Partial<Profile>): Promise<void>;
+  /** Changes the given slots of the camp's look. */
+  saveLook(changes: Partial<Look>): Promise<void>;
   setGoal(discipline: string, target: number): Promise<void>;
   clearGoal(discipline: string): Promise<void>;
   /** Adds one of the person's own exercises. */
@@ -68,7 +75,7 @@ export type Records = {
   deleteExercise(id: string): Promise<void>;
 };
 
-type Stored = Pick<Records, 'history' | 'exercises' | 'measurements' | 'goals' | 'profile'>;
+type Stored = Pick<Records, 'history' | 'exercises' | 'measurements' | 'goals' | 'profile' | 'look'>;
 
 const RecordsContext = createContext<Records | null>(null);
 
@@ -78,14 +85,15 @@ type Loaded =
   | { status: 'failed'; error: unknown };
 
 async function read(db: Database): Promise<Stored> {
-  const [history, custom, measurements, goals, profile] = await Promise.all([
+  const [history, custom, measurements, goals, profile, look] = await Promise.all([
     loadHistory(db),
     listExercises(db),
     listBodyMeasurements(db),
     listGoals(db),
     loadProfile(db),
+    loadLook(db),
   ]);
-  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], measurements, goals, profile };
+  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], measurements, goals, profile, look };
 }
 
 type RecordsProviderProps = {
@@ -133,7 +141,7 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
 
   const records = useMemo<Records | null>(() => {
     if (!ready) return null;
-    const { history, exercises, measurements, goals, profile } = ready;
+    const { history, exercises, measurements, goals, profile, look } = ready;
 
     return {
       history,
@@ -141,6 +149,11 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
       measurements,
       goals,
       profile,
+      look,
+      async saveLook(changes) {
+        await writeLook(db, changes, Date.now());
+        await reload();
+      },
       async setGoal(discipline, target) {
         await writeGoal(db, discipline, target, Date.now());
         await reload();

@@ -11,6 +11,7 @@ export * from './exercises';
 export * from './goals';
 export * from './history';
 export * from './ids';
+export * from './look';
 export * from './migrations';
 export * from './profile';
 export type { Connection, Database, SqlValue } from './types';

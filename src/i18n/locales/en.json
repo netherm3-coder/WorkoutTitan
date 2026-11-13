@@ -256,6 +256,41 @@
     "restored": "Done. Entries on the phone now: {{total}}",
     "restoreFailed": "Could not add the data. Nothing on the phone has changed."
   },
+  "recordImport": {
+    "title": "Bring over from Record",
+    "howTitle": "How to bring them over",
+    "how1": "In the old Record, open the menu and press \"{{button}}\". It saves a file named like \"{{file}}\".",
+    "how2": "Choose that file here. Before anything is brought over you will see what was found in it.",
+    "limits": "Record's file has only the date, the exercise and the result. It has no notes, no video links and no body weight, so there is nowhere to bring those from.",
+    "again": "The file can be brought over again: only new rows are added. What you corrected or deleted here does not change.",
+    "chooseButton": "Choose a file",
+    "reading": "Reading the file…",
+    "notRecordCsv": "This is not a file from \"{{button}}\": its first line must be \"{{header}}\".",
+    "unreadable": "Could not read the file.",
+    "found": "File \"{{name}}\"",
+    "rows": "Rows with results: {{total}}",
+    "newEntries": "New entries: {{total}}",
+    "alreadyHere": "Brought over before: {{total}}",
+    "newExercises": "New exercises of your own: {{total}}",
+    "reservations": "Read with reservations",
+    "issues": {
+      "keptAsText": "Will stay as text, because no numbers could be read: {{total}}",
+      "looselyRead": "Numbers read, the rest of the text kept beside them: {{total}}",
+      "distanceMissing": "A run or sprint without a distance: {{total}}",
+      "schemeAssumed": "A shuttle run without a scheme, taken as 10×10 m: {{total}}",
+      "singleRepAssumed": "A bench press with a weight only, taken as one rep: {{total}}"
+    },
+    "example": "For example, {{exercise}}: \"{{count}}\"",
+    "skipped": "Will not be brought over, having no date or no result: {{total}}",
+    "brokenLines": "Lines that could not be made out: {{total}} (numbers: {{lines}})",
+    "nothingNew": "The file has no new entries.",
+    "importButton": "Bring the entries over",
+    "cancel": "Do not bring over",
+    "importing": "Bringing over…",
+    "done": "Done. Entries added: {{added}}. On the phone now: {{total}}",
+    "failed": "Could not bring them over. Nothing on the phone has changed.",
+    "fromRecord": "{{name}} (from Record)"
+  },
   "body": {
     "title": "Body",
     "subtitle": "Weight and measurements",
@@ -534,7 +569,9 @@
     "camp": "Camp look",
     "campHint": "Knight, tent, sky",
     "backup": "Backup",
-    "backupHint": "Save your data to a file or restore it from one"
+    "backupHint": "Save your data to a file or restore it from one",
+    "recordImport": "Bring over from Record",
+    "recordImportHint": "Entries from the old app, from its export file"
   },
   "themes": {
     "camp": {

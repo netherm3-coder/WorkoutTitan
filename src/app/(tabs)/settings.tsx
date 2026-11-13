@@ -73,6 +73,12 @@ export default function SettingsScreen() {
           label={t('settings.backup')}
           onPress={() => router.push('/backup')}
         />
+        <LinkRow
+          hint={t('settings.recordImportHint')}
+          icon="swap-horizontal-outline"
+          label={t('settings.recordImport')}
+          onPress={() => router.push('/record-import')}
+        />
       </Card>
 
       <Card tone="cardAlt">

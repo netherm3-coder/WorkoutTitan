@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import type { BackupData } from '@/backup/format';
+import type { RecordImport } from '@/backup/recordImport';
 import {
   addEntry as insertEntry,
   clearGoal as removeGoal,
+  importRecord as writeRecordImport,
   deleteExercise as markExerciseDeleted,
   deleteBodyWeight as markWeightDeleted,
   deleteEntry as markDeleted,
@@ -71,6 +73,8 @@ export type Records = {
   saveLook(changes: Partial<Look>): Promise<void>;
   /** Adds the contents of a backup to what is here, all of it or none. */
   restoreBackup(data: BackupData): Promise<void>;
+  /** Adds what was planned from Record's file, all of it or none. */
+  importRecord(plan: RecordImport): Promise<void>;
   setGoal(discipline: string, target: number): Promise<void>;
   clearGoal(discipline: string): Promise<void>;
   /** Adds one of the person's own exercises. */
@@ -160,6 +164,10 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
       },
       async restoreBackup(data) {
         await db.withExclusiveTransactionAsync((transaction) => writeBackup(transaction, data, Date.now()));
+        await reload();
+      },
+      async importRecord(plan) {
+        await db.withExclusiveTransactionAsync((transaction) => writeRecordImport(transaction, plan, Date.now()));
         await reload();
       },
       async setGoal(discipline, target) {

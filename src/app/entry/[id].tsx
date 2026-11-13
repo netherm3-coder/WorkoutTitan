@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText, Card, Screen } from '@/components';
 import { useLanguage } from '@/i18n';
+import { fromRouteParam } from '@/navigation';
 import { draftFrom, EntryForm, useRecords } from '@/records';
 
 export default function EditEntryScreen() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const id = fromRouteParam(useLocalSearchParams<{ id: string }>().id);
   const { history, exercises, updateEntry, deleteEntry } = useRecords();
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/workouts'));

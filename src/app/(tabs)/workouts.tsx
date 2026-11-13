@@ -7,6 +7,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText, Button, Card, EmptyState, Screen } from '@/components';
 import { dayOf, personalBestIds, type Day, type Exercise, type WorkoutEntry } from '@/domain';
 import { useFormat } from '@/format';
+import { toRouteParam } from '@/navigation';
 import { useRecords } from '@/records';
 import { minTouchTarget, spacing, useForeground } from '@/theme';
 
@@ -73,7 +74,7 @@ export default function WorkoutsScreen() {
               key={entry.id}
               name={format.discipline(exercise, entry)}
               note={entry.note}
-              onPress={() => router.push({ pathname: '/entry/[id]', params: { id: entry.id } })}
+              onPress={() => router.push({ pathname: '/entry/[id]', params: { id: toRouteParam(entry.id) } })}
               result={format.result(entry, exercise)}
             />
           ))}

@@ -19,6 +19,7 @@ import {
   type PedestalRecord,
 } from '@/domain';
 import { useFormat } from '@/format';
+import { toRouteParam } from '@/navigation';
 import { useRecords } from '@/records';
 import { minTouchTarget, radii, spacing } from '@/theme';
 
@@ -174,7 +175,7 @@ export default function HomeScreen() {
                 ].join(', ')}
                 accessibilityRole="button"
                 key={record.discipline}
-                onPress={() => router.push({ pathname: '/goal', params: { discipline: record.discipline } })}
+                onPress={() => router.push({ pathname: '/goal', params: { discipline: toRouteParam(record.discipline) } })}
                 style={({ pressed }) => [styles.record, pressed && styles.pressed]}
               >
                 <View style={styles.recordHead}>

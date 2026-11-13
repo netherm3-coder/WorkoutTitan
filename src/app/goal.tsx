@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText, Button, Card, Screen, TextField } from '@/components';
 import { buildPedestal, isTimed, isValidGoal } from '@/domain';
 import { joinDuration, parseDecimal, splitDuration, useFormat } from '@/format';
+import { fromRouteParam } from '@/navigation';
 import { useRecords } from '@/records';
 import { spacing } from '@/theme';
 
@@ -13,7 +14,7 @@ export default function GoalScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const format = useFormat();
-  const { discipline } = useLocalSearchParams<{ discipline: string }>();
+  const discipline = fromRouteParam(useLocalSearchParams<{ discipline: string }>().discipline) ?? '';
   const { history, goals, setGoal, clearGoal } = useRecords();
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/'));

@@ -7,6 +7,7 @@ import { openTestDatabase } from '@/db/__tests__/testDatabase';
 import { openRecordDatabase } from '@/db/open';
 import { addDays, customExercise, dayOf, PULLUPS, RUN } from '@/domain';
 import { entry } from '@/domain/__tests__/support';
+import { toRouteParam } from '@/navigation';
 
 jest.mock('expo-localization', () => ({ getLocales: jest.fn() }));
 
@@ -62,7 +63,7 @@ describe('goals', () => {
   });
 
   it.each(['', '0', 'more'])('are not saved as "%s"', async (typed) => {
-    const { db, user } = await startApp('/goal?discipline=pullups', pullups);
+    const { db, user } = await startApp(`/goal?discipline=${toRouteParam('pullups')}`, pullups);
 
     if (typed) await user.type(screen.getByLabelText('Reps'), typed);
     await user.press(screen.getByRole('button', { name: 'Save goal' }));
@@ -91,7 +92,7 @@ describe('goals', () => {
   });
 
   it('say so when the discipline has no result', async () => {
-    await startApp('/goal?discipline=run@42195');
+    await startApp(`/goal?discipline=${toRouteParam('run@42195')}`);
     expect(screen.getByText('There is no result for this discipline yet.')).toBeOnTheScreen();
   });
 });

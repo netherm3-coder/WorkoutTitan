@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
@@ -6,27 +5,18 @@ import { AppText, Card, ProgressBar, Screen } from '@/components';
 import {
   ACHIEVEMENT_CATEGORIES,
   availablePoints,
-  dayOf,
   earnedPoints,
-  elapsedSince,
-  evaluateAchievements,
   persistentPoints,
   type AchievementState,
 } from '@/domain';
 import { useFormat } from '@/format';
-import { useRecords } from '@/records';
+import { useAchievements } from '@/records';
 import { spacing } from '@/theme';
 
 export default function AchievementsScreen() {
   const { t } = useTranslation();
   const format = useFormat();
-  const { history, profile } = useRecords();
-
-  const today = dayOf(new Date());
-  // Without a first sober day the counter is off and its achievements are not offered.
-  const soberDays = profile.soberSince ? elapsedSince(profile.soberSince, today).totalDays : null;
-
-  const states = useMemo(() => evaluateAchievements(history, { soberDays }), [history, soberDays]);
+  const { states, soberDays } = useAchievements();
   const earned = earnedPoints(states);
   const available = availablePoints(states);
 

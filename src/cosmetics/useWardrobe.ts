@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { accessFrom, wearable, type Access, type Look } from '@/domain';
-import { usePremium } from '@/premium';
+import { usePremium } from '@/purchases';
 import { useAchievements, useRecords } from '@/records';
 
 export type Wardrobe = {

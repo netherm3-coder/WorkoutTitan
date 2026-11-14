@@ -1,16 +1,19 @@
-import { userEvent, within } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { act, userEvent, waitFor, within } from '@testing-library/react-native';
 import { getLocales } from 'expo-localization';
 import { renderRouter, screen } from 'expo-router/testing-library';
+import { AppState } from 'react-native';
 
 import { addEntries, loadLook, saveExercise, saveLook, type Connection } from '@/db';
 import { openTestDatabase } from '@/db/__tests__/testDatabase';
 import { openRecordDatabase } from '@/db/open';
 import { addDays, customExercise, dayOf, DEFAULT_LOOK, PULLUPS, type Slot } from '@/domain';
 import { entry } from '@/domain/__tests__/support';
-import { usePremium } from '@/premium';
+import { createPurchaseStore } from '@/purchases';
+import { saveCachedPremium } from '@/purchases/premiumCache';
+import { fakeStore, runningSubscription } from '@/purchases/__tests__/fakeStore';
 
 jest.mock('expo-localization', () => ({ getLocales: jest.fn() }));
-jest.mock('@/premium', () => ({ usePremium: jest.fn(() => false) }));
 
 const open = jest.mocked(openRecordDatabase);
 const today = dayOf(new Date());
@@ -42,10 +45,11 @@ async function fiveOwnExercises(db: Connection) {
 const group = (slot: Slot) => within(screen.getByTestId(`look-${slot}`));
 const layers = () => screen.getAllByTestId(/^scene-/).map((layer) => String(layer.props.testID).replace('scene-', ''));
 
-beforeEach(() => {
+beforeEach(async () => {
+  await AsyncStorage.clear();
   const locales = [{ languageCode: 'en', regionCode: 'US' }] as unknown as ReturnType<typeof getLocales>;
   jest.mocked(getLocales).mockReturnValue(locales);
-  jest.mocked(usePremium).mockReturnValue(false);
+  jest.mocked(createPurchaseStore).mockReturnValue(null);
 });
 
 describe('the camp on the home screen', () => {
@@ -220,10 +224,10 @@ describe('the premium set', () => {
   });
 
   it('opens with a subscription', async () => {
-    jest.mocked(usePremium).mockReturnValue(true);
+    jest.mocked(createPurchaseStore).mockReturnValue(fakeStore({ ownedNow: { ok: true, purchases: [runningSubscription()] } }));
     const { db, user } = await startApp('/camp');
 
-    expect(screen.getByText('Items opened: 16 of 61')).toBeOnTheScreen();
+    expect(await screen.findByText('Items opened: 16 of 61')).toBeOnTheScreen();
 
     await user.press(group('hat').getByRole('radio', { name: 'duck' }));
     await user.press(group('sky').getByRole('radio', { name: 'sunset' }));
@@ -233,11 +237,29 @@ describe('the premium set', () => {
   });
 
   it('comes off when the subscription ends and back on when it returns', async () => {
-    jest.mocked(usePremium).mockReturnValue(false);
+    // The app saw the subscription yesterday; today Google Play says it has ended.
+    await saveCachedPremium(true, Date.now() - 24 * 60 * 60 * 1000);
+    const store = fakeStore();
+    jest.mocked(createPurchaseStore).mockReturnValue(store);
     const { db } = await startApp('/camp', (database) => saveLook(database, { hat: 'duck' }, 1));
 
-    expect(layers()).not.toContain('hat');
+    await waitFor(() => expect(layers()).not.toContain('hat'));
     expect(group('hat').getByRole('radio', { name: 'no hat' })).toBeChecked();
     expect(await loadLook(db)).toMatchObject({ hat: 'duck' });
+
+    // Subscribed again on another phone, and back in the app.
+    store.ownedNow = { ok: true, purchases: [runningSubscription()] };
+    await act(async () => {
+      for (const [, listener] of jest.mocked(AppState.addEventListener).mock.calls) listener('active');
+    });
+    expect(layers()).toContain('hat');
+    expect(group('hat').getByRole('radio', { name: 'duck' })).toBeChecked();
+  });
+
+  it('is worn from the first frame when the store said yes last time', async () => {
+    await saveCachedPremium(true, Date.now());
+    await startApp('/', (database) => saveLook(database, { hat: 'duck' }, 1));
+
+    expect(layers()).toContain('hat');
   });
 });

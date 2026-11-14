@@ -6,6 +6,7 @@
 
 export * from './backup';
 export * from './body';
+export * from './bodyParts';
 export { DatabaseProvider, useDatabase, useOpenDatabase, type OpenDatabase } from './DatabaseContext';
 export * from './entries';
 export * from './exercises';

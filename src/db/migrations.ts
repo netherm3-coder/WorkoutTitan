@@ -93,6 +93,35 @@ export const MIGRATIONS: readonly Migration[] = [
       ) STRICT;
     `,
   },
+  /*
+   * Body parts of the person's own. A measurement keeps the id of its part, so a part can be
+   * renamed or deleted without touching its measurements.
+   *
+   * Before this step a measurement could already name a part the app did not know: a backup
+   * file accepted any name. Each such name becomes a part of the person's own, named the way it
+   * was written, so nothing measured goes out of sight. The list is the built-in parts as they
+   * were at this step; a later change to that list does not change this step.
+   */
+  {
+    version: 2,
+    sql: `
+      CREATE TABLE body_parts (
+        id TEXT PRIMARY KEY NOT NULL CHECK (length(id) > 0),
+        name TEXT NOT NULL CHECK (length(trim(name)) > 0),
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        deleted_at INTEGER
+      ) STRICT;
+
+      INSERT INTO body_parts (id, name, created_at, updated_at)
+      SELECT part, part, MIN(updated_at), MAX(updated_at)
+      FROM body_measurements
+      WHERE deleted_at IS NULL
+        AND length(trim(part)) > 0
+        AND part NOT IN ('neck', 'shoulders', 'chest', 'waist', 'bicep', 'forearm', 'thigh', 'calf')
+      GROUP BY part;
+    `,
+  },
 ];
 
 const latestOf = (migrations: readonly Migration[]) =>

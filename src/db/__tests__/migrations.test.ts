@@ -32,7 +32,10 @@ describe('the list of migrations', () => {
    * fails, put the change into a new migration and leave the old text as it was.
    */
   it('never changes a migration that is already released', () => {
-    expect(MIGRATIONS.map((migration) => [migration.version, fingerprint(migration.sql)])).toEqual([[1, '96575309']]);
+    expect(MIGRATIONS.map((migration) => [migration.version, fingerprint(migration.sql)])).toEqual([
+      [1, '96575309'],
+      [2, '6ed19c91'],
+    ]);
   });
 });
 
@@ -44,7 +47,7 @@ describe('migrate', () => {
     expect(await migrate(db)).toEqual({ from: 0, to: SCHEMA_VERSION });
 
     expect(await schemaVersion(db)).toBe(SCHEMA_VERSION);
-    expect(await tableNames()).toEqual(['body_measurements', 'body_weights', 'entries', 'exercises', 'goals', 'profile']);
+    expect(await tableNames()).toEqual(['body_measurements', 'body_parts', 'body_weights', 'entries', 'exercises', 'goals', 'profile']);
   });
 
   it('makes every table strict about types', async () => {
@@ -54,7 +57,7 @@ describe('migrate', () => {
       "SELECT name, strict FROM pragma_table_list WHERE schema = 'main' AND name NOT LIKE 'sqlite_%'",
       [],
     );
-    expect(tables.length).toBe(6);
+    expect(tables.length).toBe(7);
     expect(tables.filter((table) => table.strict !== 1)).toEqual([]);
   });
 
@@ -105,6 +108,57 @@ describe('migrate', () => {
     await expect(attempt).rejects.toMatchObject({ found: 99, known: SCHEMA_VERSION });
 
     expect(db.statements).toEqual(['PRAGMA user_version']);
+  });
+});
+
+describe('step 2, body parts of the person\'s own', () => {
+  /** A database left at step 1, the layout the first versions of the app wrote. */
+  async function atStepOne() {
+    const old = openEmptyDatabase();
+    await migrate(old, MIGRATIONS.slice(0, 1));
+    return old;
+  }
+
+  const measure = (database: TestDatabase, date: string, part: string, cm: number, updatedAt: number, deletedAt: number | null = null) =>
+    database.runAsync('INSERT INTO body_measurements (date, part, cm, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?)', [
+      date,
+      part,
+      cm,
+      updatedAt,
+      deletedAt,
+    ]);
+
+  it('keeps every measurement and turns names the app did not know into parts of the person\'s own', async () => {
+    db = await atStepOne();
+    await measure(db, '2026-03-01', 'waist', 81, 10);
+    await measure(db, '2026-03-01', 'литка ліва', 39.5, 10);
+    await measure(db, '2026-04-01', 'литка ліва', 40, 30);
+    await measure(db, '2026-04-01', 'зап\'ястя', 17, 20);
+
+    expect(await migrate(db)).toEqual({ from: 1, to: 2 });
+
+    expect(await db.getAllAsync('SELECT id, name, created_at, updated_at, deleted_at FROM body_parts ORDER BY id', [])).toEqual([
+      { id: 'зап\'ястя', name: 'зап\'ястя', created_at: 20, updated_at: 20, deleted_at: null },
+      { id: 'литка ліва', name: 'литка ліва', created_at: 10, updated_at: 30, deleted_at: null },
+    ]);
+    expect(await db.getAllAsync('SELECT COUNT(*) AS count FROM body_measurements', [])).toEqual([{ count: 4 }]);
+  });
+
+  it('makes no part of a name whose measurements were all deleted, or that is only spaces', async () => {
+    db = await atStepOne();
+    await measure(db, '2026-03-01', 'стегно', 55, 10, 11);
+    await measure(db, '2026-03-01', '   ', 12, 10);
+
+    await migrate(db);
+
+    expect(await db.getAllAsync('SELECT id FROM body_parts', [])).toEqual([]);
+  });
+
+  it('runs on a database with no measurements at all', async () => {
+    db = await atStepOne();
+
+    expect(await migrate(db)).toEqual({ from: 1, to: 2 });
+    expect(await tableNames()).toContain('body_parts');
   });
 });
 

@@ -24,10 +24,15 @@ export async function deleteBodyWeight(db: Database, date: Day, now: number): Pr
   return changes > 0;
 }
 
-/** Every tape measurement that has not been deleted, oldest day first. */
+/**
+ * Every tape measurement that has not been deleted, oldest day first. The measurements of a
+ * deleted part of the person's own stay out, the way entries of a deleted exercise do.
+ */
 export async function listBodyMeasurements(db: Database): Promise<BodyMeasurement[]> {
   return db.getAllAsync<BodyMeasurement>(
-    'SELECT date, part, cm FROM body_measurements WHERE deleted_at IS NULL ORDER BY date, part',
+    `SELECT date, part, cm FROM body_measurements
+     WHERE deleted_at IS NULL AND part NOT IN (SELECT id FROM body_parts WHERE deleted_at IS NOT NULL)
+     ORDER BY date, part`,
     [],
   );
 }

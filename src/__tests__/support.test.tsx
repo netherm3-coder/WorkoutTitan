@@ -37,11 +37,11 @@ describe('the premium set', () => {
   it('is shown, item by item, before anyone pays for it', async () => {
     await openSupport(fakeStore());
 
-    expect(screen.getByRole('image', { name: 'The camp in the items of the premium set' })).toBeOnTheScreen();
+    expect(screen.getByRole('image', { name: 'The camp dressed in the premium set' })).toBeOnTheScreen();
     expect(screen.getByText('12 items for the camp that open no other way:')).toBeOnTheScreen();
     for (const line of [
       'Armour colour: pink, purple',
-      'Hat: top hat, headphones, cat ears, duck',
+      'Headwear: top hat, headphones, cat ears, duck',
       'Tent colour: pink, purple',
       'Pattern: stars, hearts',
       'Sky: sunset',
@@ -153,7 +153,7 @@ describe('without Google Play', () => {
     expect(screen.getByText(/This build sells nothing/)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: /Subscribe|Tip|Restore/ })).toBeNull();
     // The set is still described, so there is something to look at.
-    expect(screen.getByText('Hat: top hat, headphones, cat ears, duck')).toBeOnTheScreen();
+    expect(screen.getByText('Headwear: top hat, headphones, cat ears, duck')).toBeOnTheScreen();
   });
 
   it('lets a developer look at the premium set, without calling it a subscription', async () => {
@@ -199,7 +199,7 @@ describe('in Ukrainian', () => {
     expect(screen.getByText('12 предметів для табору, яких інакше не відкрити:')).toBeOnTheScreen();
     expect(await screen.findByText('59,99 грн на місяць')).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'Оформити підписку' })).toBeOnTheScreen();
-    expect(screen.getByText('Шапка: циліндр, навушники, котячі вушка, качка')).toBeOnTheScreen();
+    expect(screen.getByText('Головний убір: циліндр, навушники, котячі вушка, качка')).toBeOnTheScreen();
     expect(within(screen.getByRole('button', { name: 'Відновити покупки' })).getByText('Відновити покупки')).toBeOnTheScreen();
   });
 });

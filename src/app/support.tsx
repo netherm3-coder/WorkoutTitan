@@ -45,7 +45,7 @@ export default function SupportScreen() {
   /** Premium that was paid for, as opposed to the look a developer switched on. */
   const subscribed = premium && !(preview?.on ?? false);
 
-  // The premium set slot by slot, in wardrobe order: "Hat: top hat, headphones, cat ears, duck".
+  // The premium set slot by slot, in wardrobe order: "Headwear: top hat, headphones, cat ears, duck".
   const set = premiumSet();
   const lines = SLOTS.flatMap((slot) => {
     const names = set.filter((reward) => reward.slot === slot).map((reward) => itemName(t, slot, reward.item));

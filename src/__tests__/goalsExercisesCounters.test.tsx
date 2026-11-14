@@ -145,12 +145,12 @@ describe('own exercises', () => {
 
     await user.type(screen.getByLabelText('Name'), 'планка');
     await user.press(screen.getByRole('button', { name: 'Add exercise' }));
-    expect(await screen.findByText('There already is an exercise with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already an exercise with this name.')).toBeOnTheScreen();
 
     await user.clear(screen.getByLabelText('Name'));
     await user.type(screen.getByLabelText('Name'), 'pull-ups');
     await user.press(screen.getByRole('button', { name: 'Add exercise' }));
-    expect(await screen.findByText('There already is an exercise with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already an exercise with this name.')).toBeOnTheScreen();
 
     expect(await listExercises(db)).toHaveLength(1);
   });

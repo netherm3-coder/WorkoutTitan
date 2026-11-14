@@ -98,7 +98,7 @@ describe('the wardrobe', () => {
     await startApp('/camp');
 
     expect(screen.getByText('Items opened: 4 of 61')).toBeOnTheScreen();
-    expect(group('armour').getByRole('radio', { name: 'gray' })).toBeChecked();
+    expect(group('armour').getByRole('radio', { name: 'grey' })).toBeChecked();
     expect(group('armour').getByRole('radio', { name: 'brown, locked' })).not.toBeChecked();
     expect(group('hat').getByRole('radio', { name: 'no hat' })).toBeChecked();
     expect(group('sky').getByRole('radio', { name: 'sunny' })).toBeChecked();
@@ -124,7 +124,7 @@ describe('the wardrobe', () => {
 
     expect(await screen.findByText('Armour colour: brown')).toBeOnTheScreen();
     expect(group('armour').getByRole('radio', { name: 'brown' })).toBeChecked();
-    expect(group('armour').getByRole('radio', { name: 'gray' })).not.toBeChecked();
+    expect(group('armour').getByRole('radio', { name: 'grey' })).not.toBeChecked();
     expect(await loadLook(db)).toEqual({ ...DEFAULT_LOOK, armour: 'brown' });
   });
 
@@ -132,11 +132,11 @@ describe('the wardrobe', () => {
     const { db, user } = await startApp('/camp', firstEntry);
 
     await user.press(group('hat').getByRole('radio', { name: 'sprout' }));
-    expect(await screen.findByText('Hat: sprout')).toBeOnTheScreen();
+    expect(await screen.findByText('Headwear: sprout')).toBeOnTheScreen();
     expect(layers()).toContain('hat');
 
     await user.press(group('hat').getByRole('radio', { name: 'no hat' }));
-    expect(await screen.findByText('Hat: no hat')).toBeOnTheScreen();
+    expect(await screen.findByText('Headwear: no hat')).toBeOnTheScreen();
     expect(layers()).not.toContain('hat');
     expect(await loadLook(db)).toEqual(DEFAULT_LOOK);
   });
@@ -147,8 +147,8 @@ describe('the wardrobe', () => {
     await user.press(group('hat').getByRole('radio', { name: 'cowboy hat, locked' }));
 
     expect(await screen.findByText('The achievement "50 pull-ups" opens it.')).toBeOnTheScreen();
-    expect(screen.getByText('Hat: cowboy hat')).toBeOnTheScreen();
-    expect(screen.getByText('Hat: no hat')).toBeOnTheScreen();
+    expect(screen.getByText('Headwear: cowboy hat')).toBeOnTheScreen();
+    expect(screen.getByText('Headwear: no hat')).toBeOnTheScreen();
     expect(await loadLook(db)).toEqual(DEFAULT_LOOK);
   });
 
@@ -159,7 +159,7 @@ describe('the wardrobe', () => {
     expect(await screen.findByText('The achievement "50 pull-ups" opens it.')).toBeOnTheScreen();
 
     await user.press(group('hat').getByRole('radio', { name: 'beanie' }));
-    expect(await screen.findByText('Hat: beanie')).toBeOnTheScreen();
+    expect(await screen.findByText('Headwear: beanie')).toBeOnTheScreen();
     expect(screen.queryByText('The achievement "50 pull-ups" opens it.')).not.toBeOnTheScreen();
   });
 
@@ -195,7 +195,7 @@ describe('the wardrobe', () => {
 
     await user.press(screen.getByRole('button', { name: 'Change how the camp looks' }));
     await user.press(await screen.findByRole('radio', { name: 'sprout' }));
-    await screen.findByText('Hat: sprout');
+    await screen.findByText('Headwear: sprout');
     await user.press(screen.getByRole('button', { name: 'Back' }));
 
     expect(await screen.findByRole('header', { name: 'Room of Records' })).toBeOnTheScreen();
@@ -209,7 +209,7 @@ describe('the wardrobe', () => {
     await user.press(group('armour').getByRole('radio', { name: 'brown' }));
 
     expect(await screen.findByText('Could not save. Try again.')).toBeOnTheScreen();
-    expect(screen.getByText('Armour colour: gray')).toBeOnTheScreen();
+    expect(screen.getByText('Armour colour: grey')).toBeOnTheScreen();
   });
 });
 

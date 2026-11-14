@@ -81,12 +81,12 @@ describe('body parts of one’s own', () => {
 
     await user.type(screen.getByLabelText('Name'), 'waist');
     await user.press(screen.getByRole('button', { name: 'Add measurement' }));
-    expect(await screen.findByText('There already is a measurement with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already a measurement with this name.')).toBeOnTheScreen();
 
     await user.clear(screen.getByLabelText('Name'));
     await user.type(screen.getByLabelText('Name'), 'WRIST ');
     await user.press(screen.getByRole('button', { name: 'Add measurement' }));
-    expect(await screen.findByText('There already is a measurement with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already a measurement with this name.')).toBeOnTheScreen();
 
     expect(await listBodyParts(db)).toEqual([WRIST]);
   });
@@ -126,7 +126,7 @@ describe('body parts of one’s own', () => {
     await user.clear(screen.getByLabelText('New name for "Wrist"'));
     await user.type(screen.getByLabelText('New name for "Wrist"'), 'Neck');
     await user.press(screen.getByRole('button', { name: 'Save' }));
-    expect(await screen.findByText('There already is a measurement with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already a measurement with this name.')).toBeOnTheScreen();
 
     await user.press(screen.getByRole('button', { name: 'Cancel' }));
     expect(await screen.findByRole('button', { name: 'Rename "Wrist"' })).toBeOnTheScreen();

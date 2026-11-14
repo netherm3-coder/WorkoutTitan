@@ -153,12 +153,12 @@ describe('an own exercise', () => {
 
     await user.type(screen.getByLabelText('Name'), ' stairs ');
     await user.press(screen.getByRole('button', { name: 'Save changes' }));
-    expect(await screen.findByText('There already is an exercise with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already an exercise with this name.')).toBeOnTheScreen();
 
     await user.clear(screen.getByLabelText('Name'));
     await user.type(screen.getByLabelText('Name'), 'Run');
     await user.press(screen.getByRole('button', { name: 'Save changes' }));
-    expect(await screen.findByText('There already is an exercise with this name.')).toBeOnTheScreen();
+    expect(await screen.findByText('There is already an exercise with this name.')).toBeOnTheScreen();
 
     // Its own name, in other letters, is fine.
     await user.clear(screen.getByLabelText('Name'));

@@ -79,7 +79,7 @@ describe('bringing entries over from Record', () => {
     expect(screen.getByText('For example, Підтягування: "багато"')).toBeOnTheScreen();
     expect(screen.getByText('A bench press with a weight only, taken as one rep: 1')).toBeOnTheScreen();
     expect(screen.queryByText(/A shuttle run without a scheme/)).not.toBeOnTheScreen();
-    expect(screen.getByText('Will not be brought over, having no date or no result: 1')).toBeOnTheScreen();
+    expect(screen.getByText('No date or no result, so not brought over: 1')).toBeOnTheScreen();
     expect(await listEntries(db)).toEqual([]);
   });
 

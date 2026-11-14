@@ -56,6 +56,21 @@ describe('translation catalogues', () => {
     }
   });
 
+  it('keep Ukrainian free of English words, apart from names', () => {
+    const NAMES = new Set(['Record', 'Google', 'Play']);
+    for (const [key, text] of Object.entries(uk)) {
+      const words = text.replace(/{{[^}]+}}/g, '').match(/[A-Za-z]+/g) ?? [];
+      expect({ key, english: words.filter((word) => !NAMES.has(word)) }).toEqual({ key, english: [] });
+    }
+  });
+
+  it('spell English the British way throughout, as in "colour" and "armour"', () => {
+    const AMERICAN = /\b(colors?|colored|gray|centers?|favorites?|(kilo|centi)?meters?|liters?|behaviors?|canceled|labeled|traveled)\b/i;
+    for (const [key, text] of Object.entries(en)) {
+      expect({ key, american: AMERICAN.exec(text)?.[0] ?? null }).toEqual({ key, american: null });
+    }
+  });
+
   it('give every plural string all the forms its language needs', () => {
     const required = { uk: ['one', 'few', 'many', 'other'], en: ['one', 'other'] } as const;
     for (const language of LANGUAGES) {

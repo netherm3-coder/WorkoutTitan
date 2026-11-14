@@ -176,8 +176,11 @@ describe('achievements', () => {
     await startApp('/achievements');
 
     expect(screen.getByText('Points: 0 of 2170')).toBeOnTheScreen();
-    expect(screen.getByLabelText('First step, Your first entry, not yet')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Relentless, Earn 1300 achievement points, not yet')).toBeOnTheScreen();
+    expect(
+      screen.getByLabelText('First step, Your first entry, Opens in the camp: armour colour "brown", headwear "sprout", not yet'),
+    ).toBeOnTheScreen();
+    expect(screen.getByLabelText('Relentless, Earn 1300 achievement points, Opens in the camp: headwear "crown", not yet')).toBeOnTheScreen();
+    expect(screen.getByText('Opens in the camp: headwear "crown"')).toBeOnTheScreen();
     expect(screen.queryByText('Sobriety')).not.toBeOnTheScreen();
   });
 
@@ -185,9 +188,11 @@ describe('achievements', () => {
     await startApp('/achievements', (db) => addEntries(db, [entry(PULLUPS, daysAgo(1), { reps: 7 })], 1));
 
     expect(screen.getByText('Points: 15 of 2170')).toBeOnTheScreen();
-    expect(screen.getByLabelText('First step, Your first entry, earned')).toBeOnTheScreen();
-    expect(screen.getByLabelText('First pull-up, Your first pull-up entry, earned')).toBeOnTheScreen();
-    expect(screen.getByLabelText('10 pull-ups, 10 reps in one set, not yet')).toBeOnTheScreen();
+    expect(
+      screen.getByLabelText('First step, Your first entry, Opens in the camp: armour colour "brown", headwear "sprout", earned'),
+    ).toBeOnTheScreen();
+    expect(screen.getByLabelText('First pull-up, Your first pull-up entry, Opens in the camp: headwear "beanie", earned')).toBeOnTheScreen();
+    expect(screen.getByLabelText('10 pull-ups, 10 reps in one set, Opens in the camp: tent colour "blue", not yet')).toBeOnTheScreen();
     expect(screen.getByLabelText('70% done')).toBeOnTheScreen();
   });
 
@@ -195,7 +200,8 @@ describe('achievements', () => {
     await startApp('/achievements', (db) => saveProfile(db, { soberSince: daysAgo(10) }, 1));
 
     expect(screen.getByText('Points: 15 of 2490')).toBeOnTheScreen();
+    // The sobriety counter opens nothing for the camp, so its achievements name no reward.
     expect(screen.getByLabelText('7 days sober, A week without alcohol, earned')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Relentless, Earn 1500 achievement points, not yet')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Relentless, Earn 1500 achievement points, Opens in the camp: headwear "crown", not yet')).toBeOnTheScreen();
   });
 });

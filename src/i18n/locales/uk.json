@@ -264,6 +264,15 @@
         "cherry": "сакура"
       }
     },
+    "reward": {
+      "armour": "колір броні «{{item}}»",
+      "hat": "головний убір «{{item}}»",
+      "tent": "колір намету «{{item}}»",
+      "pattern": "візерунок «{{item}}»",
+      "patternColour": "колір візерунка «{{item}}»",
+      "sky": "небо «{{item}}»",
+      "season": "пора року «{{item}}»"
+    },
     "locked": "закрито",
     "byAchievement": "Відкриє досягнення «{{achievement}}».",
     "byPremium": "Із преміум-набору.",
@@ -385,6 +394,7 @@
     "unlocked": "здобуто",
     "locked": "ще ні",
     "progress": "Виконано на {{percent}}%",
+    "opens": "Відкриває в таборі: {{items}}",
     "categories": {
       "all": "Усі",
       "strength": "Силові",

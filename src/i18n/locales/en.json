@@ -256,6 +256,15 @@
         "cherry": "cherry blossom"
       }
     },
+    "reward": {
+      "armour": "armour colour \"{{item}}\"",
+      "hat": "headwear \"{{item}}\"",
+      "tent": "tent colour \"{{item}}\"",
+      "pattern": "pattern \"{{item}}\"",
+      "patternColour": "pattern colour \"{{item}}\"",
+      "sky": "sky \"{{item}}\"",
+      "season": "season \"{{item}}\""
+    },
     "locked": "locked",
     "byAchievement": "The achievement \"{{achievement}}\" opens it.",
     "byPremium": "Part of the premium set.",
@@ -377,6 +386,7 @@
     "unlocked": "earned",
     "locked": "not yet",
     "progress": "{{percent}}% done",
+    "opens": "Opens in the camp: {{items}}",
     "categories": {
       "all": "All",
       "strength": "Strength",

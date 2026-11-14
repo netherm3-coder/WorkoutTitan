@@ -5,7 +5,7 @@
 
 export { HAT_TILES } from './art';
 export { CampScene, type CampSceneProps } from './CampScene';
-export { itemName } from './names';
+export { itemName, rewardName } from './names';
 export { Swatch, Tile, type SwatchProps, type TileProps } from './pickers';
 export { sceneLayers, type SceneLayer } from './sceneLayers';
 export { PREMIUM_SHOWCASE } from './showcase';

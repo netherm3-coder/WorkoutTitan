@@ -2,10 +2,12 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card, ProgressBar, Screen } from '@/components';
+import { rewardName } from '@/cosmetics';
 import {
   ACHIEVEMENT_CATEGORIES,
   availablePoints,
   earnedPoints,
+  rewardsOf,
   type AchievementState,
 } from '@/domain';
 import { useFormat } from '@/format';
@@ -20,6 +22,13 @@ export default function AchievementsScreen() {
   const available = availablePoints(states);
 
   const describe = (state: AchievementState) => format.achievement(state.id, soberDays);
+
+  /** What the achievement opens for the camp, or nothing: the sobriety counter opens nothing. */
+  const opens = (state: AchievementState) => {
+    const rewards = rewardsOf(state.id);
+    if (rewards.length === 0) return null;
+    return t('achievements.opens', { items: rewards.map((reward) => rewardName(t, reward)).join(', ') });
+  };
 
   return (
     <Screen subtitle={t('achievements.subtitle')} title={t('achievements.title')}>
@@ -41,10 +50,11 @@ export default function AchievementsScreen() {
               const name = t(`achievements.items.${state.id}.name`);
               const status = t(state.unlocked ? 'achievements.unlocked' : 'achievements.locked');
               const partly = !state.unlocked && state.progress > 0;
+              const reward = opens(state);
 
               return (
                 <View
-                  accessibilityLabel={`${name}, ${describe(state)}, ${status}`}
+                  accessibilityLabel={[name, describe(state), reward, status].filter(Boolean).join(', ')}
                   accessible
                   key={state.id}
                   style={[styles.item, !state.unlocked && styles.locked]}
@@ -60,6 +70,11 @@ export default function AchievementsScreen() {
                         label={t('achievements.progress', { percent: Math.floor(state.progress * 100) })}
                         value={state.progress}
                       />
+                    ) : null}
+                    {reward ? (
+                      <AppText color="accent" variant="label">
+                        {reward}
+                      </AppText>
                     ) : null}
                   </View>
                   <AppText color={state.unlocked ? 'accent' : 'muted'} strong>{`+${state.reward}`}</AppText>

@@ -3,11 +3,13 @@ import {
   customExercise,
   entryProblems,
   isDay,
+  isBuiltInPart,
   isExerciseKind,
   readLook,
   type BodyMeasurement,
   type Exercise,
   type Look,
+  type OwnBodyPart,
   type WeightRecord,
   type WorkoutEntry,
 } from '@/domain';
@@ -16,9 +18,9 @@ import {
  * The backup file: everything a person has entered, as one JSON document.
  *
  * What goes in is what the person can see: results, their own exercises, body weight and
- * measurements, goals, the counters' dates, height and the look of the camp. What stays out:
- * language and skin (choices about this phone), anything deleted, and the entries of a deleted
- * exercise.
+ * measurements with the body parts of their own, goals, the counters' dates, height and the
+ * look of the camp. What stays out: language, skin and units (choices about this phone),
+ * anything deleted, and what went out of sight with a deleted exercise or body part.
  *
  * Reading is strict. A file is taken whole or not at all: one row that makes no sense means
  * the file was damaged or edited by hand, and half of a history is worse than an honest "no".
@@ -41,6 +43,8 @@ export type BackupData = {
   entries: WorkoutEntry[];
   bodyWeights: WeightRecord[];
   bodyMeasurements: BodyMeasurement[];
+  /** Body parts of the person's own. A file made before they existed has none. */
+  bodyParts: OwnBodyPart[];
   goals: { discipline: string; target: number }[];
   profile: BackupProfile;
   look: Look;
@@ -220,10 +224,19 @@ function readData(raw: Json): BackupData {
     const where = `bodyMeasurements[${index}]`;
     const record = row(item, where);
     need(isDay(record.date), `${where}.date`);
-    need(isText(record.part) && record.part.length > 0, `${where}.part`);
+    need(isText(record.part) && record.part.trim().length > 0, `${where}.part`);
     need(isPositive(record.cm), `${where}.cm`);
     return { date: record.date, part: record.part, cm: record.cm };
   });
+
+  const bodyParts = list(raw.bodyParts ?? [], 'bodyParts').map((item, index) => {
+    const where = `bodyParts[${index}]`;
+    const record = row(item, where);
+    need(isText(record.id) && record.id.length > 0 && !isBuiltInPart(record.id), `${where}.id`);
+    need(isText(record.name) && record.name.trim().length > 0, `${where}.name`);
+    return { id: record.id, name: record.name.trim() };
+  });
+  need(new Set(bodyParts.map((part) => part.id)).size === bodyParts.length, 'bodyParts');
 
   const goals = list(raw.goals ?? [], 'goals').map((item, index) => {
     const where = `goals[${index}]`;
@@ -238,6 +251,7 @@ function readData(raw: Json): BackupData {
     entries,
     bodyWeights: lastByKey(bodyWeights, (record) => record.date),
     bodyMeasurements: lastByKey(bodyMeasurements, (record) => `${record.date} ${record.part}`),
+    bodyParts,
     goals: lastByKey(goals, (goal) => goal.discipline),
     profile: readProfile(raw.profile, 'profile'),
     // The look is read the forgiving way it is read from the database: an item this version

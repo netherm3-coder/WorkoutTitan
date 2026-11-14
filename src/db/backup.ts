@@ -1,6 +1,7 @@
 import type { BackupData } from '@/backup/format';
 
 import { listBodyMeasurements, saveBodyMeasurements, saveBodyWeight } from './body';
+import { ensureBodyParts, listBodyParts, saveBodyPart } from './bodyParts';
 import { putEntries } from './entries';
 import { listExercises, saveExercise } from './exercises';
 import { listGoals, setGoal } from './goals';
@@ -11,10 +12,11 @@ import type { Database } from './types';
 
 /** Everything that goes into a backup: what the person can see, nothing deleted. */
 export async function collectBackupData(db: Database): Promise<BackupData> {
-  const [history, exercises, bodyMeasurements, goals, profile, look] = await Promise.all([
+  const [history, exercises, bodyMeasurements, bodyParts, goals, profile, look] = await Promise.all([
     loadHistory(db),
     listExercises(db),
     listBodyMeasurements(db),
+    listBodyParts(db),
     listGoals(db),
     loadProfile(db),
     loadLook(db),
@@ -25,6 +27,7 @@ export async function collectBackupData(db: Database): Promise<BackupData> {
     entries: [...history.entries],
     bodyWeights: [...history.weights],
     bodyMeasurements,
+    bodyParts,
     goals: [...goals].map(([discipline, target]) => ({ discipline, target })),
     profile,
     look,
@@ -64,6 +67,17 @@ export async function restoreBackup(db: Database, data: BackupData, now: number)
   for (const record of data.bodyWeights) {
     await saveBodyWeight(db, record, now);
   }
+
+  for (const part of data.bodyParts) {
+    await saveBodyPart(db, part, now);
+  }
+  // A measurement of a part the file does not define (one written before parts of one's own
+  // existed, or by hand) gets a part named after it, so it does not go out of sight.
+  await ensureBodyParts(
+    db,
+    data.bodyMeasurements.map((record) => record.part),
+    now,
+  );
 
   const byDate = new Map<string, Record<string, number>>();
   for (const { date, part, cm } of data.bodyMeasurements) {

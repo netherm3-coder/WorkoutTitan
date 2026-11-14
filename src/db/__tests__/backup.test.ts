@@ -4,7 +4,8 @@ import { makeRecordHistory, RECORD_WEIGHTS } from '@/domain/__tests__/recordData
 import { entry, minutes, resetSequence } from '@/domain/__tests__/support';
 
 import { collectBackupData, planRestore, restoreBackup } from '../backup';
-import { deleteBodyWeight, saveBodyMeasurements, saveBodyWeight } from '../body';
+import { deleteBodyWeight, listBodyMeasurements, saveBodyMeasurements, saveBodyWeight } from '../body';
+import { deleteBodyPart, listBodyParts, listDeletedBodyParts, saveBodyPart } from '../bodyParts';
 import { addEntries, deleteEntry, listEntries, updateEntry } from '../entries';
 import { deleteExercise, saveExercise } from '../exercises';
 import { clearGoal, setGoal } from '../goals';
@@ -22,12 +23,14 @@ beforeEach(async () => {
 
 const PLANK = customExercise({ id: 'own:plank', name: 'Планка', kind: 'duration', better: 'higher' });
 const SQUAT = customExercise({ id: 'own:squat', name: 'Присідання', kind: 'weight' });
+const CALF = { id: 'own:calf', name: 'Литка ліва' };
 
 const EMPTY: BackupData = {
   exercises: [],
   entries: [],
   bodyWeights: [],
   bodyMeasurements: [],
+  bodyParts: [],
   goals: [],
   profile: { heightCm: null, trainingSince: null, soberSince: null },
   look: DEFAULT_LOOK,
@@ -42,7 +45,8 @@ async function fill(database: TestDatabase) {
   await saveExercise(database, PLANK, 1);
   await addEntries(database, [pullups, run, plank], 1);
   await saveBodyWeight(database, { date: '2026-03-01', kg: 78.4 }, 1);
-  await saveBodyMeasurements(database, '2026-03-01', { chest: 104, 'литка ліва': 39.5 }, 1);
+  await saveBodyPart(database, CALF, 1);
+  await saveBodyMeasurements(database, '2026-03-01', { chest: 104, [CALF.id]: 39.5 }, 1);
   await setGoal(database, 'pullups', 20, 1);
   await saveProfile(database, { heightCm: 181, trainingSince: '2021-09-01' }, 1);
   await saveLook(database, { armour: 'red', hat: 'beanie' }, 1);
@@ -87,8 +91,9 @@ describe('collectBackupData', () => {
       bodyWeights: [{ date: '2026-03-01', kg: 78.4 }],
       bodyMeasurements: [
         { date: '2026-03-01', part: 'chest', cm: 104 },
-        { date: '2026-03-01', part: 'литка ліва', cm: 39.5 },
+        { date: '2026-03-01', part: CALF.id, cm: 39.5 },
       ],
+      bodyParts: [CALF],
       goals: [{ discipline: 'pullups', target: 20 }],
       profile: { heightCm: 181, trainingSince: '2021-09-01', soberSince: null },
       look: { ...DEFAULT_LOOK, armour: 'red', hat: 'beanie' },
@@ -107,7 +112,7 @@ describe('collectBackupData', () => {
       exercises: [],
       entries: [pullups],
       bodyWeights: [],
-      bodyMeasurements: [{ date: '2026-03-01', part: 'литка ліва', cm: 39.5 }],
+      bodyMeasurements: [{ date: '2026-03-01', part: CALF.id, cm: 39.5 }],
       goals: [],
     });
   });
@@ -228,6 +233,53 @@ describe('restoreBackup', () => {
     await expect(restore(db, broken)).rejects.toThrow(RangeError);
 
     expect(await contents(db)).toEqual(before);
+  });
+});
+
+describe('body parts of one\'s own in a backup', () => {
+  it('leave out a deleted part and what was measured on it', async () => {
+    await fill(db);
+    await deleteBodyPart(db, CALF.id, 2);
+
+    expect(await collectBackupData(db)).toMatchObject({
+      bodyParts: [],
+      bodyMeasurements: [{ date: '2026-03-01', part: 'chest', cm: 104 }],
+    });
+  });
+
+  it('come back with their name and measurements on another phone', async () => {
+    await fill(db);
+    const other = await openTestDatabase();
+
+    await restore(other, throughFile(await collectBackupData(db)));
+
+    expect(await listBodyParts(other)).toEqual([CALF]);
+    expect(await listBodyMeasurements(other)).toContainEqual({ date: '2026-03-01', part: CALF.id, cm: 39.5 });
+  });
+
+  it('come back on the same phone when deleted after the copy was made, renamed as the file says', async () => {
+    await fill(db);
+    const data = throughFile(await collectBackupData(db));
+    await saveBodyPart(db, { ...CALF, name: 'Литка' }, 2);
+    await deleteBodyPart(db, CALF.id, 3);
+
+    await restore(db, data);
+
+    expect(await listBodyParts(db)).toEqual([CALF]);
+    expect(await listDeletedBodyParts(db)).toEqual([]);
+  });
+
+  it('are made for measurements of parts the file does not define', async () => {
+    await restore(db, {
+      ...EMPTY,
+      bodyMeasurements: [
+        { date: '2026-03-01', part: 'waist', cm: 81 },
+        { date: '2026-03-01', part: 'литка ліва', cm: 39.5 },
+      ],
+    });
+
+    expect(await listBodyParts(db)).toEqual([{ id: 'литка ліва', name: 'литка ліва' }]);
+    expect(await listBodyMeasurements(db)).toHaveLength(2);
   });
 });
 

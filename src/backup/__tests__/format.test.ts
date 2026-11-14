@@ -27,8 +27,9 @@ const sample = (): BackupData => ({
   bodyWeights: [{ date: '2026-03-01', kg: 78.4 }],
   bodyMeasurements: [
     { date: '2026-03-01', part: 'chest', cm: 104 },
-    { date: '2026-03-01', part: 'литка ліва', cm: 39.5 },
+    { date: '2026-03-01', part: 'own:calf', cm: 39.5 },
   ],
+  bodyParts: [{ id: 'own:calf', name: 'Литка ліва' }],
   goals: [{ discipline: 'pullups', target: 20 }],
   profile: { heightCm: 181, trainingSince: '2021-09-01', soberSince: null },
   look: { ...DEFAULT_LOOK, armour: 'red', hat: 'beanie' },
@@ -72,6 +73,7 @@ describe('a backup file', () => {
       entries: [],
       bodyWeights: [],
       bodyMeasurements: [],
+      bodyParts: [],
       goals: [],
       profile: { heightCm: null, trainingSince: null, soberSince: null },
       look: DEFAULT_LOOK,
@@ -131,6 +133,10 @@ describe('a damaged backup', () => {
     ['a weight of zero', (file) => (file.bodyWeights[0].kg = 0), 'bodyWeights[0].kg'],
     ['a weight on no day', (file) => (file.bodyWeights[0].date = null), 'bodyWeights[0].date'],
     ['a measurement of nothing', (file) => (file.bodyMeasurements[0].part = ''), 'bodyMeasurements[0].part'],
+    ['a measurement of only spaces', (file) => (file.bodyMeasurements[0].part = '  '), 'bodyMeasurements[0].part'],
+    ['a body part posing as a built-in one', (file) => (file.bodyParts[0].id = 'waist'), 'bodyParts[0].id'],
+    ['a body part without a name', (file) => (file.bodyParts[0].name = ' '), 'bodyParts[0].name'],
+    ['the same body part twice', (file) => file.bodyParts.push(file.bodyParts[0]), 'bodyParts'],
     ['a negative measurement', (file) => (file.bodyMeasurements[1].cm = -1), 'bodyMeasurements[1].cm'],
     ['a goal of zero', (file) => (file.goals[0].target = 0), 'goals[0].target'],
     ['a height that is not a number', (file) => (file.profile.heightCm = 'tall'), 'profile.heightCm'],
@@ -144,7 +150,7 @@ describe('a backup with something left out or extra', () => {
   it('reads a missing section as empty', () => {
     const reading = readBackup(
       tampered((file) => {
-        for (const section of ['exercises', 'bodyWeights', 'bodyMeasurements', 'goals', 'profile', 'look']) delete file[section];
+        for (const section of ['exercises', 'bodyWeights', 'bodyMeasurements', 'bodyParts', 'goals', 'profile', 'look']) delete file[section];
         file.entries = file.entries.slice(0, 3);
       }),
     );
@@ -155,6 +161,7 @@ describe('a backup with something left out or extra', () => {
         exercises: [],
         bodyWeights: [],
         bodyMeasurements: [],
+        bodyParts: [],
         goals: [],
         profile: { heightCm: null, trainingSince: null, soberSince: null },
         look: DEFAULT_LOOK,

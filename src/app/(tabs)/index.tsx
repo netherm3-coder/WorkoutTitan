@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, EmptyState, ProgressBar, Screen } from '@/components';
-import { CampScene, useWardrobe } from '@/cosmetics';
+import { CampScene, NewItemsNotice, useWardrobe } from '@/cosmetics';
 import {
   buildPedestal,
   daysStanding,
@@ -85,6 +85,8 @@ export default function HomeScreen() {
           <Ionicons color="#ffffff" name="color-palette-outline" size={24} />
         </Pressable>
       </Card>
+
+      <NewItemsNotice />
 
       <Button label={t('journal.add')} onPress={() => router.push('/entry/new')} />
 

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { StartupError } from '@/components';
+import { loadSeenItems, NewItemsProvider } from '@/cosmetics';
 import { DatabaseProvider, DatabaseTooNewError, useOpenDatabase } from '@/db';
 import { defaultUnits, UnitsProvider } from '@/format';
 import { initI18n, pickLanguage } from '@/i18n';
@@ -16,8 +17,8 @@ import { loadSettings, saveLengthUnit, saveThemeId, saveWeightUnit, type StoredS
 import { fontAssets, ThemeProvider, useTheme } from '@/theme';
 
 // Keep the splash screen up until fonts, saved settings and the history are in, so the first
-// frame is already in the right language and skin, shows real data, and dresses the camp in
-// what the person paid for.
+// frame is already in the right language and skin, shows real data, dresses the camp in what
+// the person paid for and knows which of its items are news.
 void SplashScreen.preventAutoHideAsync();
 
 /** Takes the splash screen down. Drawn only once there is something to show under it. */
@@ -32,15 +33,17 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontAssets);
   const [settings, setSettings] = useState<StoredSettings | null>(null);
   const [savedPremium, setSavedPremium] = useState(false);
+  const [seenItems, setSeenItems] = useState<ReadonlySet<string> | null>(null);
   const [store] = useState(createPurchaseStore);
 
   useEffect(() => {
     let cancelled = false;
 
-    void Promise.all([loadSettings(), loadCachedPremium(Date.now())]).then(([saved, premium]) => {
+    void Promise.all([loadSettings(), loadCachedPremium(Date.now()), loadSeenItems()]).then(([saved, premium, seen]) => {
       if (cancelled) return;
       initI18n(saved.language ?? pickLanguage(getLocales()));
       setSavedPremium(premium);
+      setSeenItems(seen);
       setSettings(saved);
     });
 
@@ -74,8 +77,10 @@ export default function RootLayout() {
           {opened.status === 'ready' ? (
             <DatabaseProvider value={opened.db}>
               <RecordsProvider renderFailure={(error, again) => <DatabaseFailure error={error} onRetry={again} retrying={false} />}>
-                <Ready />
-                <RootStack />
+                <NewItemsProvider initialSeen={seenItems}>
+                  <Ready />
+                  <RootStack />
+                </NewItemsProvider>
               </RecordsProvider>
             </DatabaseProvider>
           ) : (

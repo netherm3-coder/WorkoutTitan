@@ -2,6 +2,7 @@ import {
   ACHIEVEMENTS,
   accessFrom,
   DEFAULT_LOOK,
+  earnedItems,
   evaluateAchievements,
   isLookOption,
   isOpen,
@@ -107,6 +108,26 @@ describe('what opens an item', () => {
 
     // 61 items: the four starting ones, 45 to earn and 12 for subscribers.
     expect(count).toEqual({ start: 4, achievement: 45, premium: 12 });
+  });
+});
+
+describe('the items a person has earned', () => {
+  it('are none without achievements', () => {
+    expect(earnedItems(new Set())).toEqual([]);
+  });
+
+  it('are what the earned achievements open, in wardrobe order', () => {
+    expect(earnedItems(new Set<AchievementId>(['first_pullup', 'first_step']))).toEqual([
+      { slot: 'armour', item: 'brown' },
+      { slot: 'hat', item: 'sprout' },
+      { slot: 'hat', item: 'beanie' },
+    ]);
+  });
+
+  it('are all 45 to earn once every achievement is in, and never the start or the premium set', () => {
+    const all = earnedItems(new Set(ACHIEVEMENTS.map((achievement) => achievement.id)));
+    expect(all).toHaveLength(45);
+    expect(all.every(({ slot, item }) => unlockOf(slot, item).by === 'achievement')).toBe(true);
   });
 });
 

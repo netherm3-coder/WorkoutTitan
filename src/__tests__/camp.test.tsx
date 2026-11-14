@@ -266,3 +266,87 @@ describe('the premium set', () => {
     expect(layers()).toContain('hat');
   });
 });
+
+describe('new items', () => {
+  const SEEN = 'record.camp.seenItems';
+  const title = /new items? for the camp/;
+
+  /** The list of seen items as last written to the phone, or `null` when it was not written. */
+  const savedSeen = (): unknown => {
+    const writes = jest.mocked(AsyncStorage.setItem).mock.calls.filter(([key]) => key === SEEN);
+    const last = writes.at(-1);
+    return last ? JSON.parse(last[1]) : null;
+  };
+
+  beforeEach(() => {
+    jest.mocked(AsyncStorage.setItem).mockClear();
+  });
+
+  it('are announced on the home screen and marked in the wardrobe until it is opened', async () => {
+    // An install that has kept the list and seen nothing yet; the first pull-ups open three items.
+    await AsyncStorage.setItem(SEEN, '[]');
+    const { user } = await startApp('/', firstEntry);
+
+    expect(screen.getByText('3 new items for the camp')).toBeOnTheScreen();
+    expect(screen.getByText('armour colour "brown", headwear "sprout", headwear "beanie"')).toBeOnTheScreen();
+
+    await user.press(screen.getByRole('button', { name: 'Try on' }));
+    expect(await screen.findByRole('header', { name: 'Camp look' })).toBeOnTheScreen();
+    expect(group('armour').getByRole('radio', { name: 'brown, new' })).toBeOnTheScreen();
+    expect(group('hat').getByRole('radio', { name: 'sprout, new' })).toBeOnTheScreen();
+    expect(group('hat').getByRole('radio', { name: 'crown, locked' })).toBeOnTheScreen();
+
+    await user.press(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.queryByText(title)).toBeNull();
+    await waitFor(() => expect(savedSeen()).toEqual(['armour:brown', 'hat:beanie', 'hat:sprout']));
+  });
+
+  it('can be hidden without opening the wardrobe', async () => {
+    await AsyncStorage.setItem(SEEN, '[]');
+    const { user } = await startApp('/', firstEntry);
+
+    await user.press(screen.getByRole('button', { name: 'Hide' }));
+
+    expect(screen.queryByText(title)).toBeNull();
+    await waitFor(() => expect(savedSeen()).toEqual(['armour:brown', 'hat:beanie', 'hat:sprout']));
+  });
+
+  it('are not news when they were earned before the app kept a list', async () => {
+    await startApp('/', firstEntry);
+
+    expect(screen.queryByText(title)).toBeNull();
+    await waitFor(() => expect(savedSeen()).toEqual(['armour:brown', 'hat:beanie', 'hat:sprout']));
+  });
+
+  it('are named three at a time, with the rest counted', async () => {
+    await AsyncStorage.setItem(SEEN, '[]');
+    await startApp('/', async (db) => {
+      await firstEntry(db);
+      await fiveOwnExercises(db);
+    });
+
+    const heading = screen.getByText(title);
+    const total = Number(/^(\d+)/.exec(String(heading.props.children))?.[1]);
+    expect(total).toBeGreaterThan(3);
+    expect(screen.getByText(new RegExp(`^armour colour "brown", headwear "sprout", headwear "beanie" and ${total - 3} more$`))).toBeOnTheScreen();
+  });
+
+  it('do not include the premium set, which the support screen announces', async () => {
+    await AsyncStorage.setItem(SEEN, '[]');
+    jest.mocked(createPurchaseStore).mockReturnValue(fakeStore({ ownedNow: { ok: true, purchases: [runningSubscription()] } }));
+    await startApp('/');
+
+    await waitFor(() => expect(layers()).toEqual(['sky', 'tent', 'knight', 'campfire']));
+    expect(screen.queryByText(title)).toBeNull();
+  });
+
+  it('are counted in Ukrainian too', async () => {
+    const locales = [{ languageCode: 'uk', regionCode: 'UA' }] as unknown as ReturnType<typeof getLocales>;
+    jest.mocked(getLocales).mockReturnValue(locales);
+    await AsyncStorage.setItem(SEEN, '[]');
+    await startApp('/', firstEntry);
+
+    expect(screen.getByText('3 нові предмети для табору')).toBeOnTheScreen();
+    expect(screen.getByText('колір броні «коричневий», головний убір «паросток», головний убір «в\'язана шапка»')).toBeOnTheScreen();
+  });
+});

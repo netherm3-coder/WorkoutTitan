@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
@@ -8,11 +8,13 @@ import {
   ARMOUR_SWATCHES,
   CampScene,
   HAT_TILES,
+  itemKey,
   itemName,
   PATTERN_SWATCHES,
   Swatch,
   TENT_SWATCHES,
   Tile,
+  useNewItems,
   useWardrobe,
 } from '@/cosmetics';
 import { isOpen, LOOK_OPTIONS, unlockOf, wardrobeCount, type Look, type LookItem, type Slot } from '@/domain';
@@ -27,6 +29,15 @@ export default function CampLookScreen() {
   const { theme } = useTheme();
   const { shown, access, choose } = useWardrobe();
   const { soberDays } = useAchievements();
+  const { fresh: freshNow, markSeen } = useNewItems();
+
+  /** What was new when the screen opened. It stays marked while the screen is open. */
+  const [news] = useState(() => new Set(freshNow.map(itemKey)));
+
+  // Opening the wardrobe is looking at what is new.
+  useEffect(() => {
+    markSeen();
+  }, [markSeen]);
 
   /** The locked item the person pressed last: the screen says what opens it. */
   const [asked, setAsked] = useState<{ slot: Slot; item: LookItem } | null>(null);
@@ -50,11 +61,13 @@ export default function CampLookScreen() {
   /** What every kind of picker needs to know about one item. */
   const choice = (slot: Slot, item: LookItem) => {
     const locked = !isOpen(slot, item, access);
+    const fresh = item !== null && news.has(itemKey({ slot, item }));
     const name = itemName(t, slot, item);
     return {
-      accessibilityLabel: locked ? `${name}, ${t('camp.locked')}` : name,
+      accessibilityLabel: locked ? `${name}, ${t('camp.locked')}` : fresh ? `${name}, ${t('camp.fresh')}` : name,
       selected: shown[slot] === item,
       locked,
+      fresh,
       onPress: () => pick(slot, item),
     };
   };
@@ -122,12 +135,12 @@ export default function CampLookScreen() {
     section(
       slot,
       LOOK_OPTIONS[slot].map((item) => {
-        const { locked, ...rest } = choice(slot, item);
+        const { locked, fresh, ...rest } = choice(slot, item);
         return (
           <Chip
             key={item ?? 'none'}
             {...rest}
-            icon={locked ? 'lock-closed' : undefined}
+            icon={locked ? 'lock-closed' : fresh ? 'sparkles' : undefined}
             label={itemName(t, slot, item)}
           />
         );

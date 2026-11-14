@@ -296,6 +296,17 @@ export function rewardsOf(achievement: AchievementId): Reward[] {
   });
 }
 
+/**
+ * The items that the given achievements open, in wardrobe order. Nothing from the start and
+ * nothing from the premium set: these are the ones a person has earned.
+ */
+export function earnedItems(achievements: ReadonlySet<AchievementId>): Reward[] {
+  return WARDROBE.filter(({ slot, item }) => {
+    const unlock = unlockOf(slot, item);
+    return unlock.by === 'achievement' && achievements.has(unlock.achievement);
+  });
+}
+
 /** The items of the premium set. */
 export function premiumSet(): Reward[] {
   return WARDROBE.filter(({ slot, item }) => unlockOf(slot, item).by === 'premium');

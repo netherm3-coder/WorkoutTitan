@@ -10,6 +10,8 @@ type ChoiceProps = {
   selected: boolean;
   /** Not open yet. It can still be pressed, to ask what opens it. */
   locked: boolean;
+  /** Opened since the person last looked: it carries a dot. */
+  fresh?: boolean;
   onPress: () => void;
 };
 
@@ -22,7 +24,7 @@ const markOn = (color: string) => (relativeLuminance(parseColor(color)) > 0.4 ? 
 export type SwatchProps = ChoiceProps & { color: string };
 
 /** One colour to choose. The chosen one carries a tick, so it does not rely on the ring alone. */
-export function Swatch({ color, accessibilityLabel, selected, locked, onPress }: SwatchProps) {
+export function Swatch({ color, accessibilityLabel, selected, locked, fresh = false, onPress }: SwatchProps) {
   const foreground = useForeground();
 
   return (
@@ -40,6 +42,7 @@ export function Swatch({ color, accessibilityLabel, selected, locked, onPress }:
       <View style={[StyleSheet.absoluteFill, { backgroundColor: color }, locked && styles.dimmed]} />
       {locked ? <Ionicons color={foreground.text} name="lock-closed" size={18} /> : null}
       {selected && !locked ? <Ionicons color={markOn(color)} name="checkmark" size={24} /> : null}
+      {fresh ? <View style={[styles.dot, styles.swatchDot, { backgroundColor: foreground.accent }]} /> : null}
     </Pressable>
   );
 }
@@ -50,7 +53,7 @@ export type TileProps = ChoiceProps & {
 };
 
 /** One item to choose by its picture. */
-export function Tile({ source, accessibilityLabel, selected, locked, onPress }: TileProps) {
+export function Tile({ source, accessibilityLabel, selected, locked, fresh = false, onPress }: TileProps) {
   const foreground = useForeground();
 
   return (
@@ -80,6 +83,7 @@ export function Tile({ source, accessibilityLabel, selected, locked, onPress }: 
           <Ionicons color={LIGHT_MARK} name="checkmark" size={14} />
         </View>
       ) : null}
+      {fresh ? <View style={[styles.dot, styles.tileDot, { backgroundColor: foreground.accent }]} /> : null}
     </Pressable>
   );
 }
@@ -117,6 +121,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  dot: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: radii.pill,
+    borderWidth: 2,
+    borderColor: LIGHT_MARK,
+  },
+  // Inside the circle: its corner would be cut off.
+  swatchDot: {
+    top: 5,
+    right: 5,
+  },
+  tileDot: {
+    top: 4,
+    right: 4,
   },
   dimmed: {
     opacity: 0.3,

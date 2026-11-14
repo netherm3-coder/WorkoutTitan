@@ -266,11 +266,19 @@
       "season": "season \"{{item}}\""
     },
     "locked": "locked",
+    "fresh": "new",
     "byAchievement": "The achievement \"{{achievement}}\" opens it.",
     "byPremium": "Part of the premium set.",
     "aboutPremium": "The premium set",
     "aboutPremiumHint": "What is in it and what it costs",
-    "saveFailed": "Could not save. Try again."
+    "saveFailed": "Could not save. Try again.",
+    "news": {
+      "title_one": "{{count}} new item for the camp",
+      "title_other": "{{count}} new items for the camp",
+      "more": "and {{count}} more",
+      "tryOn": "Try on",
+      "hide": "Hide"
+    }
   },
   "backup": {
     "title": "Backup",

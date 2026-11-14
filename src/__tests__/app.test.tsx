@@ -144,7 +144,7 @@ describe('support screen', () => {
 
     await user.press(screen.getByRole('link', { name: 'Support the author' }));
 
-    expect(await screen.findByText(/support development here/)).toBeOnTheScreen();
+    expect(await screen.findByText(/Record is free and has no ads/)).toBeOnTheScreen();
     expect(app.getPathname()).toBe('/support');
 
     await user.press(screen.getByRole('button', { name: 'Back' }));

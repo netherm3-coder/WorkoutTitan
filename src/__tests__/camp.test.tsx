@@ -219,8 +219,11 @@ describe('the premium set', () => {
 
     await user.press(group('hat').getByRole('radio', { name: 'duck, locked' }));
 
-    expect(await screen.findByText('Part of the premium set. The app has no subscription yet.')).toBeOnTheScreen();
+    expect(await screen.findByText('Part of the premium set.')).toBeOnTheScreen();
     expect(await loadLook(db)).toEqual(DEFAULT_LOOK);
+
+    await user.press(screen.getByRole('link', { name: 'The premium set' }));
+    expect(await screen.findByRole('header', { name: 'Support the author' })).toBeOnTheScreen();
   });
 
   it('opens with a subscription', async () => {

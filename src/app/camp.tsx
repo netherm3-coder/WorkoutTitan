@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, Card, Chip, Icon, Screen } from '@/components';
+import { AppText, Card, Chip, Icon, LinkRow, Screen } from '@/components';
 import {
   ARMOUR_SWATCHES,
   CampScene,
@@ -89,7 +89,15 @@ export default function CampLookScreen() {
               </AppText>
             </>
           ) : (
-            <AppText>{t('camp.byPremium')}</AppText>
+            <>
+              <AppText>{t('camp.byPremium')}</AppText>
+              <LinkRow
+                hint={t('camp.aboutPremiumHint')}
+                icon="heart"
+                label={t('camp.aboutPremium')}
+                onPress={() => router.push('/support')}
+              />
+            </>
           )}
         </View>
       </View>,

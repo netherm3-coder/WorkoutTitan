@@ -5,18 +5,20 @@ import { radii, spacing, typeScale, useForeground, useTheme } from '@/theme';
 export type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   label: string;
   /**
-   * `primary` is the main action on a screen; `accent` is the warm highlight colour; `danger`
-   * is an outline for actions that take something away.
+   * `primary` is the main action on a screen; `accent` is the warm highlight colour; `quiet` is
+   * an outline for a secondary action next to them; `danger` is an outline for actions that
+   * take something away.
    */
-  variant?: 'primary' | 'accent' | 'danger';
+  variant?: 'primary' | 'accent' | 'quiet' | 'danger';
 };
 
 export function Button({ label, variant = 'primary', disabled, ...rest }: ButtonProps) {
   const { theme } = useTheme();
   const foreground = useForeground();
+  const line = variant === 'danger' ? foreground.danger : foreground.accent;
   const colors =
-    variant === 'danger'
-      ? { background: 'transparent', border: foreground.danger, text: foreground.danger }
+    variant === 'danger' || variant === 'quiet'
+      ? { background: 'transparent', border: line, text: line }
       : theme.button[variant];
 
   return (

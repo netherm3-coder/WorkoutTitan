@@ -258,7 +258,9 @@
     },
     "locked": "locked",
     "byAchievement": "The achievement \"{{achievement}}\" opens it.",
-    "byPremium": "Part of the premium set. The app has no subscription yet.",
+    "byPremium": "Part of the premium set.",
+    "aboutPremium": "The premium set",
+    "aboutPremiumHint": "What is in it and what it costs",
     "saveFailed": "Could not save. Try again."
   },
   "backup": {
@@ -646,7 +648,50 @@
   },
   "support": {
     "title": "Support the author",
-    "body": "You will be able to support development here with a tip or a premium subscription."
+    "intro": "Record is free and has no ads. If it helps you, this is where you can thank the author.",
+    "premiumTitle": "Premium",
+    "premiumAlt": "The camp in the items of the premium set",
+    "premiumBody_one": "{{count}} item for the camp that opens no other way:",
+    "premiumBody_other": "{{count}} items for the camp that open no other way:",
+    "premiumSame": "Everything else in the app is the same with it or without it.",
+    "price": "{{price}} a month",
+    "subscribe": "Subscribe",
+    "terms": "The subscription renews every month until you cancel it. You can cancel any time in Google Play; the month already paid for runs to its end.",
+    "active": "Your subscription is active. Thank you!",
+    "manage": "Manage subscription",
+    "premiumNotSold": "The subscription is not in Google Play yet.",
+    "tipsTitle": "Tip",
+    "tipsBody": "A one-off payment of your choice. It opens nothing; it simply thanks the author.",
+    "tip": "Tip {{price}}",
+    "tipsNotSold": "Tips are not in Google Play yet.",
+    "waiting": "Waiting for Google Play…",
+    "restore": "Restore purchases",
+    "restoring": "Checking…",
+    "restoreHint": "If the subscription did not show up by itself, for example after reinstalling.",
+    "store": {
+      "none": "This build sells nothing. Purchases work only in the app installed from Google Play.",
+      "connecting": "Connecting to Google Play…",
+      "failed": "Google Play is not answering. Check the internet connection and that the phone is signed in to a Google account.",
+      "retry": "Try again"
+    },
+    "notices": {
+      "premiumOn": "Premium is on. The new items are waiting in Camp look.",
+      "thanks": "Thank you for the support!",
+      "pending": "The payment is still being processed. Once Google Play confirms it, everything turns on by itself.",
+      "restored": "Subscription found; premium is on.",
+      "nothingToRestore": "This Google account has no active subscription.",
+      "tipCleared": "The previous tip is complete. You can give another one now.",
+      "network": "No connection to Google Play. Check the internet connection and try again.",
+      "unavailable": "Google Play does not sell this right now. Try again later.",
+      "billing": "Google Play is not taking payments right now. Try again later.",
+      "failed": "That did not work. Try again."
+    },
+    "dev": {
+      "title": "For development",
+      "body": "Shown only in development. Opens the premium set without buying it, until the app restarts.",
+      "show": "Show premium",
+      "hide": "Hide premium"
+    }
   },
   "startup": {
     "failedTitle": "Data did not open",

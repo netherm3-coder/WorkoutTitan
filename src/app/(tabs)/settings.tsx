@@ -87,6 +87,12 @@ export default function SettingsScreen() {
           onPress={() => router.push('/exercises')}
         />
         <LinkRow
+          hint={t('settings.partsHint')}
+          icon="body-outline"
+          label={t('settings.parts')}
+          onPress={() => router.push('/body-parts')}
+        />
+        <LinkRow
           hint={t('settings.countersHint')}
           icon="hourglass-outline"
           label={t('settings.counters')}

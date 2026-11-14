@@ -4,21 +4,21 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
-import { BODY_PARTS, dayOf, type BodyPart } from '@/domain';
+import { dayOf } from '@/domain';
 import { decimalsOf, lengthFrom, parseDecimal, roundTo, useFormat, weightFrom, weightIn } from '@/format';
-import { useRecords } from '@/records';
+import { useBodyParts, useRecords } from '@/records';
 import { minTouchTarget, spacing } from '@/theme';
 
 /** How many of the latest weigh-ins are listed. */
 const RECENT = 7;
 
-const isBuiltInPart = (part: string): part is BodyPart => (BODY_PARTS as readonly string[]).includes(part);
 
 export default function BodyScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const format = useFormat();
   const { history, measurements, profile, saveBodyWeight, deleteBodyWeight, saveProfile } = useRecords();
+  const { parts, nameOf } = useBodyParts();
 
   const today = dayOf(new Date());
   const [day, setDay] = useState(today);
@@ -32,17 +32,16 @@ export default function BodyScreen() {
   const change = latest && previous ? latest.kg - previous.kg : null;
   const bmi = latest && profile.heightCm ? latest.kg / (profile.heightCm / 100) ** 2 : null;
 
-  // The latest value of every body part that was ever measured, in the order of the form.
+  // The latest value of every body part that was ever measured, in the order of the form:
+  // the built-in parts, then the person's own.
   const latestParts = useMemo(() => {
     const found = new Map<string, { cm: number; date: string }>();
     for (const item of measurements) found.set(item.part, { cm: item.cm, date: item.date });
 
-    const order = (part: string) => {
-      const index = (BODY_PARTS as readonly string[]).indexOf(part);
-      return index < 0 ? BODY_PARTS.length : index;
-    };
+    const position = new Map(parts.map((part, index) => [part.id, index]));
+    const order = (part: string) => position.get(part) ?? parts.length;
     return [...found.entries()].sort(([a], [b]) => order(a) - order(b));
-  }, [measurements]);
+  }, [measurements, parts]);
 
   const attempt = (action: Promise<void>) => {
     setProblem(null);
@@ -141,7 +140,7 @@ export default function BodyScreen() {
         <AppText variant="heading">{t('body.measurements')}</AppText>
         {latestParts.length === 0 ? <AppText color="muted">{t('body.noMeasurements')}</AppText> : null}
         {latestParts.map(([part, { cm, date }]) => {
-          const name = isBuiltInPart(part) ? t(`body.parts.${part}`) : part;
+          const name = nameOf(part);
           return (
             <View accessibilityLabel={`${name}: ${format.length(cm)}`} accessible key={part} style={styles.row}>
               <View style={styles.grow}>

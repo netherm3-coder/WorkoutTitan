@@ -5,11 +5,14 @@ import type { RecordImport } from '@/backup/recordImport';
 import {
   addEntry as insertEntry,
   clearGoal as removeGoal,
+  deleteBodyPart as markBodyPartDeleted,
   deleteBodyWeight as markWeightDeleted,
   deleteEntry as markDeleted,
   deleteExercise as markExerciseDeleted,
   importRecord as writeRecordImport,
   listBodyMeasurements,
+  listBodyParts,
+  listDeletedBodyParts,
   listDeletedExercises,
   listExercises,
   listGoals,
@@ -18,9 +21,11 @@ import {
   loadProfile,
   newId,
   restoreBackup as writeBackup,
+  restoreBodyPart as reviveBodyPart,
   restoreEntry,
   restoreExercise as reviveExercise,
   saveBodyMeasurements as writeMeasurements,
+  saveBodyPart as writeBodyPart,
   saveBodyWeight as writeWeight,
   saveExercise as writeExercise,
   saveLook as writeLook,
@@ -29,6 +34,7 @@ import {
   updateEntry as replaceEntry,
   useDatabase,
   type Database,
+  type DeletedBodyPart,
   type DeletedExercise,
   type Profile,
 } from '@/db';
@@ -40,6 +46,7 @@ import {
   type History,
   type Look,
   type Measures,
+  type OwnBodyPart,
   type WeightRecord,
   type WorkoutEntry,
 } from '@/domain';
@@ -86,13 +93,27 @@ export type Records = {
   updateExercise(exercise: Exercise): Promise<void>;
   /** Removes an own exercise. Its entries leave the history with it. */
   deleteExercise(id: string): Promise<void>;
+  /** Body parts of the person's own, in the order they were added. */
+  bodyParts: readonly OwnBodyPart[];
+  /** Body parts of the person's own that were deleted, the most recent first. */
+  deletedBodyParts: readonly DeletedBodyPart[];
+  /** Adds a body part of the person's own. */
+  addBodyPart(name: string): Promise<void>;
+  renameBodyPart(id: string, name: string): Promise<void>;
+  /** Deletes a body part of the person's own. Its measurements go out of sight with it. */
+  deleteBodyPart(id: string): Promise<void>;
+  /** Brings a deleted body part back, with its measurements. */
+  restoreBodyPart(id: string): Promise<void>;
   /** Own exercises that were deleted, the most recent first. */
   deletedExercises: readonly DeletedExercise[];
   /** Brings a deleted exercise back, with its entries. */
   restoreExercise(id: string): Promise<void>;
 };
 
-type Stored = Pick<Records, 'history' | 'exercises' | 'deletedExercises' | 'measurements' | 'goals' | 'profile' | 'look'>;
+type Stored = Pick<
+  Records,
+  'history' | 'exercises' | 'deletedExercises' | 'measurements' | 'bodyParts' | 'deletedBodyParts' | 'goals' | 'profile' | 'look'
+>;
 
 const RecordsContext = createContext<Records | null>(null);
 
@@ -102,16 +123,28 @@ type Loaded =
   | { status: 'failed'; error: unknown };
 
 async function read(db: Database): Promise<Stored> {
-  const [history, custom, deletedExercises, measurements, goals, profile, look] = await Promise.all([
+  const [history, custom, deletedExercises, measurements, bodyParts, deletedBodyParts, goals, profile, look] = await Promise.all([
     loadHistory(db),
     listExercises(db),
     listDeletedExercises(db),
     listBodyMeasurements(db),
+    listBodyParts(db),
+    listDeletedBodyParts(db),
     listGoals(db),
     loadProfile(db),
     loadLook(db),
   ]);
-  return { history, exercises: [...BUILT_IN_EXERCISES, ...custom], deletedExercises, measurements, goals, profile, look };
+  return {
+    history,
+    exercises: [...BUILT_IN_EXERCISES, ...custom],
+    deletedExercises,
+    measurements,
+    bodyParts,
+    deletedBodyParts,
+    goals,
+    profile,
+    look,
+  };
 }
 
 type RecordsProviderProps = {
@@ -159,7 +192,7 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
 
   const records = useMemo<Records | null>(() => {
     if (!ready) return null;
-    const { history, exercises, deletedExercises, measurements, goals, profile, look } = ready;
+    const { history, exercises, deletedExercises, measurements, bodyParts, deletedBodyParts, goals, profile, look } = ready;
 
     return {
       history,
@@ -199,6 +232,25 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
       },
       async deleteExercise(id) {
         await markExerciseDeleted(db, id, Date.now());
+        await reload();
+      },
+      bodyParts,
+      deletedBodyParts,
+      async addBodyPart(name) {
+        const now = Date.now();
+        await writeBodyPart(db, { id: `own:${newId(now)}`, name }, now);
+        await reload();
+      },
+      async renameBodyPart(id, name) {
+        await writeBodyPart(db, { id, name }, Date.now());
+        await reload();
+      },
+      async deleteBodyPart(id) {
+        await markBodyPartDeleted(db, id, Date.now());
+        await reload();
+      },
+      async restoreBodyPart(id) {
+        await reviveBodyPart(db, id, Date.now());
         await reload();
       },
       deletedExercises,

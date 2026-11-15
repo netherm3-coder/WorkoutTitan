@@ -1,0 +1,48 @@
+# The checks from the README, run by GitHub after every push: a cross next to a commit means the
+# branch is broken before anyone builds it. Run by hand: Actions → Check → Run workflow.
+name: Check
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Types, lint, tests, bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Node 22.13 or newer: the database tests run on the SQLite built into Node.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Types, lint without warnings, tests
+        run: npm run check
+
+      # Days, weeks and streaks must not shift with the phone's time zone: a zone behind UTC that
+      # moves its clocks for summer, and the zone farthest ahead of UTC.
+      - name: Tests in other time zones
+        run: |
+          TZ=America/Los_Angeles npm test
+          TZ=Pacific/Kiritimati npm test
+
+      - name: Android bundle
+        run: npm run bundle
+        env:
+          EXPO_NO_TELEMETRY: 1
+          EXPO_OFFLINE: 1

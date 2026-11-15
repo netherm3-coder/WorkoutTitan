@@ -36,4 +36,14 @@ describe('what the build is made of', () => {
     expect(png(splash[1].image)).toMatchObject({ width: 1024, height: 1024, alpha: true });
     expect(splash[1].backgroundColor).toBe('#373048');
   });
+
+  it('asks for no permission it does not use', () => {
+    expect(appJson.expo.android.blockedPermissions).toEqual(
+      expect.arrayContaining([
+        'android.permission.READ_EXTERNAL_STORAGE',
+        'android.permission.WRITE_EXTERNAL_STORAGE',
+        'android.permission.SYSTEM_ALERT_WINDOW',
+      ]),
+    );
+  });
 });

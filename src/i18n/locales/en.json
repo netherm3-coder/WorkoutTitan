@@ -635,6 +635,8 @@
     "appearance": "Appearance",
     "support": "Support the author",
     "supportHint": "Tips and premium",
+    "privacy": "Privacy policy",
+    "privacyHint": "What the app keeps and where",
     "version": "Version {{version}}",
     "entriesOnPhone": "Entries on this phone: {{total}}",
     "counters": "Counters",

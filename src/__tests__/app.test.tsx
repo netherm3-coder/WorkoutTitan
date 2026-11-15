@@ -2,6 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userEvent } from '@testing-library/react-native';
 import { getLocales } from 'expo-localization';
 import { renderRouter, screen } from 'expo-router/testing-library';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { Linking } from 'react-native';
 
 jest.mock('expo-localization', () => ({ getLocales: jest.fn() }));
 
@@ -150,6 +153,26 @@ describe('support screen', () => {
     await user.press(screen.getByRole('button', { name: 'Back' }));
 
     expect(app.getPathname()).toBe('/settings');
+  });
+});
+
+describe('privacy policy', () => {
+  it('opens in the browser from Settings, at the address Play Console is given', async () => {
+    const user = userEvent.setup();
+    await startApp('/settings');
+    await screen.findByRole('header', { name: 'Settings' });
+
+    await user.press(screen.getByRole('link', { name: 'Privacy policy' }));
+
+    expect(Linking.openURL).toHaveBeenCalledWith('https://netherm3-coder.github.io/WorkoutTitan/privacy/');
+  });
+
+  it('is published from the repository, in both languages', () => {
+    const page = readFileSync(join(__dirname, '..', '..', 'docs', 'privacy', 'index.html'), 'utf8');
+    expect(page).toContain('<section id="uk" lang="uk">');
+    expect(page).toContain('<section id="en" lang="en">');
+    // GitHub Pages serves docs/ as it is only with Jekyll switched off.
+    expect(existsSync(join(__dirname, '..', '..', 'docs', '.nojekyll'))).toBe(true);
   });
 });
 

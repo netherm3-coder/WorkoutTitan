@@ -1,12 +1,13 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 
 import { AppText, Card, Chip, LinkRow, OptionRow, Screen, ThemeSwatch } from '@/components';
 import { LENGTH_UNITS, useUnits, WEIGHT_UNITS } from '@/format';
 import { LANGUAGE_NAMES, LANGUAGES, useLanguage } from '@/i18n';
 import { useRecords } from '@/records';
+import { PRIVACY_POLICY_URL } from '@/settings/links';
 import { spacing, themes, useTheme } from '@/theme';
 
 export default function SettingsScreen() {
@@ -17,6 +18,14 @@ export default function SettingsScreen() {
   const { units, setWeightUnit, setLengthUnit } = useUnits();
   const version = Constants.expoConfig?.version;
   const entryCount = useRecords().history.entries.length;
+
+  const openPrivacyPolicy = async () => {
+    try {
+      await Linking.openURL(PRIVACY_POLICY_URL);
+    } catch (error) {
+      console.warn('Could not open the privacy policy', error);
+    }
+  };
 
   return (
     <Screen title={t('settings.title')}>
@@ -122,6 +131,12 @@ export default function SettingsScreen() {
       </Card>
 
       <Card>
+        <LinkRow
+          hint={t('settings.privacyHint')}
+          icon="shield-checkmark-outline"
+          label={t('settings.privacy')}
+          onPress={openPrivacyPolicy}
+        />
         {version ? (
           <AppText color="muted" variant="label">
             {t('settings.version', { version })}

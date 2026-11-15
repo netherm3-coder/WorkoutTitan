@@ -649,6 +649,8 @@
     "appearance": "Оформлення",
     "support": "Підтримати автора",
     "supportHint": "Донати та преміум",
+    "privacy": "Політика приватності",
+    "privacyHint": "Що застосунок зберігає і де",
     "version": "Версія {{version}}",
     "entriesOnPhone": "Записів на телефоні: {{total}}",
     "counters": "Лічильники",

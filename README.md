@@ -2,7 +2,7 @@
 
 Особистий трекер рекордів: підтягування, відтискання, бруси, біг. Виглядає як WorkoutTitan, працює як Record (`netherm3-coder/-record`), дані зберігає на телефоні.
 
-Стан: готові етапи 0–8 з 9: запис результатів, журнал, п'єдестал із цілями, вага й заміри зі своїми частинами тіла, спортивний статус, досягнення, власні вправи з редагуванням, лічильники стажу й тверезості, вигляд табору з предметами за досягнення і повідомленням про нові, резервна копія у файл, перенесення записів із файла Record, кілограми або фунти, сантиметри або дюйми, підписка на преміум-набір і донати через Google Play. План і рішення: [docs/plan.md](docs/plan.md). Модель, формули і відмінності від Record: [docs/domain.md](docs/domain.md). База даних: [docs/database.md](docs/database.md). Косметика: [docs/cosmetics.md](docs/cosmetics.md). Резервна копія: [docs/backup.md](docs/backup.md). Перенесення з Record: [docs/record-import.md](docs/record-import.md). Одиниці: [docs/units.md](docs/units.md). Покупки: [docs/purchases.md](docs/purchases.md). Реліз: [docs/release.md](docs/release.md).
+Стан: усі дев'ять етапів зроблені з боку коду, лишилися перевірка на телефоні й подача в Google Play ([docs/release.md](docs/release.md)). Є запис результатів, журнал, п'єдестал із цілями, вага й заміри зі своїми частинами тіла, спортивний статус, досягнення, власні вправи з редагуванням, лічильники стажу й тверезості, вигляд табору з предметами за досягнення і повідомленням про нові, резервна копія у файл, перенесення записів із файла Record, кілограми або фунти, сантиметри або дюйми, підписка на преміум-набір і донати через Google Play. План і рішення: [docs/plan.md](docs/plan.md). Модель, формули і відмінності від Record: [docs/domain.md](docs/domain.md). База даних: [docs/database.md](docs/database.md). Косметика: [docs/cosmetics.md](docs/cosmetics.md). Резервна копія: [docs/backup.md](docs/backup.md). Перенесення з Record: [docs/record-import.md](docs/record-import.md). Одиниці: [docs/units.md](docs/units.md). Покупки: [docs/purchases.md](docs/purchases.md). Реліз: [docs/release.md](docs/release.md).
 
 ## Запуск
 
@@ -57,7 +57,7 @@ node scripts/expo-cli.cjs export --platform web --output-dir dist-web
 | `src/purchases` | Покупки: підписка й донати через Google Play, чи відкритий преміум |
 | `assets/scene` | Арт сцени, який іде в збірку. Його пише `scripts/build-scene-art.py` з оригіналів у `assets/AppAssets` |
 | `assets/images` | Іконка і заставка. Їх пише `scripts/build-icons.py` з багаття в `assets/AppAssets` |
-| `store` | Сторінка в Google Play: тексти й іконка 512×512 |
+| `store` | Сторінка в Google Play: тексти, іконка 512×512, скріншоти, банер і вигадана історія, з якої їх знято |
 | `docs/privacy` | Політика приватності, яку публікує GitHub Pages |
 | `legacy` | Копія розрахунків Record для тестів. У застосунок не входить |
 

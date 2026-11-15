@@ -19,6 +19,8 @@ npm start
 EAS_SKIP_AUTO_FINGERPRINT=1 eas build -p android --profile preview
 ```
 
+`eas build` вивантажує на сервер EAS лише те, що потрібне для збірки: без оригіналів арту, сторінки магазину й копії Git (`.easignore`). Архів важить близько 11 МБ, а не 240.
+
 ## Перевірка
 
 ```bash

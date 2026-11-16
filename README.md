@@ -6,12 +6,27 @@
 
 ## Запуск
 
+Перший раз, у Termux на телефоні:
+
 ```bash
+cd ~
+git clone -b claude/record-merge https://github.com/netherm3-coder/WorkoutTitan.git
+cd WorkoutTitan
 npm install
 npm start
 ```
 
-Далі відкрий проєкт в Expo Go. Усе, крім покупок, працює в Expo Go без збірки. Покупки працюють лише в застосунку, встановленому з Google Play: [docs/purchases.md](docs/purchases.md).
+Клон важить близько 100 МБ, разом із `node_modules` на диску піде близько 2 ГБ. Клонуй у домашню теку Termux, а не в спільне сховище телефона: там не працюють символьні посилання, і `npm install` падає.
+
+Наступні рази:
+
+```bash
+cd ~/WorkoutTitan && git pull && npm install && npm start
+```
+
+Коли Termux покаже адресу `exp://…`, відкрий Expo Go → Enter URL manually → `exp://127.0.0.1:8081`. Ця адреса працює й без Wi-Fi. Перше відкриття збирає бандл на телефоні кілька хвилин. Щоб Android не приспав Termux, поки ти в Expo Go, перед `npm start` виконай `termux-wake-lock`.
+
+Усе, крім покупок, працює в Expo Go без збірки. Покупки працюють лише в застосунку, встановленому з Google Play: [docs/purchases.md](docs/purchases.md).
 
 Збірка APK:
 

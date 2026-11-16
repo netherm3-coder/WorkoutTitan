@@ -1,5 +1,6 @@
 # The checks from the README, run by GitHub after every push: a cross next to a commit means the
-# branch is broken before anyone builds it. Run by hand: Actions → Check → Run workflow.
+# branch is broken before anyone builds it. Manual runs from the Actions tab work once this file
+# is on the default branch.
 name: Check
 
 on:

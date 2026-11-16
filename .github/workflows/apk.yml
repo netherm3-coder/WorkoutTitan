@@ -29,8 +29,18 @@ jobs:
   apk:
     name: Test APK
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
+      # The native build can go past the runner's 16 GB, and a runner out of memory is killed
+      # without a log. Extra swap slows such a peak down instead.
+      - name: Swap, memory and disk
+        run: |
+          sudo fallocate -l 8G /mnt/build.swap && sudo chmod 600 /mnt/build.swap \
+            && sudo mkswap /mnt/build.swap && sudo swapon /mnt/build.swap \
+            || echo "No extra swap"
+          free -h
+          df -h / /mnt || true
+
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -52,13 +62,22 @@ jobs:
         run: npx expo prebuild --platform android --no-install
 
       # arm64-v8a only, the processor of nearly every phone of recent years: a much shorter build
-      # and a much smaller file than with all four processor types.
+      # and a much smaller file than with all four processor types. Gradle and the Kotlin compiler
+      # get fixed memory, so that they leave room for the C++ compilers running beside them.
       - name: Build
         working-directory: android
         run: >-
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon --console=plain
           -PreactNativeArchitectures=arm64-v8a
-          "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+          "-Dorg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g"
+          "-Pkotlin.daemon.jvmargs=-Xmx2g"
+
+      - name: Memory and disk after the build
+        if: always()
+        run: |
+          free -h
+          df -h / /mnt || true
+          ls -l android/app/build/outputs/apk/release/ || true
 
       - name: Replace the test release
         env:

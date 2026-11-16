@@ -1,0 +1,78 @@
+# Builds an APK from the newest commit to install on your own phone and puts it on the release
+# page "Тестова збірка Record" (tag test-apk). The link to the file stays the same:
+# https://github.com/netherm3-coder/WorkoutTitan/releases/download/test-apk/record.apk
+# Signed with the debug key of the Android template, so it is for testing only; the store build
+# comes from EAS (docs/release.md). Manual runs from the Actions tab work once this file is on
+# the default branch.
+name: APK
+
+on:
+  push:
+    branches: [claude/record-merge, main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'store/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write # to replace the test release
+
+concurrency:
+  group: apk
+  cancel-in-progress: true
+
+env:
+  EXPO_NO_TELEMETRY: 1
+
+jobs:
+  apk:
+    name: Test APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # The Android Gradle plugin is made for Java 17; the runner's default Java is newer.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Android project from app.json
+        run: npx expo prebuild --platform android --no-install
+
+      # arm64-v8a only, the processor of nearly every phone of recent years: a much shorter build
+      # and a much smaller file than with all four processor types.
+      - name: Build
+        working-directory: android
+        run: >-
+          ./gradlew assembleRelease --no-daemon
+          -PreactNativeArchitectures=arm64-v8a
+          "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+
+      - name: Replace the test release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk record.apk
+          notes=$(cat <<EOF
+          Збірка з гілки ${GITHUB_REF_NAME}, коміт ${GITHUB_SHA::7}, $(date -u '+%Y-%m-%d %H:%M') UTC.
+
+          Лише для перевірки на своєму телефоні, не для магазину: підписана ключем для налагодження з шаблону Android. Лише для процесорів arm64-v8a. Покупки тут не працюють: товари з'являться, коли застосунок буде в Play Console.
+
+          Наступна збірка заміняє цю сама після кожного надсилання в гілку. Посилання на файл не змінюється.
+          EOF
+          )
+          gh release delete test-apk --yes --cleanup-tag || true
+          gh release create test-apk record.apk --prerelease \
+            --target "$GITHUB_SHA" --title "Тестова збірка Record" --notes "$notes"

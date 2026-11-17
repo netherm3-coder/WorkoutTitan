@@ -15,6 +15,7 @@ export * from './history';
 export * from './ids';
 export * from './look';
 export * from './migrations';
+export * from './photos';
 export * from './profile';
 export * from './recordImport';
 export type { Connection, Database, SqlValue } from './types';

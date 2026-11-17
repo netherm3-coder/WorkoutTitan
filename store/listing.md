@@ -29,7 +29,8 @@ Record знаходить твій найкращий результат у ко
 Що є в застосунку:
 • Рекорди за дисциплінами. Повторення, вага, час і дистанція порівнюються кожне за своїм правилом: у бігу краще менше, у підтягуваннях більше.
 • Цілі з поступом до них.
-• Тіло: вага, зріст і заміри, зокрема свої.
+• Графік прогресу кожної дисципліни, посилання на відео й результат у записі.
+• Тіло: вага, зріст і заміри, зокрема свої, графік ваги, карта пропорцій і фото прогресу.
 • 38 досягнень. Більшість відкриває предмети для табору.
 • Табір із лицарем: колір броні, головні убори, намети, візерунки, небо й пори року.
 • Скіни інтерфейсу, кілограми або фунти, сантиметри або дюйми.
@@ -61,7 +62,8 @@ Record finds your best result in every exercise. Log pull-ups, push-ups, bench p
 What is in the app:
 • Records by discipline. Reps, weight, time and distance are each compared their own way: less is better for a run, more for pull-ups.
 • Goals with your progress towards them.
-• Body: weight, height and measurements, your own ones included.
+• A progress chart for every discipline, and links to a video and a result in an entry.
+• Body: weight, height and measurements, your own ones included, a weight chart, a body map and progress photos.
 • 38 achievements. Most of them open items for the camp.
 • A camp with a knight: armour colour, headwear, tents, patterns, sky and seasons.
 • Interface skins, kilograms or pounds, centimetres or inches.

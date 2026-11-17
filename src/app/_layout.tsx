@@ -11,6 +11,7 @@ import { loadSeenItems, NewItemsProvider } from '@/cosmetics';
 import { DatabaseProvider, DatabaseTooNewError, useOpenDatabase } from '@/db';
 import { defaultUnits, UnitsProvider } from '@/format';
 import { initI18n, pickLanguage } from '@/i18n';
+import { PhotosProvider } from '@/photos';
 import { createPurchaseStore, loadCachedPremium, PurchasesProvider } from '@/purchases';
 import { RecordsProvider } from '@/records';
 import { loadSettings, saveLengthUnit, saveThemeId, saveWeightUnit, type StoredSettings } from '@/settings/storage';
@@ -78,8 +79,10 @@ export default function RootLayout() {
             <DatabaseProvider value={opened.db}>
               <RecordsProvider renderFailure={(error, again) => <DatabaseFailure error={error} onRetry={again} retrying={false} />}>
                 <NewItemsProvider initialSeen={seenItems}>
-                  <Ready />
-                  <RootStack />
+                  <PhotosProvider>
+                    <Ready />
+                    <RootStack />
+                  </PhotosProvider>
                 </NewItemsProvider>
               </RecordsProvider>
             </DatabaseProvider>

@@ -47,4 +47,14 @@ describe('what the build is made of', () => {
       ]),
     );
   });
+
+  it('picks progress photos without the camera, the microphone or access to the whole gallery', () => {
+    // The system photo picker hands over only the chosen pictures and needs no permission. The
+    // plugin blocks the camera and the microphone, which the image picker library asks for by
+    // default; storage access is blocked above.
+    expect(appJson.expo.plugins).toContainEqual([
+      'expo-image-picker',
+      { photosPermission: false, cameraPermission: false, microphonePermission: false },
+    ]);
+  });
 });

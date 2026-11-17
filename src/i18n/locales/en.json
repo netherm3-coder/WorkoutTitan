@@ -290,7 +290,7 @@
   "backup": {
     "title": "Backup",
     "saveTitle": "Save to a file",
-    "saveBody": "The file holds everything you entered: results, your own exercises, weight and measurements, goals, counters and the look of the camp. Language and skin stay on the phone.",
+    "saveBody": "The file holds everything you entered: results, your own exercises, weight and measurements, goals, counters and the look of the camp. Language, skin and progress photos stay on the phone.",
     "saveButton": "Save a copy",
     "saving": "Preparing the file…",
     "saved": "The file {{name}} is ready. Keep it somewhere that will not be lost with the phone.",
@@ -764,5 +764,25 @@
     },
     "needTwoDays": "The chart appears once there are results from at least two days.",
     "summary": "Chart of {{discipline}}, days with a result: {{count}}. From {{first}} ({{from}}) to {{last}} ({{to}})."
+  },
+  "photos": {
+    "title": "Progress photos",
+    "subtitle": "A visual diary",
+    "add": "Add photos from the gallery",
+    "addHint": "Up to {{max}} at a time. The app sees only the pictures you choose and keeps copies of them on the phone.",
+    "addFailed": "Could not add the photos. Try again.",
+    "emptyTitle": "No photos yet",
+    "emptyBody": "Add the first one, and in time this page shows how your body changes.",
+    "photoOf": "Photo of {{day}}",
+    "showMore": "Show older",
+    "none": "No photos yet.",
+    "addFirst": "Add the first photo",
+    "all": "All photos: {{total}}",
+    "delete": "Delete photo",
+    "confirmDelete": "Delete this photo? The app's copy is erased; the original in your gallery stays.",
+    "confirm": "Yes, delete",
+    "keep": "Keep it",
+    "deleteFailed": "Could not delete the photo.",
+    "gone": "This photo is no longer here."
   }
 }

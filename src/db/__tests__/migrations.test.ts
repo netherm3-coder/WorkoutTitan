@@ -35,6 +35,7 @@ describe('the list of migrations', () => {
     expect(MIGRATIONS.map((migration) => [migration.version, fingerprint(migration.sql)])).toEqual([
       [1, '96575309'],
       [2, '6ed19c91'],
+      [3, '89ea103d'],
     ]);
   });
 });
@@ -47,7 +48,16 @@ describe('migrate', () => {
     expect(await migrate(db)).toEqual({ from: 0, to: SCHEMA_VERSION });
 
     expect(await schemaVersion(db)).toBe(SCHEMA_VERSION);
-    expect(await tableNames()).toEqual(['body_measurements', 'body_parts', 'body_weights', 'entries', 'exercises', 'goals', 'profile']);
+    expect(await tableNames()).toEqual([
+      'body_measurements',
+      'body_parts',
+      'body_weights',
+      'entries',
+      'exercises',
+      'goals',
+      'profile',
+      'progress_photos',
+    ]);
   });
 
   it('makes every table strict about types', async () => {
@@ -57,7 +67,7 @@ describe('migrate', () => {
       "SELECT name, strict FROM pragma_table_list WHERE schema = 'main' AND name NOT LIKE 'sqlite_%'",
       [],
     );
-    expect(tables.length).toBe(7);
+    expect(tables.length).toBe(8);
     expect(tables.filter((table) => table.strict !== 1)).toEqual([]);
   });
 
@@ -135,7 +145,7 @@ describe('step 2, body parts of the person\'s own', () => {
     await measure(db, '2026-04-01', 'литка ліва', 40, 30);
     await measure(db, '2026-04-01', 'зап\'ястя', 17, 20);
 
-    expect(await migrate(db)).toEqual({ from: 1, to: 2 });
+    expect(await migrate(db)).toEqual({ from: 1, to: SCHEMA_VERSION });
 
     expect(await db.getAllAsync('SELECT id, name, created_at, updated_at, deleted_at FROM body_parts ORDER BY id', [])).toEqual([
       { id: 'зап\'ястя', name: 'зап\'ястя', created_at: 20, updated_at: 20, deleted_at: null },
@@ -157,7 +167,7 @@ describe('step 2, body parts of the person\'s own', () => {
   it('runs on a database with no measurements at all', async () => {
     db = await atStepOne();
 
-    expect(await migrate(db)).toEqual({ from: 1, to: 2 });
+    expect(await migrate(db)).toEqual({ from: 1, to: SCHEMA_VERSION });
     expect(await tableNames()).toContain('body_parts');
   });
 });
@@ -260,5 +270,17 @@ describe('the layout', () => {
     await expect(db.runAsync('INSERT INTO goals (discipline, target, updated_at) VALUES (?, ?, 1)', ['run@5000', 1])).rejects.toThrow(
       /UNIQUE/,
     );
+  });
+});
+
+describe('step 3, progress photos', () => {
+  it('adds the table of photos to a database of the previous layout and leaves the rest alone', async () => {
+    db = openEmptyDatabase();
+    await migrate(db, MIGRATIONS.slice(0, 2));
+    await db.runAsync("INSERT INTO body_weights (date, kg, updated_at) VALUES ('2026-01-01', 80, 1)", []);
+
+    expect(await migrate(db)).toEqual({ from: 2, to: 3 });
+    expect(await tableNames()).toContain('progress_photos');
+    expect(await db.getAllAsync('SELECT date, kg FROM body_weights', [])).toEqual([{ date: '2026-01-01', kg: 80 }]);
   });
 });

@@ -7,6 +7,7 @@ import { BodyMapCard, WeightTrendCard } from '@/charts';
 import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
 import { dayOf } from '@/domain';
 import { decimalsOf, lengthFrom, parseDecimal, roundTo, useFormat, weightFrom, weightIn } from '@/format';
+import { PhotosCard } from '@/photos';
 import { useBodyParts, useRecords } from '@/records';
 import { minTouchTarget, spacing } from '@/theme';
 
@@ -160,6 +161,8 @@ export default function BodyScreen() {
       </Card>
 
       <BodyMapCard measurements={measurements} />
+
+      <PhotosCard />
     </Screen>
   );
 }

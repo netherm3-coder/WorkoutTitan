@@ -122,6 +122,26 @@ export const MIGRATIONS: readonly Migration[] = [
       GROUP BY part;
     `,
   },
+  /*
+   * Progress photos, as in Record's photo diary. The picture is a file among the app's own
+   * documents; the row holds its name and its day. Photos stay on the phone: the backup file
+   * does not carry them.
+   */
+  {
+    version: 3,
+    sql: `
+      CREATE TABLE progress_photos (
+        id TEXT PRIMARY KEY NOT NULL,
+        date TEXT NOT NULL CHECK (date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+        file TEXT NOT NULL CHECK (length(file) > 0),
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        deleted_at INTEGER
+      ) STRICT;
+
+      CREATE INDEX progress_photos_in_order ON progress_photos (date, created_at, id) WHERE deleted_at IS NULL;
+    `,
+  },
 ];
 
 const latestOf = (migrations: readonly Migration[]) =>

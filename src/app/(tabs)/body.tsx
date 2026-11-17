@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { WeightTrendCard } from '@/charts';
+import { BodyMapCard, WeightTrendCard } from '@/charts';
 import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
 import { dayOf } from '@/domain';
 import { decimalsOf, lengthFrom, parseDecimal, roundTo, useFormat, weightFrom, weightIn } from '@/format';
@@ -158,6 +158,8 @@ export default function BodyScreen() {
         })}
         <Button label={t('body.measure')} onPress={() => router.push('/measurements')} variant="accent" />
       </Card>
+
+      <BodyMapCard measurements={measurements} />
     </Screen>
   );
 }

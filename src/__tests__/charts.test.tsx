@@ -2,7 +2,7 @@ import { fireEvent, userEvent, within } from '@testing-library/react-native';
 import { getLocales } from 'expo-localization';
 import { renderRouter, screen } from 'expo-router/testing-library';
 
-import { addEntries, saveBodyWeight, type Connection } from '@/db';
+import { addEntries, saveBodyMeasurements, saveBodyWeight, type Connection } from '@/db';
 import { openTestDatabase } from '@/db/__tests__/testDatabase';
 import { openRecordDatabase } from '@/db/open';
 import { addDays, dayOf, PULLUPS, RUN } from '@/domain';
@@ -109,5 +109,30 @@ describe('the weight chart', () => {
   it('needs two weigh-ins', async () => {
     await startApp('/body', (db) => saveBodyWeight(db, { date: daysAgo(3), kg: 80.5 }, 1));
     expect(screen.queryByText('Weight trend')).not.toBeOnTheScreen();
+  });
+});
+
+describe('the body map', () => {
+  it('puts the latest measurement of each part on the figure, with its change', async () => {
+    await startApp('/body', async (db) => {
+      await saveBodyMeasurements(db, daysAgo(60), { neck: 38, waist: 84, 'own:wrist': 17 }, 1);
+      await saveBodyMeasurements(db, daysAgo(5), { neck: 38.5, waist: 82, chest: 100, 'own:wrist': 17.5 }, 2);
+    });
+    expect(screen.getByText('Body map')).toBeOnTheScreen();
+
+    await fireEvent(screen.getByTestId('body-map'), 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 300, height: 418 } } });
+
+    const map = within(screen.getByTestId('body-map'));
+    expect(map.getByLabelText('Neck: 38.5 cm, 0.5 cm more than last time')).toBeOnTheScreen();
+    expect(map.getByLabelText('Waist: 82 cm, 2 cm less than last time')).toBeOnTheScreen();
+    expect(map.getByLabelText('Chest: 100 cm')).toBeOnTheScreen();
+    expect(within(map.getByLabelText('Waist: 82 cm, 2 cm less than last time')).getByText('▼2')).toBeOnTheScreen();
+    // The wrist is a part of the person's own: it stays in the list, off the figure.
+    expect(map.queryByLabelText(/^Wrist|own:wrist/)).not.toBeOnTheScreen();
+  });
+
+  it('is not there before the first measurement', async () => {
+    await startApp('/body');
+    expect(screen.queryByText('Body map')).not.toBeOnTheScreen();
   });
 });

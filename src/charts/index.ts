@@ -4,3 +4,4 @@ export { geometryOf, scaleOf, TIME_STEPS, type ChartPoint, type Geometry, type S
 export { LineChart, type LineChartProps } from './LineChart';
 export { ProgressCard, type ProgressCardProps } from './ProgressCard';
 export { WeightTrendCard, type WeightTrendCardProps } from './WeightTrendCard';
+export { BodyMapCard, type BodyMapCardProps } from './BodyMapCard';

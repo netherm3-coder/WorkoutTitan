@@ -374,6 +374,10 @@
     "bmi": "Body mass index: {{value}}",
     "measurements": "Measurements",
     "noMeasurements": "No measurements yet.",
+    "map": "Body map",
+    "mapCaption": "Latest measurements, {{unit}}; under each, the change since the one before",
+    "mapSpotUp": "{{part}}: {{value}}, {{change}} more than last time",
+    "mapSpotDown": "{{part}}: {{value}}, {{change}} less than last time",
     "measure": "Record measurements",
     "measureTitle": "Body measurements",
     "measureIn": {

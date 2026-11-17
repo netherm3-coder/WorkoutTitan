@@ -384,6 +384,10 @@
     "bmi": "Індекс маси тіла: {{value}}",
     "measurements": "Заміри",
     "noMeasurements": "Замірів ще немає.",
+    "map": "Карта пропорцій",
+    "mapCaption": "Останні заміри, {{unit}}; під числом — зміна від попереднього заміру",
+    "mapSpotUp": "{{part}}: {{value}}, на {{change}} більше, ніж минулого разу",
+    "mapSpotDown": "{{part}}: {{value}}, на {{change}} менше, ніж минулого разу",
     "measure": "Записати заміри",
     "measureTitle": "Заміри тіла",
     "measureIn": {

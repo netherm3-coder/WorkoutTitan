@@ -37,17 +37,21 @@ async function layOut() {
   }
 }
 
-const seedPhotos = (count: number) => (db: Connection) =>
-  addPhotos(
-    db,
-    Array.from({ length: count }, (_value, index) => ({
+/** Photos a week apart, newest first, with their pictures kept unless said otherwise. */
+const seedPhotos =
+  (count: number, { missing = [] as number[] } = {}) =>
+  (db: Connection) => {
+    const photos = Array.from({ length: count }, (_value, index) => ({
       id: `p${index}`,
       date: daysAgo(index * 7),
       file: `p${index}.jpg`,
       createdAt: index + 1,
-    })),
-    1,
-  );
+    }));
+    for (const [index, photo] of photos.entries()) {
+      if (!missing.includes(index)) kept.set(photo.file, `file:///cache/${photo.file}`);
+    }
+    return addPhotos(db, photos, 1);
+  };
 
 beforeEach(() => {
   jest.mocked(getLocales).mockReturnValue([{ languageCode: 'en', regionCode: 'GB' }] as unknown as ReturnType<typeof getLocales>);
@@ -74,6 +78,15 @@ describe('progress photos on the body screen', () => {
 
     expect(screen.getAllByRole('imagebutton', { name: /^Photo of / })).toHaveLength(3);
     expect(screen.getByRole('button', { name: 'All photos: 4' })).toBeOnTheScreen();
+  });
+
+  it('leave out photos whose pictures are not on the phone, as after Android restores its backup', async () => {
+    const { db } = await startApp('/body', seedPhotos(3, { missing: [1] }));
+    await layOut();
+
+    expect(screen.getAllByRole('imagebutton', { name: /^Photo of / })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'All photos: 2' })).toBeOnTheScreen();
+    expect(await listPhotos(db)).toHaveLength(3);
   });
 });
 

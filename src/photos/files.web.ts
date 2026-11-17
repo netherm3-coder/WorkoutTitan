@@ -13,6 +13,10 @@ export function photoUri(name: string): string {
   return kept.get(name) ?? '';
 }
 
+export function hasPhoto(name: string): boolean {
+  return kept.has(name);
+}
+
 export function removePhoto(name: string): void {
   kept.delete(name);
 }

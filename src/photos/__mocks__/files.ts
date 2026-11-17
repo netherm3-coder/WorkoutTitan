@@ -7,6 +7,8 @@ export const keepPhoto = jest.fn(async (source: string, name: string) => {
 
 export const photoUri = jest.fn((name: string) => `file:///documents/progress-photos/${name}`);
 
+export const hasPhoto = jest.fn((name: string) => kept.has(name));
+
 export const removePhoto = jest.fn((name: string) => {
   kept.delete(name);
 });

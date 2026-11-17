@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { addPhotos, deletePhoto, listPhotos, newId, useDatabase } from '@/db';
 import type { Day, ProgressPhoto } from '@/domain';
 
-import { keepPhoto, removePhoto } from './files';
+import { hasPhoto, keepPhoto, removePhoto } from './files';
 import { pickPhotos } from './pick';
 
 export type Photos = {
@@ -22,18 +22,25 @@ function extensionOf(uri: string): string {
   return match?.[1]?.toLowerCase() ?? 'jpg';
 }
 
+/**
+ * The photos whose pictures are on the phone. After Android brings the app's data back from its
+ * cloud backup on a new phone, the rows are there but the pictures are not (they are left out of
+ * that backup), and an empty frame would only puzzle. The rows stay in the database.
+ */
+const onThePhone = (photos: readonly ProgressPhoto[]) => photos.filter((photo) => hasPhoto(photo.file));
+
 /** Progress photos for the body screen and the photo screens, read once and shared. */
 export function PhotosProvider({ children }: { children: ReactNode }) {
   const db = useDatabase();
   const [photos, setPhotos] = useState<readonly ProgressPhoto[]>([]);
 
-  const reload = useCallback(async () => setPhotos(await listPhotos(db)), [db]);
+  const reload = useCallback(async () => setPhotos(onThePhone(await listPhotos(db))), [db]);
 
   useEffect(() => {
     let cancelled = false;
     listPhotos(db).then(
       (found) => {
-        if (!cancelled) setPhotos(found);
+        if (!cancelled) setPhotos(onThePhone(found));
       },
       (error: unknown) => console.warn('Could not read the progress photos', error),
     );

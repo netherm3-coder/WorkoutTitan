@@ -1,6 +1,9 @@
 import { Directory, File, Paths } from 'expo-file-system';
 
-/** Where the pictures of progress photos live: among the app's own documents, out of the gallery. */
+/**
+ * Where the pictures of progress photos live: among the app's own documents, out of the gallery.
+ * Android's cloud backup of the app leaves this folder out (plugins/withBackupRules.js).
+ */
 const folder = () => new Directory(Paths.document, 'progress-photos');
 
 /**
@@ -16,6 +19,14 @@ export async function keepPhoto(source: string, name: string): Promise<void> {
 /** The address an image component shows a kept picture from. */
 export function photoUri(name: string): string {
   return new File(folder(), name).uri;
+}
+
+/**
+ * Whether the picture is on the phone. It is not when Android has brought the database back
+ * from its cloud backup on a new phone: the photos are left out of that backup.
+ */
+export function hasPhoto(name: string): boolean {
+  return new File(folder(), name).exists;
 }
 
 /** Removes a kept picture. A picture that is already gone is fine. */

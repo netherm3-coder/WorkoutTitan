@@ -1,6 +1,7 @@
 import { userEvent, within } from '@testing-library/react-native';
 import { getLocales } from 'expo-localization';
 import { renderRouter, screen } from 'expo-router/testing-library';
+import { Linking } from 'react-native';
 
 import { addEntries, listEntries, saveBodyWeight, type Connection } from '@/db';
 import { openTestDatabase } from '@/db/__tests__/testDatabase';
@@ -118,6 +119,38 @@ describe('logging a result', () => {
     expect(screen.getByRole('radio', { name: 'Run' })).toBeChecked();
     expect(screen.getByLabelText('Distance, km')).toBeOnTheScreen();
   });
+
+  it('keeps a video link and a result link and opens them from the journal', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL');
+    const { db, user } = await startApp('/entry/new');
+
+    await user.type(screen.getByLabelText('Reps'), '15');
+    // Pasted without its scheme, as a link copied from the share menu often is.
+    await user.type(screen.getByLabelText('Video link'), 'youtu.be/abc123');
+    await user.type(screen.getByLabelText('Result link'), 'https://example.org/results?id=7');
+    await user.press(screen.getByRole('button', { name: 'Save' }));
+
+    const video = await screen.findByRole('link', { name: 'Video: Pull-ups, 15, Personal best' });
+    expect(await listEntries(db)).toMatchObject([
+      { reps: 15, videoUrl: 'https://youtu.be/abc123', resultUrl: 'https://example.org/results?id=7' },
+    ]);
+
+    await user.press(video);
+    expect(openURL).toHaveBeenLastCalledWith('https://youtu.be/abc123');
+    await user.press(screen.getByRole('link', { name: 'Result page: Pull-ups, 15, Personal best' }));
+    expect(openURL).toHaveBeenLastCalledWith('https://example.org/results?id=7');
+  });
+
+  it('does not save a link that is not a web address', async () => {
+    const { db, user } = await startApp('/entry/new');
+
+    await user.type(screen.getByLabelText('Reps'), '15');
+    await user.type(screen.getByLabelText('Result link'), 'my best set');
+    await user.press(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('"Result link" has to be a web address.')).toBeOnTheScreen();
+    expect(await listEntries(db)).toEqual([]);
+  });
 });
 
 describe('the journal', () => {
@@ -163,6 +196,28 @@ describe('the journal', () => {
 
     expect(await screen.findByRole('button', { name: 'Pull-ups, 13 (+20 kg) (0:41), Personal best' })).toBeOnTheScreen();
     expect((await listEntries(db)).find((item) => item.id === 'best')).toMatchObject({ reps: 13, loadKg: 20, date: '2026-01-07' });
+  });
+
+  it('shows the links of a result for editing and drops a link that is cleared', async () => {
+    const { db, user } = await startApp('/workouts', (db) =>
+      addEntries(
+        db,
+        [{ ...entry(PULLUPS, '2026-01-05', { reps: 10 }, { id: 'linked' }), videoUrl: 'https://youtu.be/x', resultUrl: 'https://example.org/r' }],
+        1,
+      ),
+    );
+    expect(screen.getByRole('link', { name: 'Video: Pull-ups, 10, Personal best' })).toBeOnTheScreen();
+
+    await user.press(screen.getByRole('button', { name: 'Pull-ups, 10, Personal best' }));
+    expect(await screen.findByLabelText('Video link')).toHaveDisplayValue('https://youtu.be/x');
+    expect(screen.getByLabelText('Result link')).toHaveDisplayValue('https://example.org/r');
+
+    await user.clear(screen.getByLabelText('Video link'));
+    await user.press(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByRole('link', { name: 'Result page: Pull-ups, 10, Personal best' })).toBeOnTheScreen();
+    expect(screen.queryByRole('link', { name: /^Video/ })).not.toBeOnTheScreen();
+    expect(await listEntries(db)).toMatchObject([{ id: 'linked', videoUrl: '', resultUrl: 'https://example.org/r' }]);
   });
 
   it('deletes a result and can bring it back', async () => {

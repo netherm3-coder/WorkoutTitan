@@ -7,13 +7,29 @@ import { dayOf, type Exercise, type Measures } from '@/domain';
 import { useFormat } from '@/format';
 import { spacing } from '@/theme';
 
-import { fieldsOf, readDraft, type Draft, type DraftProblem, type NumberField } from './entryDraft';
+import {
+  fieldsOf,
+  LINK_FIELDS,
+  readDraft,
+  readLinks,
+  type Draft,
+  type DraftProblem,
+  type LinkField,
+  type NumberField,
+} from './entryDraft';
+
+export type EntryFormResult = {
+  exerciseId: string;
+  date: string;
+  note: string;
+  measures: Measures;
+} & Record<LinkField, string>;
 
 export type EntryFormProps = {
   initial: Draft;
   /** The exercises to choose from. */
   exercises: readonly Exercise[];
-  onSubmit: (result: { exerciseId: string; date: string; note: string; measures: Measures }) => Promise<void>;
+  onSubmit: (result: EntryFormResult) => Promise<void>;
   /** Given when an existing entry is being edited. */
   onDelete?: () => Promise<void>;
   /** Opens the list of the person's own exercises, where one can be added. */
@@ -70,10 +86,13 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
   // A set against body weight needs only its reps; the load and the time are extras.
   const optional = (field: NumberField) => exercise.kind === 'bodyweight' && field !== 'reps';
 
-  const describe = (problem: DraftProblem): string =>
-    typeof problem === 'string'
-      ? t(`entry.problems.${problem}`)
-      : t('entry.problems.notANumber', { field: label(problem.notANumber) });
+  const linkLabel = (field: LinkField): string => t(field === 'videoUrl' ? 'entry.videoUrl' : 'entry.resultUrl');
+
+  const describe = (problem: DraftProblem): string => {
+    if (typeof problem === 'string') return t(`entry.problems.${problem}`);
+    if ('badLink' in problem) return t('entry.problems.badLink', { field: linkLabel(problem.badLink) });
+    return t('entry.problems.notANumber', { field: label(problem.notANumber) });
+  };
 
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -88,11 +107,13 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
   };
 
   const submit = () => {
-    const { measures, problems: found } = readDraft(draft, exercise, format.units);
+    const { measures, problems: wrongNumbers } = readDraft(draft, exercise, format.units);
+    const { links, problems: wrongLinks } = readLinks(draft);
+    const found = [...wrongNumbers, ...wrongLinks];
     setProblems(found);
     if (found.length > 0) return;
 
-    void run(() => onSubmit({ exerciseId: exercise.id, date: draft.date, note: draft.note.trim(), measures }));
+    void run(() => onSubmit({ exerciseId: exercise.id, date: draft.date, note: draft.note.trim(), measures, ...links }));
   };
 
   return (
@@ -147,6 +168,20 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
           remark={t('entry.optional')}
           value={draft.note}
         />
+
+        {LINK_FIELDS.map((field) => (
+          <TextField
+            autoCapitalize="none"
+            autoCorrect={false}
+            key={field}
+            keyboardType="url"
+            label={linkLabel(field)}
+            onChangeText={(text) => set({ [field]: text })}
+            placeholder={field === 'videoUrl' ? 'https://youtu.be/…' : 'https://…'}
+            remark={t('entry.optional')}
+            value={draft[field]}
+          />
+        ))}
       </Card>
 
       {problems.length > 0 || failed ? (

@@ -21,8 +21,8 @@ export default function NewEntryScreen() {
         exercises={exercises}
         onManageExercises={() => router.push('/exercises')}
         initial={emptyDraft(last?.exerciseId ?? PULLUPS.id, dayOf(new Date()))}
-        onSubmit={async ({ exerciseId, date, note, measures }) => {
-          await addEntry({ ...measures, exerciseId, date, note });
+        onSubmit={async ({ exerciseId, date, note, videoUrl, resultUrl, measures }) => {
+          await addEntry({ ...measures, exerciseId, date, note, videoUrl, resultUrl });
           goBack();
         }}
       />

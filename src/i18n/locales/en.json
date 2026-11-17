@@ -32,6 +32,10 @@
   "journal": {
     "add": "Log a result",
     "personalBest": "Personal best",
+    "video": "Video",
+    "result": "Result",
+    "videoFor": "Video: {{entry}}",
+    "resultFor": "Result page: {{entry}}",
     "deleted": "Entry deleted.",
     "undo": "Bring back",
     "showMore": "Show older"
@@ -56,6 +60,8 @@
     "valueIn": "Result, {{unit}}",
     "words": "Result in words",
     "note": "Note",
+    "videoUrl": "Video link",
+    "resultUrl": "Result link",
     "optional": "optional",
     "save": "Save",
     "delete": "Delete entry",
@@ -70,7 +76,8 @@
       "segmentsRequired": "Enter the number of segments.",
       "valueRequired": "Enter the result as a number.",
       "textRequired": "Describe the result.",
-      "notANumber": "\"{{field}}\" has to be a number."
+      "notANumber": "\"{{field}}\" has to be a number.",
+      "badLink": "\"{{field}}\" has to be a web address."
     },
     "ownExercises": "Your exercises"
   },

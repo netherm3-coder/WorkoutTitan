@@ -52,7 +52,7 @@ import {
 } from '@/domain';
 
 /** What the form hands over for a new entry; the id and the moment of writing are added here. */
-export type NewEntry = Measures & { exerciseId: string; date: Day; note: string };
+export type NewEntry = Measures & { exerciseId: string; date: Day; note: string; videoUrl: string; resultUrl: string };
 
 export type Records = {
   /** Everything recorded so far. A new object after every change. */
@@ -278,7 +278,7 @@ export function RecordsProvider({ children, renderFailure }: RecordsProviderProp
       },
       async addEntry(entry) {
         const now = Date.now();
-        await insertEntry(db, { ...entry, id: newId(now), createdAt: now, videoUrl: '', resultUrl: '' }, now);
+        await insertEntry(db, { ...entry, id: newId(now), createdAt: now }, now);
         setLastDeleted(null);
         await reload();
       },

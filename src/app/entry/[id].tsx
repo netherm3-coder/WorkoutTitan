@@ -34,8 +34,8 @@ export default function EditEntryScreen() {
             await deleteEntry(entry.id);
             goBack();
           }}
-          onSubmit={async ({ exerciseId, date, note, measures }) => {
-            await updateEntry({ ...entry, ...measures, exerciseId, date, note });
+          onSubmit={async ({ exerciseId, date, note, videoUrl, resultUrl, measures }) => {
+            await updateEntry({ ...entry, ...measures, exerciseId, date, note, videoUrl, resultUrl });
             goBack();
           }}
         />

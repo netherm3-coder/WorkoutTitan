@@ -2,7 +2,7 @@ import { BENCH_PRESS, customExercise, NO_MEASURES, PULLUPS, RUN, SHUTTLE, SPRINT
 
 import { METRIC, US_UNITS } from '@/format';
 
-import { draftFrom, emptyDraft, fieldsOf, readDraft, type Draft } from '../entryDraft';
+import { draftFrom, emptyDraft, fieldsOf, readDraft, readLinks, type Draft } from '../entryDraft';
 
 const DAY = '2026-11-12';
 const draft = (exerciseId: string, typed: Partial<Draft>): Draft => ({ ...emptyDraft(exerciseId, DAY), ...typed });
@@ -169,3 +169,36 @@ describe('a load in pounds', () => {
   });
 });
 
+
+describe('readLinks', () => {
+  it.each([
+    ['a full address', 'https://youtu.be/abc123', 'https://youtu.be/abc123'],
+    ['plain http', 'http://example.org/page', 'http://example.org/page'],
+    ['an address without its scheme', 'youtu.be/abc123', 'https://youtu.be/abc123'],
+    ['spaces around it', '  www.strava.com/activities/1  ', 'https://www.strava.com/activities/1'],
+    ['a query and an anchor', 'example.org/r?id=7#top', 'https://example.org/r?id=7#top'],
+  ])('reads %s', (_name, typed, link) => {
+    expect(readLinks(draft(PULLUPS.id, { videoUrl: typed }))).toEqual({ links: { videoUrl: link, resultUrl: '' }, problems: [] });
+  });
+
+  it.each([
+    ['words', 'my best set'],
+    ['another scheme', 'ftp://example.org/file'],
+    ['a host without a dot', 'https://localhost/clip'],
+    ['a space inside', 'https://youtu.be/abc 123'],
+  ])('refuses %s', (_name, typed) => {
+    expect(readLinks(draft(PULLUPS.id, { resultUrl: typed }))).toEqual({
+      links: { videoUrl: '', resultUrl: '' },
+      problems: [{ badLink: 'resultUrl' }],
+    });
+  });
+
+  it('leaves empty fields empty', () => {
+    expect(readLinks(draft(PULLUPS.id, { videoUrl: ' ' }))).toEqual({ links: { videoUrl: '', resultUrl: '' }, problems: [] });
+  });
+
+  it('fills the form with the links of an entry', () => {
+    const linked = { ...entry(PULLUPS.id, { reps: 5 }), videoUrl: 'https://youtu.be/x', resultUrl: 'https://example.org/r' };
+    expect(draftFrom(linked, PULLUPS, 'en', METRIC)).toMatchObject({ videoUrl: 'https://youtu.be/x', resultUrl: 'https://example.org/r' });
+  });
+});

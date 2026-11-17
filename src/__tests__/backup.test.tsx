@@ -170,7 +170,7 @@ describe('restoring from a file', () => {
 
     await user.press(screen.getByRole('button', { name: 'Back' }));
     await user.press(await screen.findByRole('tab', { name: 'Workouts' }));
-    expect(await screen.findByText('Планка')).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: /^Планка, / })).toBeOnTheScreen();
   });
 
   it('counts only the entries the phone lacks as new', async () => {

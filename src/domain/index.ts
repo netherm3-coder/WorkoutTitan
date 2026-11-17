@@ -16,6 +16,7 @@ export * from './exercises';
 export * from './goals';
 export * from './history';
 export * from './pedestal';
+export * from './progress';
 export * from './score';
 export * from './status';
 export * from './strength';

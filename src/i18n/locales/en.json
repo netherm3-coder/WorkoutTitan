@@ -364,6 +364,9 @@
     "saveWeight": "Record weight",
     "noWeight": "No weight yet. It is needed for the one-rep max and the sport status.",
     "sincePrevious": "{{change}} since the previous weigh-in",
+    "trend": "Weight trend",
+    "trendCaption": "Every weigh-in, {{unit}}",
+    "trendSummary": "Weight chart, weigh-ins: {{count}}. From {{first}} ({{from}}) to {{last}} ({{to}}).",
     "recent": "Recent weigh-ins",
     "deleteWeight": "Delete the weight of {{day}}",
     "heightField": "Height, {{unit}}",
@@ -734,5 +737,28 @@
   "common": {
     "back": "Back",
     "selected": "Selected"
+  },
+  "progress": {
+    "title": "Progress",
+    "caption": {
+      "reps": "Most reps in a day",
+      "load": "Heaviest weight in a day",
+      "addedLoad": "Heaviest added weight in a day",
+      "fastest": "Best time of each day; higher is faster",
+      "longest": "Longest time in a day",
+      "most": "Best result of each day",
+      "least": "Best result of each day; higher is less"
+    },
+    "captionIn": {
+      "reps": "Most reps in a day, {{unit}}",
+      "load": "Heaviest weight in a day, {{unit}}",
+      "addedLoad": "Heaviest added weight in a day, {{unit}}",
+      "fastest": "Best time of each day, {{unit}}; higher is faster",
+      "longest": "Longest time in a day, {{unit}}",
+      "most": "Best result of each day, {{unit}}",
+      "least": "Best result of each day, {{unit}}; higher is less"
+    },
+    "needTwoDays": "The chart appears once there are results from at least two days.",
+    "summary": "Chart of {{discipline}}, days with a result: {{count}}. From {{first}} ({{from}}) to {{last}} ({{to}})."
   }
 }

@@ -4,8 +4,9 @@ import { useMemo, useState, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
+import { ProgressCard } from '@/charts';
 import { AppText, Button, Card, EmptyState, Screen } from '@/components';
-import { dayOf, personalBestIds, type Day, type Exercise, type WorkoutEntry } from '@/domain';
+import { dayOf, personalBestIds, progressSeries, type Day, type Exercise, type WorkoutEntry } from '@/domain';
 import { useFormat } from '@/format';
 import { toRouteParam } from '@/navigation';
 import { useRecords } from '@/records';
@@ -25,6 +26,7 @@ export default function WorkoutsScreen() {
 
   const today = dayOf(new Date());
   const bests = useMemo(() => personalBestIds(history), [history]);
+  const progress = useMemo(() => progressSeries(history), [history]);
 
   // Newest first, grouped by day. The history itself is oldest first.
   const groups = useMemo(() => {
@@ -56,6 +58,8 @@ export default function WorkoutsScreen() {
           </View>
         </Card>
       ) : null}
+
+      {progress.length > 0 ? <ProgressCard series={progress} /> : null}
 
       {groups.length === 0 ? (
         <Card>

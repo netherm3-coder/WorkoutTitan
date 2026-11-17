@@ -69,7 +69,9 @@ describe('an own exercise', () => {
 
     await user.press(screen.getByRole('button', { name: 'Back' }));
     await user.press(await screen.findByRole('tab', { name: 'Workouts' }));
-    expect((await screen.findAllByText('Elbow plank')).length).toBe(2);
+    // Both entries in the journal, and the discipline in the progress chart.
+    expect(await screen.findAllByRole('button', { name: /^Elbow plank, / })).toHaveLength(2);
+    expect(screen.getByRole('radio', { name: 'Elbow plank' })).toBeOnTheScreen();
     expect(screen.queryByText('Планка')).not.toBeOnTheScreen();
   });
 
@@ -215,7 +217,7 @@ describe('a deleted exercise', () => {
 
     await user.press(screen.getByRole('button', { name: 'Back' }));
     await user.press(await screen.findByRole('tab', { name: 'Workouts' }));
-    expect((await screen.findAllByText('Планка')).length).toBe(2);
+    expect(await screen.findAllByRole('button', { name: /^Планка, / })).toHaveLength(2);
   });
 
   it('does not come back while another exercise has its name', async () => {

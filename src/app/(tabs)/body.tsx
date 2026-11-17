@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { WeightTrendCard } from '@/charts';
 import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
 import { dayOf } from '@/domain';
 import { decimalsOf, lengthFrom, parseDecimal, roundTo, useFormat, weightFrom, weightIn } from '@/format';
@@ -104,6 +105,8 @@ export default function BodyScreen() {
           </AppText>
         ) : null}
       </Card>
+
+      {weights.length >= 2 ? <WeightTrendCard weights={weights} /> : null}
 
       {weights.length > 0 ? (
         <Card>

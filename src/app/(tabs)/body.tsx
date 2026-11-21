@@ -11,8 +11,10 @@ import { PhotosCard } from '@/photos';
 import { useBodyParts, useRecords } from '@/records';
 import { minTouchTarget, spacing } from '@/theme';
 
-/** How many of the latest weigh-ins are listed. */
+/** How many of the latest weigh-ins are listed at first. */
 const RECENT = 7;
+/** How many more each press of "show older" adds, as Record loaded them. */
+const OLDER = 30;
 
 
 export default function BodyScreen() {
@@ -26,6 +28,7 @@ export default function BodyScreen() {
   const [day, setDay] = useState(today);
   const [weight, setWeight] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
+  const [listed, setListed] = useState(RECENT);
 
   // Weigh-ins come oldest first.
   const { weights } = history;
@@ -121,12 +124,29 @@ export default function BodyScreen() {
         <Card>
           <AppText variant="heading">{t('body.recent')}</AppText>
           {weights
-            .slice(-RECENT)
+            .map((record, index) => ({ record, before: weights[index - 1] }))
+            .slice(-listed)
             .reverse()
-            .map((record) => (
+            .map(({ record, before }) => (
               <View key={record.date} style={styles.row}>
-                <AppText style={styles.grow}>{format.day(record.date, today)}</AppText>
-                <AppText strong>{format.weight(record.kg)}</AppText>
+                <View
+                  accessibilityLabel={[format.day(record.date, today), format.weight(record.kg), before ? signed(record.kg - before.kg) : null]
+                    .filter(Boolean)
+                    .join(', ')}
+                  accessible
+                  style={[styles.row, styles.grow]}
+                >
+                  <View style={styles.grow}>
+                    <AppText>{format.day(record.date, today)}</AppText>
+                    {/* The change since the weigh-in before, as Record showed it beside each one. */}
+                    {before ? (
+                      <AppText color="muted" variant="label">
+                        {signed(record.kg - before.kg)}
+                      </AppText>
+                    ) : null}
+                  </View>
+                  <AppText strong>{format.weight(record.kg)}</AppText>
+                </View>
                 <Pressable
                   accessibilityLabel={t('body.deleteWeight', { day: format.day(record.date, today) })}
                   accessibilityRole="button"
@@ -137,6 +157,9 @@ export default function BodyScreen() {
                 </Pressable>
               </View>
             ))}
+          {weights.length > listed ? (
+            <Button label={t('journal.showMore')} onPress={() => setListed((shown) => shown + OLDER)} variant="accent" />
+          ) : null}
         </Card>
       ) : null}
 

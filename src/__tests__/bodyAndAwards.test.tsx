@@ -67,6 +67,26 @@ describe('body weight', () => {
     expect(await listBodyWeights(db)).toEqual([{ date: daysAgo(8), kg: 81 }]);
   });
 
+  it('lists every weigh-in with its change, the older ones on request', async () => {
+    const { user } = await startApp('/body', async (database) => {
+      // Ten weekly weigh-ins, from 82 kg down by 0.2 kg a week.
+      for (let week = 9; week >= 0; week -= 1) {
+        await saveBodyWeight(database, { date: daysAgo(week * 7 + 1), kg: 82 - (9 - week) * 0.2 }, 1);
+      }
+    });
+
+    const listedWeights = () => screen.getAllByRole('button', { name: /^Delete the weight of / });
+    expect(listedWeights()).toHaveLength(7);
+    expect(screen.getByLabelText('Yesterday, 80.2 kg, −0.2 kg')).toBeOnTheScreen();
+
+    await user.press(screen.getByRole('button', { name: 'Show older' }));
+
+    expect(listedWeights()).toHaveLength(10);
+    expect(screen.queryByRole('button', { name: 'Show older' })).not.toBeOnTheScreen();
+    // The first weigh-in has nothing before it to change from.
+    expect(screen.getByLabelText(/^\d+ \w+( \d{4})?, 82 kg$/)).toBeOnTheScreen();
+  });
+
   it('can be recorded for an earlier day', async () => {
     const { db, user } = await startApp('/body');
 

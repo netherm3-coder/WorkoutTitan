@@ -104,6 +104,17 @@ describe('the one-rep max of a set', () => {
     expect(rows(/^Pull-ups, .*, 1RM: \+34 kg, Personal best$/)).toHaveLength(1);
   });
 
+  it('is left out beside a bare set of more than ten reps, which would show the same number', async () => {
+    await startApp('/workouts', async (db) => {
+      await weighed(db);
+      await addEntries(db, [entry(PULLUPS, daysAgo(2), { reps: 15 }), entry(PULLUPS, daysAgo(1), { reps: 12, loadKg: 20 })], 1);
+    });
+
+    expect(rows(/^Pull-ups, 15, Personal best$/)).toHaveLength(1);
+    // (80 + 20) x (1 + 10 / 30) - 80 = 53.3: with a load, the estimate still follows the weight.
+    expect(screen.getByText('1RM: +53.3 kg')).toBeOnTheScreen();
+  });
+
   it('is not guessed before the first weigh-in', async () => {
     await startApp('/workouts', (db) => addEntries(db, [entry(PULLUPS, daysAgo(1), { reps: 8, loadKg: 10 })], 1));
     expect(screen.queryByText(/^1RM/)).not.toBeOnTheScreen();
@@ -119,6 +130,16 @@ describe('the one-rep max of a set', () => {
 
     await user.type(screen.getByLabelText('Extra weight, kg'), '10');
     expect(screen.getByText('Estimated one-rep max (1RM): +34 kg')).toBeOnTheScreen();
+
+    // Past ten bare reps the estimate would stop moving, so the form says why it is gone.
+    await user.clear(screen.getByLabelText('Extra weight, kg'));
+    await user.clear(screen.getByLabelText('Reps'));
+    await user.type(screen.getByLabelText('Reps'), '15');
+    expect(screen.queryByText(/^Estimated one-rep max/)).not.toBeOnTheScreen();
+    expect(screen.getByText('Without extra load, the 1RM is worked out for up to 10 reps.')).toBeOnTheScreen();
+
+    await user.type(screen.getByLabelText('Extra weight, kg'), '10');
+    expect(screen.getByText('Estimated one-rep max (1RM): +40 kg')).toBeOnTheScreen();
 
     // A number that does not read gives no estimate rather than a wrong one.
     await user.type(screen.getByLabelText('Extra weight, kg'), 'x');

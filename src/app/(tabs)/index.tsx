@@ -14,6 +14,7 @@ import {
   goalProgress,
   lifetimeTotals,
   NO_MEASURES,
+  oneRepMaxWorthShowing,
   PULLUPS,
   sportStatus,
   type PedestalRecord,
@@ -51,9 +52,9 @@ export default function HomeScreen() {
   };
 
   const oneRepMax = (record: PedestalRecord) => {
-    // A single rep with no extra load estimates nothing beyond itself.
-    if (record.oneRepMaxKg === null || !(record.oneRepMaxKg > 0)) return null;
-    const weight = format.weight(record.oneRepMaxKg);
+    const kg = oneRepMaxWorthShowing(record.oneRepMaxKg, record.entry, record.exercise);
+    if (kg === null) return null;
+    const weight = format.weight(kg);
     return t(record.exercise.kind === 'weight' ? 'strength.oneRepMax' : 'strength.oneRepMaxAdded', { weight });
   };
 

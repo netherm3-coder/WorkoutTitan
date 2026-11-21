@@ -3,7 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Chip, DayStepper, TextField } from '@/components';
-import { dayOf, entryOneRepMaxKg, type Exercise, type Measures, type WeightRecord } from '@/domain';
+import {
+  dayOf,
+  entryOneRepMaxKg,
+  oneRepMaxWorthShowing,
+  RM_REPS_CAP,
+  type Exercise,
+  type Measures,
+  type WeightRecord,
+} from '@/domain';
 import { useFormat } from '@/format';
 import { spacing } from '@/theme';
 
@@ -113,8 +121,11 @@ export function EntryForm({ initial, exercises, weights, onSubmit, onDelete, onM
     if (exercise.kind !== 'bodyweight' && exercise.kind !== 'weight') return null;
     const { measures, problems: wrong } = readDraft(draft, exercise, format.units);
     if (wrong.length > 0) return null;
-    const kg = entryOneRepMaxKg({ date: draft.date, reps: measures.reps, loadKg: measures.loadKg }, exercise, weights);
-    if (kg === null || !(kg > 0)) return null;
+    const set = { date: draft.date, reps: measures.reps, loadKg: measures.loadKg };
+    const estimated = entryOneRepMaxKg(set, exercise, weights);
+    const kg = oneRepMaxWorthShowing(estimated, set, exercise);
+    // Shown where it would otherwise just vanish once the reps pass the cap.
+    if (kg === null) return estimated !== null && estimated > 0 ? t('strength.bareRepsCap', { reps: RM_REPS_CAP }) : null;
     return t(exercise.kind === 'weight' ? 'strength.estimate' : 'strength.estimateAdded', { weight: format.weight(kg) });
   };
   const strength = estimate();

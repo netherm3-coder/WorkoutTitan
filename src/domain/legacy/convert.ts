@@ -353,6 +353,20 @@ function customId(name: string): string {
 
 const sameUnit = (a: string, b: string) => a.toLowerCase().replace(/\.$/, '') === b.toLowerCase().replace(/\.$/, '');
 
+/** Word beginnings of an exercise held for as long as possible: a plank, a hang, a static hold. */
+const HOLD_STEMS = ['планк', 'утрим', 'статик', 'стільчик', 'plank', 'hang', 'hold'];
+/** "Вис", a hang, only as a word of its own: as a beginning it is also "висота", "виступ"… */
+const HOLD_WORDS = ['вис', 'виси', 'вису', 'висі'];
+
+/**
+ * Whether the name says the time is held rather than raced. Record ranked every bare time as a
+ * race, shorter is better, which turns a plank upside down; such names get longer is better.
+ */
+export function isHoldName(name: string): boolean {
+  const words = name.toLowerCase().split(/[^\p{L}]+/u);
+  return words.some((word) => HOLD_WORDS.includes(word) || HOLD_STEMS.some((stem) => word.startsWith(stem)));
+}
+
 /**
  * An exercise has one kind, but in Record the same name could be logged in different shapes.
  * Each custom exercise takes the kind most of its entries have.
@@ -376,6 +390,7 @@ function settleCustomExercises(readings: readonly CustomReading[]): Map<string, 
         id,
         name: group[0]?.name ?? id,
         kind,
+        better: kind === 'duration' && isHoldName(group[0]?.name ?? '') ? 'higher' : undefined,
         unit: mostCommon(units, units, sameUnit) ?? null,
         distanceUnit: ofKind[0]?.distanceUnit ?? null,
       }),

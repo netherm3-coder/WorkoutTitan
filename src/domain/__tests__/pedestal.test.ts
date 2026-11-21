@@ -1,6 +1,13 @@
 import { customExercise, BENCH_PRESS, PULLUPS, PUSHUPS, RUN, SHUTTLE } from '../exercises';
 import { chronological, rankEntries } from '../history';
-import { buildPedestal, daysStanding, entryOneRepMaxKg, improvementCounts, personalBestIds } from '../pedestal';
+import {
+  buildPedestal,
+  daysStanding,
+  entryOneRepMaxKg,
+  improvementCounts,
+  oneRepMaxWorthShowing,
+  personalBestIds,
+} from '../pedestal';
 
 import { entry, history, minutes, resetSequence, seconds } from './support';
 
@@ -240,5 +247,22 @@ describe('entryOneRepMaxKg', () => {
   it('is nothing for a run or a text result', () => {
     expect(entryOneRepMaxKg(entry(RUN, '2026-02-01', { distanceM: 5000, durationMs: minutes(25) }), RUN, weighed)).toBeNull();
     expect(entryOneRepMaxKg(entry(NOTES, '2026-02-01', { text: 'легко' }), NOTES, weighed)).toBeNull();
+  });
+});
+
+describe('oneRepMaxWorthShowing', () => {
+  it('leaves out a bare set above ten reps, which estimates the same whatever the reps', () => {
+    expect(oneRepMaxWorthShowing(26.7, { reps: 11, loadKg: null }, PUSHUPS)).toBeNull();
+    expect(oneRepMaxWorthShowing(26.7, { reps: 10, loadKg: null }, PUSHUPS)).toBe(26.7);
+  });
+
+  it('keeps a loaded set or a lift above ten reps: the estimate still follows the weight', () => {
+    expect(oneRepMaxWorthShowing(53.3, { reps: 12, loadKg: 20 }, PULLUPS)).toBe(53.3);
+    expect(oneRepMaxWorthShowing(80, { reps: 15, loadKg: 60 }, BENCH_PRESS)).toBe(80);
+  });
+
+  it('shows nothing for no estimate or an estimate of nothing', () => {
+    expect(oneRepMaxWorthShowing(null, { reps: 5, loadKg: 10 }, PULLUPS)).toBeNull();
+    expect(oneRepMaxWorthShowing(0, { reps: 1, loadKg: null }, PULLUPS)).toBeNull();
   });
 });

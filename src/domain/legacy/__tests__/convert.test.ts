@@ -1,6 +1,6 @@
 import { entryProblems, NO_MEASURES } from '../../entry';
 import { exerciseLookup } from '../../exercises';
-import { convertLegacyWorkouts, type LegacyWorkout } from '../convert';
+import { convertLegacyWorkouts, isHoldName, type LegacyWorkout } from '../convert';
 
 const DATE = '2026-03-14';
 
@@ -218,6 +218,21 @@ describe('custom exercises', () => {
         distanceUnit: null,
       },
     });
+  });
+
+  it.each(['Планка', 'Бокова планка', 'Вис на перекладині', 'Утримання кута', 'Статика на брусах', 'Plank', 'Dead hang'])(
+    'keep a longer time as the better one when the name says it is held, as in %s',
+    (name) => {
+      expect(read(name, '1:30')).toMatchObject({
+        measures: numbers({ durationMs: 90_000 }),
+        exercise: { kind: 'duration', better: 'higher' },
+      });
+    },
+  );
+
+  it('tell a hang from words that only begin like one', () => {
+    expect(['Висота стрибка', 'Виступ', 'Біг з висом'].map(isHoldName)).toEqual([false, false, false]);
+    expect(['Вис', 'Виси на кільцях', 'Holding'].map(isHoldName)).toEqual([true, true, true]);
   });
 
   it('become a count without a unit for a bare number', () => {

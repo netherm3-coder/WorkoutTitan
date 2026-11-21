@@ -4,7 +4,7 @@ import type { WorkoutEntry } from './entry';
 import type { Exercise } from './exercises';
 import { rankEntries, type History } from './history';
 import { headlineHigherIsBetter, headlineOf } from './score';
-import { oneRepMaxAddedKg, oneRepMaxKg } from './strength';
+import { oneRepMaxAddedKg, oneRepMaxKg, RM_REPS_CAP } from './strength';
 
 /** The standing record of one discipline. */
 export type PedestalRecord = {
@@ -104,6 +104,23 @@ function betterHeadline(current: number | null, candidate: number | null, exerci
   if (candidate === null) return current;
   if (current === null) return candidate;
   return headlineHigherIsBetter(exercise) ? Math.max(current, candidate) : Math.min(current, candidate);
+}
+
+/**
+ * Whether a set's one-rep max is worth showing. A set against bare body weight with more reps
+ * than the cap gives the same estimate whatever the reps, a third of the body weight, so beside
+ * every such set it would say nothing, and on the podium it would undersell a record. With extra
+ * load or a barbell the estimate still follows the weight.
+ */
+export function oneRepMaxWorthShowing(
+  estimateKg: number | null,
+  entry: Pick<WorkoutEntry, 'reps' | 'loadKg'>,
+  exercise: Exercise,
+): number | null {
+  if (estimateKg === null || !(estimateKg > 0)) return null;
+  const bare = exercise.kind === 'bodyweight' && !((entry.loadKg ?? 0) > 0);
+  if (bare && entry.reps !== null && entry.reps > RM_REPS_CAP) return null;
+  return estimateKg;
 }
 
 /**

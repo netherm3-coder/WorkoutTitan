@@ -11,6 +11,7 @@ import {
   disciplineKey,
   entryOneRepMaxKg,
   journalDisciplines,
+  oneRepMaxWorthShowing,
   personalBestIds,
   progressSeries,
   type Day,
@@ -57,8 +58,8 @@ export default function WorkoutsScreen() {
 
   /** The one-rep max of a set as Record showed it beside the entry, when there is one to show. */
   const strength = (entry: WorkoutEntry, exercise: Exercise) => {
-    const kg = entryOneRepMaxKg(entry, exercise, history.weights);
-    if (kg === null || !(kg > 0)) return null;
+    const kg = oneRepMaxWorthShowing(entryOneRepMaxKg(entry, exercise, history.weights), entry, exercise);
+    if (kg === null) return null;
     return t(exercise.kind === 'weight' ? 'strength.oneRepMax' : 'strength.oneRepMaxAdded', { weight: format.weight(kg) });
   };
 

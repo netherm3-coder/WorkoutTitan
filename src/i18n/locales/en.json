@@ -616,7 +616,8 @@
     "oneRepMax": "1RM: {{weight}}",
     "oneRepMaxAdded": "1RM: +{{weight}}",
     "estimate": "Estimated one-rep max (1RM): {{weight}}",
-    "estimateAdded": "Estimated one-rep max (1RM): +{{weight}}"
+    "estimateAdded": "Estimated one-rep max (1RM): +{{weight}}",
+    "bareRepsCap": "Without extra load, the 1RM is worked out for up to {{reps}} reps."
   },
   "units": {
     "kg": "kg",
@@ -690,7 +691,7 @@
       },
       "oneRepMax": {
         "title": "1RM",
-        "body": "An estimated one-rep max by the Epley formula. For a bodyweight exercise it is the extra load one rep would take; for the bench press, the whole weight on the bar. Reps above 10 count as 10, as beyond that the formula overshoots. Until there is a weigh-in, bodyweight exercises show no 1RM."
+        "body": "An estimated one-rep max by the Epley formula. For a bodyweight exercise it is the extra load one rep would take; for the bench press, the whole weight on the bar. Reps above 10 count as 10, as beyond that the formula overshoots. So a set of more than 10 reps without extra load shows no 1RM: the number would be the same whatever the reps. Until there is a weigh-in, bodyweight exercises show no 1RM."
       },
       "status": {
         "title": "Sport status",

@@ -7,16 +7,20 @@ import { StyleSheet, View } from 'react-native';
 import {
   backupFileName,
   buildBackup,
+  entriesTableName,
   pickTextFile,
   readBackup,
   serialiseBackup,
   shareTextFile,
+  toCsv,
+  withHours,
   type Backup,
   type BackupProblem,
+  type Cell,
 } from '@/backup';
 import { AppText, Button, Card, Screen } from '@/components';
 import { collectBackupData, planRestore, useDatabase, type RestorePlan } from '@/db';
-import { dayOf } from '@/domain';
+import { dayOf, type Exercise, type WorkoutEntry } from '@/domain';
 import { useFormat } from '@/format';
 import { useRecords } from '@/records';
 import { spacing } from '@/theme';
@@ -42,6 +46,7 @@ export default function BackupScreen() {
 
   const [saving, setSaving] = useState<Saving>({ step: 'idle' });
   const [restoring, setRestoring] = useState<Restoring>({ step: 'idle' });
+  const [table, setTable] = useState<Saving>({ step: 'idle' });
 
   // Opened from a link there is nothing to go back to, so return to the settings instead.
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/settings'));
@@ -57,6 +62,57 @@ export default function BackupScreen() {
     } catch (error) {
       console.warn('Could not save the backup', error);
       setSaving({ step: 'failed' });
+    }
+  };
+
+  /** One entry as a row of the table: the result as the journal writes it, then its numbers. */
+  const rowOf = (entry: WorkoutEntry, exercise: Exercise): Cell[] => {
+    const number = (value: number | null) => (value === null ? null : format.number(value));
+    return [
+      entry.date,
+      format.discipline(exercise, entry),
+      withHours(format.result(entry, exercise)),
+      number(entry.reps),
+      entry.loadKg === null ? null : format.weightField(entry.loadKg),
+      number(entry.durationMs === null ? null : entry.durationMs / 1000),
+      // A shuttle run stores one leg; the table gives the whole distance, as for a run.
+      number(entry.distanceM === null ? null : entry.distanceM * (entry.segments ?? 1)),
+      number(entry.value),
+      entry.note,
+      entry.videoUrl,
+      entry.resultUrl,
+    ];
+  };
+
+  const saveTable = async () => {
+    setTable({ step: 'working' });
+    try {
+      const name = entriesTableName(dayOf(new Date()));
+      const columns = (key: 'date' | 'discipline' | 'result' | 'reps' | 'time' | 'distance' | 'value' | 'note' | 'video' | 'resultUrl') =>
+        t(`backup.tableColumns.${key}`);
+      const header: Cell[] = [
+        columns('date'),
+        columns('discipline'),
+        columns('result'),
+        columns('reps'),
+        t('backup.tableColumns.load', { unit: format.weightUnit }),
+        columns('time'),
+        columns('distance'),
+        columns('value'),
+        columns('note'),
+        columns('video'),
+        columns('resultUrl'),
+      ];
+      // Oldest first, as the history keeps them: the order a chart in a spreadsheet wants.
+      const rows = history.entries.flatMap((entry) => {
+        const exercise = history.exercises(entry.exerciseId);
+        return exercise ? [rowOf(entry, exercise)] : [];
+      });
+      await shareTextFile(name, toCsv([header, ...rows]), 'text/csv');
+      setTable({ step: 'done', name });
+    } catch (error) {
+      console.warn('Could not save the table', error);
+      setTable({ step: 'failed' });
     }
   };
 
@@ -116,6 +172,33 @@ export default function BackupScreen() {
         {saving.step === 'failed' ? (
           <AppText accessibilityLiveRegion="polite" accessibilityRole="alert" color="danger">
             {t('backup.saveFailed')}
+          </AppText>
+        ) : null}
+      </Card>
+
+      <Card>
+        <AppText variant="heading">{t('backup.tableTitle')}</AppText>
+        <AppText>{t('backup.tableBody')}</AppText>
+        {history.entries.length === 0 ? (
+          <AppText color="muted" variant="label">
+            {t('backup.tableNothing')}
+          </AppText>
+        ) : (
+          <Button
+            disabled={table.step === 'working'}
+            label={table.step === 'working' ? t('backup.tableSaving') : t('backup.tableButton')}
+            onPress={saveTable}
+            variant="accent"
+          />
+        )}
+        {table.step === 'done' ? (
+          <AppText accessibilityLiveRegion="polite" color="success">
+            {t('backup.tableSaved', { name: table.name })}
+          </AppText>
+        ) : null}
+        {table.step === 'failed' ? (
+          <AppText accessibilityLiveRegion="polite" accessibilityRole="alert" color="danger">
+            {t('backup.tableFailed')}
           </AppText>
         ) : null}
       </Card>

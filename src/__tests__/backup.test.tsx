@@ -16,7 +16,7 @@ import {
 } from '@/db';
 import { openTestDatabase } from '@/db/__tests__/testDatabase';
 import { openRecordDatabase } from '@/db/open';
-import { addDays, customExercise, dayOf, PULLUPS, RUN } from '@/domain';
+import { addDays, customExercise, dayOf, PULLUPS, RUN, SHUTTLE } from '@/domain';
 import { entry, minutes, resetSequence } from '@/domain/__tests__/support';
 
 jest.mock('expo-localization', () => ({ getLocales: jest.fn() }));
@@ -132,6 +132,64 @@ describe('saving a copy', () => {
 
     expect(await screen.findByText('Could not save the file. Try again.')).toBeOnTheScreen();
     expect(screen.queryByText(/is ready/)).not.toBeOnTheScreen();
+  });
+});
+
+describe('the table of entries', () => {
+  it('hands the share sheet a CSV of every result, oldest first, with its numbers', async () => {
+    const { user } = await startApp('/backup', async (db) => {
+      await saveExercise(db, PLANK, 1);
+      await addEntries(
+        db,
+        [
+          entry(PULLUPS, daysAgo(3), { reps: 12, loadKg: 20 }, { note: 'heavy, but "clean"\nlast set' }),
+          entry(SHUTTLE, daysAgo(2), { segments: 4, distanceM: 9, durationMs: 9800 }),
+          entry(PLANK, daysAgo(1), { durationMs: minutes(3) }),
+        ],
+        1,
+      );
+    });
+
+    await user.press(screen.getByRole('button', { name: 'Save the table' }));
+
+    expect(await screen.findByText(`The table record-entries-${today}.csv is ready.`)).toBeOnTheScreen();
+    expect(sharedFile()).toMatchObject({ name: `record-entries-${today}.csv`, mimeType: 'text/csv' });
+    expect(sharedFile().text.split('\r\n')).toEqual([
+      '\uFEFF"Date","Discipline","Result","Reps","Load, kg","Time, s","Distance, m","Number","Note","Video","Result page"',
+      `"${daysAgo(3)}","Pull-ups","12 (+20 kg)","12","20","","","","heavy, but ""clean"" last set","",""`,
+      // Bare times carry their hours, or a spreadsheet would read 3:00 as three hours.
+      `"${daysAgo(2)}","Shuttle run 4×9 m","0:00:09.8","","","9.8","36","","","",""`,
+      `"${daysAgo(1)}","Планка","0:03:00","","","180","","","","",""`,
+      '',
+    ]);
+  });
+
+  it('writes numbers with the decimal mark of the language', async () => {
+    const locales = [{ languageCode: 'uk', regionCode: 'UA' }] as unknown as ReturnType<typeof getLocales>;
+    jest.mocked(getLocales).mockReturnValue(locales);
+    const { user } = await startApp('/backup', (db) =>
+      addEntries(db, [entry(PULLUPS, daysAgo(1), { reps: 6, loadKg: 12.5 })], 1),
+    );
+
+    await user.press(screen.getByRole('button', { name: 'Зберегти таблицю' }));
+
+    expect(await screen.findByText(`Таблиця record-entries-${today}.csv готова.`)).toBeOnTheScreen();
+    expect(sharedFile().text.split('\r\n')[1]).toBe(`"${daysAgo(1)}","Підтягування","6 (+12,5 кг)","6","12,5","","","","","",""`);
+  });
+
+  it('is not offered before the first entry', async () => {
+    await startApp('/backup');
+    expect(screen.queryByRole('button', { name: 'Save the table' })).not.toBeOnTheScreen();
+    expect(screen.getByText('No entries yet.')).toBeOnTheScreen();
+  });
+
+  it('says so when the table could not be made', async () => {
+    share.mockRejectedValueOnce(new Error('no share sheet'));
+    const { user } = await startApp('/backup', fill);
+
+    await user.press(screen.getByRole('button', { name: 'Save the table' }));
+
+    expect(await screen.findByText('Could not save the table. Try again.')).toBeOnTheScreen();
   });
 });
 

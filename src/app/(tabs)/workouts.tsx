@@ -6,7 +6,17 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { ProgressCard } from '@/charts';
 import { AppText, Button, Card, EmptyState, Screen } from '@/components';
-import { dayOf, personalBestIds, progressSeries, type Day, type Exercise, type WorkoutEntry } from '@/domain';
+import {
+  dayOf,
+  disciplineKey,
+  entryOneRepMaxKg,
+  journalDisciplines,
+  personalBestIds,
+  progressSeries,
+  type Day,
+  type Exercise,
+  type WorkoutEntry,
+} from '@/domain';
 import { useFormat } from '@/format';
 import { toRouteParam } from '@/navigation';
 import { useRecords } from '@/records';
@@ -23,15 +33,39 @@ export default function WorkoutsScreen() {
   const format = useFormat();
   const { history, lastDeleted, undoDelete } = useRecords();
   const [limit, setLimit] = useState(PAGE);
+  const [chosen, setChosen] = useState<string | null>(null);
 
   const today = dayOf(new Date());
   const bests = useMemo(() => personalBestIds(history), [history]);
   const progress = useMemo(() => progressSeries(history), [history]);
+  const disciplines = useMemo(() => journalDisciplines(history), [history]);
+
+  // A discipline whose last entry is gone cannot stay chosen: the journal shows everything again.
+  const filter = chosen !== null && disciplines.some((item) => item.discipline === chosen) ? chosen : null;
+  const listed = useMemo(() => {
+    if (filter === null) return history.entries;
+    return history.entries.filter((entry) => {
+      const exercise = history.exercises(entry.exerciseId);
+      return exercise !== undefined && disciplineKey(exercise, entry) === filter;
+    });
+  }, [history, filter]);
+
+  const choose = (discipline: string | null) => {
+    setChosen(discipline);
+    setLimit(PAGE);
+  };
+
+  /** The one-rep max of a set as Record showed it beside the entry, when there is one to show. */
+  const strength = (entry: WorkoutEntry, exercise: Exercise) => {
+    const kg = entryOneRepMaxKg(entry, exercise, history.weights);
+    if (kg === null || !(kg > 0)) return null;
+    return t(exercise.kind === 'weight' ? 'strength.oneRepMax' : 'strength.oneRepMaxAdded', { weight: format.weight(kg) });
+  };
 
   // Newest first, grouped by day. The history itself is oldest first.
   const groups = useMemo(() => {
     const result: DayGroup[] = [];
-    for (const entry of history.entries.slice(-limit).reverse()) {
+    for (const entry of listed.slice(-limit).reverse()) {
       const exercise = history.exercises(entry.exerciseId);
       if (!exercise) continue;
 
@@ -40,7 +74,7 @@ export default function WorkoutsScreen() {
       else result.push({ day: entry.date, rows: [{ entry, exercise }] });
     }
     return result;
-  }, [history, limit]);
+  }, [history, listed, limit]);
 
   return (
     <Screen subtitle={t('workouts.subtitle')} title={t('workouts.title')}>
@@ -59,7 +93,9 @@ export default function WorkoutsScreen() {
         </Card>
       ) : null}
 
-      {progress.length > 0 ? <ProgressCard series={progress} /> : null}
+      {disciplines.length > 0 ? (
+        <ProgressCard chosen={filter} disciplines={disciplines} onChoose={choose} series={progress} />
+      ) : null}
 
       {groups.length === 0 ? (
         <Card>
@@ -81,13 +117,14 @@ export default function WorkoutsScreen() {
               onPress={() => router.push({ pathname: '/entry/[id]', params: { id: toRouteParam(entry.id) } })}
               result={format.result(entry, exercise)}
               resultUrl={entry.resultUrl}
+              strength={strength(entry, exercise)}
               videoUrl={entry.videoUrl}
             />
           ))}
         </Card>
       ))}
 
-      {history.entries.length > limit ? (
+      {listed.length > limit ? (
         <Button label={t('journal.showMore')} onPress={() => setLimit((shown) => shown + PAGE)} variant="accent" />
       ) : null}
     </Screen>
@@ -97,6 +134,8 @@ export default function WorkoutsScreen() {
 type EntryRowProps = {
   name: string;
   result: string;
+  /** The estimated one-rep max of the set, when it has one. */
+  strength: string | null;
   note: string;
   videoUrl: string;
   resultUrl: string;
@@ -104,10 +143,10 @@ type EntryRowProps = {
   onPress: () => void;
 };
 
-function EntryRow({ name, result, note, videoUrl, resultUrl, best, onPress }: EntryRowProps) {
+function EntryRow({ name, result, strength, note, videoUrl, resultUrl, best, onPress }: EntryRowProps) {
   const { t } = useTranslation();
   const foreground = useForeground();
-  const spoken = [name, result, best ? t('journal.personalBest') : null].filter(Boolean).join(', ');
+  const spoken = [name, result, strength, best ? t('journal.personalBest') : null].filter(Boolean).join(', ');
 
   return (
     <View>
@@ -122,6 +161,11 @@ function EntryRow({ name, result, note, videoUrl, resultUrl, best, onPress }: En
             {name}
           </AppText>
           <AppText strong>{result}</AppText>
+          {strength ? (
+            <AppText color="accent" variant="label">
+              {strength}
+            </AppText>
+          ) : null}
           {note ? (
             <AppText color="muted" numberOfLines={2} variant="label">
               {note}

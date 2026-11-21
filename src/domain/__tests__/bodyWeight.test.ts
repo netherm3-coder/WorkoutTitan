@@ -1,4 +1,4 @@
-import { bodyWeightAt, FALLBACK_BODY_WEIGHT_KG, latestBodyWeight } from '../bodyWeight';
+import { bmiOf, bodyWeightAt, FALLBACK_BODY_WEIGHT_KG, latestBodyWeight } from '../bodyWeight';
 
 const weights = [
   { date: '2026-03-01', kg: 80 },
@@ -37,5 +37,34 @@ describe('latestBodyWeight', () => {
 describe('the stand-in body weight', () => {
   it('is the 75 kg Record assumed', () => {
     expect(FALLBACK_BODY_WEIGHT_KG).toBe(75);
+  });
+});
+
+describe('bmiOf', () => {
+  it('is weight over height squared, to one decimal', () => {
+    expect(bmiOf(80, 180)).toEqual({ value: 24.7, category: 'normal' });
+  });
+
+  it('puts the value in the category of adults that Record names', () => {
+    const category = (kg: number) => bmiOf(kg, 100)?.category;
+    expect([18.4, 18.5, 24.9, 25, 29.9, 30].map(category)).toEqual([
+      'underweight',
+      'normal',
+      'normal',
+      'overweight',
+      'overweight',
+      'obese',
+    ]);
+  });
+
+  it('takes the category of the number it shows', () => {
+    // 24.96 shows as 25.0, so it is not "normal" next to a 25.0.
+    expect(bmiOf(24.96, 100)).toEqual({ value: 25, category: 'overweight' });
+  });
+
+  it('is unknown without a height', () => {
+    expect(bmiOf(80, null)).toBeNull();
+    expect(bmiOf(80, 0)).toBeNull();
+    expect(bmiOf(0, 180)).toBeNull();
   });
 });

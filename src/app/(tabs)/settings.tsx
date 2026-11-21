@@ -132,6 +132,12 @@ export default function SettingsScreen() {
 
       <Card>
         <LinkRow
+          hint={t('settings.helpHint')}
+          icon="help-circle-outline"
+          label={t('settings.help')}
+          onPress={() => router.push('/how-it-works')}
+        />
+        <LinkRow
           hint={t('settings.privacyHint')}
           icon="shield-checkmark-outline"
           label={t('settings.privacy')}

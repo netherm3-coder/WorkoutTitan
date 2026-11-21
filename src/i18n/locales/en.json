@@ -16,8 +16,6 @@
     "setToday": "Set today",
     "standing_one": "Standing for {{count}} day",
     "standing_other": "Standing for {{count}} days",
-    "oneRepMaxAdded": "1RM: +{{weight}}",
-    "oneRepMax": "1RM: {{weight}}",
     "totals": "Hall of fame",
     "otherEntries": "Other entries",
     "goal": "Goal: {{goal}}",
@@ -371,7 +369,14 @@
     "deleteWeight": "Delete the weight of {{day}}",
     "heightField": "Height, {{unit}}",
     "saveHeight": "Save height",
-    "bmi": "Body mass index: {{value}}",
+    "bmi": "Body mass index: {{value}} ({{category}})",
+    "bmiCategory": {
+      "underweight": "underweight",
+      "normal": "normal",
+      "overweight": "overweight",
+      "obese": "obese"
+    },
+    "bmiNeedsHeight": "Enter your height below to see your body mass index.",
     "measurements": "Measurements",
     "noMeasurements": "No measurements yet.",
     "map": "Body map",
@@ -604,7 +609,14 @@
     "toNext": "{{weight}} to go to \"{{level}}\"",
     "top": "This is the top level.",
     "best": "Strongest set: {{result}}",
-    "capped": "Reps above 10 count as 10."
+    "capped": "Reps above 10 count as 10.",
+    "howItWorks": "How the status is worked out"
+  },
+  "strength": {
+    "oneRepMax": "1RM: {{weight}}",
+    "oneRepMaxAdded": "1RM: +{{weight}}",
+    "estimate": "Estimated one-rep max (1RM): {{weight}}",
+    "estimateAdded": "Estimated one-rep max (1RM): +{{weight}}"
   },
   "units": {
     "kg": "kg",
@@ -664,7 +676,51 @@
     "backup": "Backup",
     "backupHint": "Save your data to a file or restore it from one",
     "recordImport": "Bring over from Record",
-    "recordImportHint": "Entries from the old app, from its export file"
+    "recordImportHint": "Entries from the old app, from its export file",
+    "help": "How it works",
+    "helpHint": "How records, 1RM and status are worked out"
+  },
+  "help": {
+    "title": "How it works",
+    "subtitle": "The rules behind records, status and body",
+    "sections": {
+      "index": {
+        "title": "Strength index",
+        "body": "Sets of bodyweight exercises are compared by an index: (body weight + extra load) × (1 + reps / 30). So 10 pull-ups with +16 kg rank above 15 without weight. The trophy in the journal marks a result that beat everything before it in its discipline."
+      },
+      "oneRepMax": {
+        "title": "1RM",
+        "body": "An estimated one-rep max by the Epley formula. For a bodyweight exercise it is the extra load one rep would take; for the bench press, the whole weight on the bar. Reps above 10 count as 10, as beyond that the formula overshoots. Until there is a weigh-in, bodyweight exercises show no 1RM."
+      },
+      "status": {
+        "title": "Sport status",
+        "body": "It takes the strongest pull-up set of the last 90 days: its 1RM including body weight, divided by body weight. Recruit from 1.0, Athlete from 1.2, Master candidate from 1.5, Elite from 1.8. Stop training and the rank drops; the record stays on the podium."
+      },
+      "disciplines": {
+        "title": "Disciplines",
+        "body": "Every running distance and every shuttle pattern is a discipline with its own record: 5 km and 3 km do not compete. In running a shorter time is better; for your own exercises you decide what is better."
+      },
+      "goals": {
+        "title": "Goals",
+        "body": "A goal is set on the podium, for a discipline that already has a result. Progress towards it is measured from the best number in the whole history: the most reps, the heaviest weight or the best time."
+      },
+      "chart": {
+        "title": "Progress chart",
+        "body": "One point a day, the best result of that day. For times the scale is upside down, so up is always better. If most sets of a bodyweight exercise had extra load, the chart shows the extra load."
+      },
+      "bmi": {
+        "title": "Body mass index",
+        "body": "Weight divided by height squared. The categories are the WHO's for adults: under 18.5 underweight, under 25 normal, under 30 overweight, above that obese. It cannot tell muscle from fat, so for athletes it often reads high."
+      },
+      "bodyMap": {
+        "title": "Body map",
+        "body": "The figure shows the latest measurement of each of the eight body parts and the change since that part was last measured. The arrows have no colour: what is good depends on your goal. Your own body parts are not on the figure."
+      },
+      "counters": {
+        "title": "Counters",
+        "body": "Training experience and sobriety count the days from the dates you set in Counters in the settings."
+      }
+    }
   },
   "themes": {
     "camp": {
@@ -744,6 +800,8 @@
   },
   "progress": {
     "title": "Progress",
+    "all": "All",
+    "pick": "Choose a discipline to see its chart and only its entries.",
     "caption": {
       "reps": "Most reps in a day",
       "load": "Heaviest weight in a day",
@@ -763,6 +821,7 @@
       "least": "Best result of each day, {{unit}}; higher is less"
     },
     "needTwoDays": "The chart appears once there are results from at least two days.",
+    "noChart": "Text results have no chart.",
     "summary": "Chart of {{discipline}}, days with a result: {{count}}. From {{first}} ({{from}}) to {{last}} ({{to}})."
   },
   "photos": {

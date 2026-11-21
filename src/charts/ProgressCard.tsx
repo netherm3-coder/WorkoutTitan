@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText, Card, Chip } from '@/components';
-import { daysBetween, dayOf, isTimed, type ProgressSeries } from '@/domain';
+import { daysBetween, dayOf, isTimed, type JournalDiscipline, type ProgressSeries } from '@/domain';
 import { formatDuration, formatNumber, useFormat, weightIn } from '@/format';
 import { useLanguage } from '@/i18n';
 import { spacing } from '@/theme';
@@ -13,7 +12,12 @@ import { LineChart } from './LineChart';
 
 export type ProgressCardProps = {
   /** The disciplines to choose from, the one logged last first. */
+  disciplines: readonly JournalDiscipline[];
+  /** The progress of the disciplines that have numbers. */
   series: readonly ProgressSeries[];
+  /** The discipline chosen, or `null` for all of them. */
+  chosen: string | null;
+  onChoose: (discipline: string | null) => void;
 };
 
 type Caption = 'reps' | 'load' | 'addedLoad' | 'fastest' | 'longest' | 'most' | 'least';
@@ -34,17 +38,48 @@ function captionOf(series: ProgressSeries): Caption {
 }
 
 /**
- * The progress chart of the journal, as in Record: pick a discipline and see how its results
- * went, one point for the best of each day.
+ * The filter and the progress chart of the journal, as in Record: pick a discipline, and the
+ * journal lists only its entries while the chart shows how its results went, one point for the
+ * best of each day. With all disciplines there is nothing to chart.
  */
-export function ProgressCard({ series }: ProgressCardProps) {
+export function ProgressCard({ disciplines, series, chosen, onChoose }: ProgressCardProps) {
+  const { t } = useTranslation();
+  const format = useFormat();
+
+  return (
+    <Card>
+      <AppText variant="heading">{t('progress.title')}</AppText>
+      <ScrollView
+        accessibilityRole="radiogroup"
+        contentContainerStyle={styles.chips}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        <Chip label={t('progress.all')} onPress={() => onChoose(null)} selected={chosen === null} />
+        {disciplines.map((item) => (
+          <Chip
+            key={item.discipline}
+            label={format.discipline(item.exercise, item.latest)}
+            onPress={() => onChoose(item.discipline)}
+            selected={item.discipline === chosen}
+          />
+        ))}
+      </ScrollView>
+      <Progress chosen={chosen} series={series} />
+    </Card>
+  );
+}
+
+/** What the card shows below the choice: a hint, the chart, or why there is no chart. */
+function Progress({ chosen, series }: Pick<ProgressCardProps, 'chosen' | 'series'>) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const format = useFormat();
-  const [chosen, setChosen] = useState<string | null>(null);
 
-  const current = series.find((item) => item.discipline === chosen) ?? series[0];
-  if (!current) return null;
+  if (chosen === null) return <AppText color="muted">{t('progress.pick')}</AppText>;
+
+  const current = series.find((item) => item.discipline === chosen);
+  if (!current) return <AppText color="muted">{t('progress.noChart')}</AppText>;
 
   const today = dayOf(new Date());
   const name = (item: ProgressSeries) => format.discipline(item.exercise, item.latest);
@@ -63,18 +98,7 @@ export function ProgressCard({ series }: ProgressCardProps) {
   const last = current.points[current.points.length - 1];
 
   return (
-    <Card>
-      <AppText variant="heading">{t('progress.title')}</AppText>
-      <ScrollView
-        accessibilityRole="radiogroup"
-        contentContainerStyle={styles.chips}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-      >
-        {series.map((item) => (
-          <Chip key={item.discipline} label={name(item)} onPress={() => setChosen(item.discipline)} selected={item === current} />
-        ))}
-      </ScrollView>
+    <>
       <AppText color="muted" variant="label">
         {unit ? t(`progress.captionIn.${caption}`, { unit }) : t(`progress.caption.${caption}`)}
       </AppText>
@@ -102,7 +126,7 @@ export function ProgressCard({ series }: ProgressCardProps) {
           <AppText color="muted">{t('progress.needTwoDays')}</AppText>
         </View>
       )}
-    </Card>
+    </>
   );
 }
 

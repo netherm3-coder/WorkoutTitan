@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Chip, DayStepper, TextField } from '@/components';
-import { dayOf, type Exercise, type Measures } from '@/domain';
+import { dayOf, entryOneRepMaxKg, type Exercise, type Measures, type WeightRecord } from '@/domain';
 import { useFormat } from '@/format';
 import { spacing } from '@/theme';
 
@@ -29,6 +29,8 @@ export type EntryFormProps = {
   initial: Draft;
   /** The exercises to choose from. */
   exercises: readonly Exercise[];
+  /** Weigh-ins, for the one-rep max of a set against body weight. */
+  weights: readonly WeightRecord[];
   onSubmit: (result: EntryFormResult) => Promise<void>;
   /** Given when an existing entry is being edited. */
   onDelete?: () => Promise<void>;
@@ -46,7 +48,7 @@ const ROWS: readonly (readonly NumberField[])[] = [
 ];
 
 /** The form for a result: which exercise, which day, and the numbers that kind of exercise needs. */
-export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExercises }: EntryFormProps) {
+export function EntryForm({ initial, exercises, weights, onSubmit, onDelete, onManageExercises }: EntryFormProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
@@ -106,6 +108,17 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
     }
   };
 
+  /** The one-rep max of the set being typed, once its numbers read right. */
+  const estimate = (): string | null => {
+    if (exercise.kind !== 'bodyweight' && exercise.kind !== 'weight') return null;
+    const { measures, problems: wrong } = readDraft(draft, exercise, format.units);
+    if (wrong.length > 0) return null;
+    const kg = entryOneRepMaxKg({ date: draft.date, reps: measures.reps, loadKg: measures.loadKg }, exercise, weights);
+    if (kg === null || !(kg > 0)) return null;
+    return t(exercise.kind === 'weight' ? 'strength.estimate' : 'strength.estimateAdded', { weight: format.weight(kg) });
+  };
+  const strength = estimate();
+
   const submit = () => {
     const { measures, problems: wrongNumbers } = readDraft(draft, exercise, format.units);
     const { links, problems: wrongLinks } = readLinks(draft);
@@ -156,6 +169,12 @@ export function EntryForm({ initial, exercises, onSubmit, onDelete, onManageExer
               ))}
             </View>
           ))}
+
+        {strength ? (
+          <AppText color="accent" strong variant="label">
+            {strength}
+          </AppText>
+        ) : null}
 
         {exercise.kind === 'text' ? (
           <TextField label={t('entry.words')} multiline onChangeText={(words) => set({ words })} value={draft.words} />

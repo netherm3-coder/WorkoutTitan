@@ -78,15 +78,22 @@ describe('body weight', () => {
     expect(await listBodyWeights(db)).toEqual([{ date: daysAgo(1), kg: 79 }]);
   });
 
-  it('gives a body mass index once the height is known', async () => {
+  it('gives a body mass index with its category once the height is known', async () => {
     const { db, user } = await startApp('/body', (database) => saveBodyWeight(database, { date: today, kg: 80 }, 1));
-    expect(screen.queryByText(/Body mass index/)).not.toBeOnTheScreen();
+    expect(screen.queryByText(/^Body mass index/)).not.toBeOnTheScreen();
+    expect(screen.getByText('Enter your height below to see your body mass index.')).toBeOnTheScreen();
 
     await user.type(screen.getByLabelText('Height, cm'), '180');
     await user.press(screen.getByRole('button', { name: 'Save height' }));
 
-    expect(await screen.findByText('Body mass index: 24.7')).toBeOnTheScreen();
+    expect(await screen.findByText('Body mass index: 24.7 (normal)')).toBeOnTheScreen();
+    expect(screen.queryByText('Enter your height below to see your body mass index.')).not.toBeOnTheScreen();
     expect(await loadProfile(db)).toMatchObject({ heightCm: 180 });
+  });
+
+  it('asks for no height before there is a weight', async () => {
+    await startApp('/body');
+    expect(screen.queryByText('Enter your height below to see your body mass index.')).not.toBeOnTheScreen();
   });
 });
 

@@ -26,6 +26,33 @@ export type ProgressSeries = {
   points: ProgressPoint[];
 };
 
+/** A discipline with entries in the journal, as the journal's filter offers it. */
+export type JournalDiscipline = {
+  /** The discipline, as `disciplineKey` names it. */
+  discipline: string;
+  exercise: Exercise;
+  /** The latest entry of the discipline. It names the discipline and holds its distance. */
+  latest: WorkoutEntry;
+};
+
+/**
+ * Every discipline with an entry, the one logged last first: the choices of the journal's
+ * filter, as in Record. Free-text exercises are in, they have entries to list even with no
+ * chart; entries whose exercise no longer exists are not.
+ */
+export function journalDisciplines(history: History): JournalDiscipline[] {
+  const found = new Map<string, JournalDiscipline & { last: number }>();
+
+  chronological(history.entries).forEach((entry, index) => {
+    const exercise = history.exercises(entry.exerciseId);
+    if (!exercise) return;
+    const discipline = disciplineKey(exercise, entry);
+    found.set(discipline, { discipline, exercise, latest: entry, last: index });
+  });
+
+  return [...found.values()].sort((a, b) => b.last - a.last).map(({ last: _last, ...rest }) => rest);
+}
+
 /**
  * The progress of every discipline that has numbers, the one logged last first, which is the
  * one a chart opens on. Free-text exercises have nothing to plot and are left out, and so are

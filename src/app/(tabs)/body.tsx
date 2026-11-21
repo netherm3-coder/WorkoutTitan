@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { BodyMapCard, WeightTrendCard } from '@/charts';
 import { AppText, Button, Card, DayStepper, Icon, Screen, TextField } from '@/components';
-import { dayOf } from '@/domain';
+import { bmiOf, dayOf } from '@/domain';
 import { decimalsOf, lengthFrom, parseDecimal, roundTo, useFormat, weightFrom, weightIn } from '@/format';
 import { PhotosCard } from '@/photos';
 import { useBodyParts, useRecords } from '@/records';
@@ -32,7 +32,7 @@ export default function BodyScreen() {
   const latest = weights[weights.length - 1];
   const previous = weights[weights.length - 2];
   const change = latest && previous ? latest.kg - previous.kg : null;
-  const bmi = latest && profile.heightCm ? latest.kg / (profile.heightCm / 100) ** 2 : null;
+  const bmi = latest ? bmiOf(latest.kg, profile.heightCm) : null;
 
   // The latest value of every body part that was ever measured, in the order of the form:
   // the built-in parts, then the person's own.
@@ -88,7 +88,15 @@ export default function BodyScreen() {
             {t('body.sincePrevious', { change: signed(change) })}
           </AppText>
         ) : null}
-        {bmi !== null ? <AppText variant="label">{t('body.bmi', { value: format.number(Math.round(bmi * 10) / 10) })}</AppText> : null}
+        {bmi !== null ? (
+          <AppText variant="label">
+            {t('body.bmi', { value: format.number(bmi.value), category: t(`body.bmiCategory.${bmi.category}`) })}
+          </AppText>
+        ) : latest ? (
+          <AppText color="muted" variant="label">
+            {t('body.bmiNeedsHeight')}
+          </AppText>
+        ) : null}
       </Card>
 
       <Card>

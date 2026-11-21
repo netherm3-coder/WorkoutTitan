@@ -49,8 +49,16 @@ describe('the progress chart of the journal', () => {
       1,
     );
 
-  it('opens on the discipline logged last and switches to another', async () => {
+  it('opens on all disciplines, then charts the one chosen', async () => {
     const { user } = await startApp('/workouts', seed);
+
+    expect(screen.getByRole('radio', { name: 'All' })).toBeChecked();
+    expect(screen.getByText('Choose a discipline to see its chart and only its entries.')).toBeOnTheScreen();
+    expect(screen.queryByRole('image', { name: /^Chart of/ })).not.toBeOnTheScreen();
+    // The discipline logged last comes first.
+    expect(screen.getAllByRole('radio').map((chip) => chip.props.accessibilityLabel)).toEqual(['All', 'Run 5 km', 'Pull-ups']);
+
+    await user.press(screen.getByRole('radio', { name: 'Run 5 km' }));
 
     expect(screen.getByRole('radio', { name: 'Run 5 km' })).toBeChecked();
     expect(screen.getByText('Best time of each day; higher is faster')).toBeOnTheScreen();
@@ -76,7 +84,10 @@ describe('the progress chart of the journal', () => {
   });
 
   it('waits for a second day', async () => {
-    await startApp('/workouts', (db) => addEntries(db, [entry(PULLUPS, daysAgo(1), { reps: 10 }), entry(PULLUPS, daysAgo(1), { reps: 11 })], 1));
+    const { user } = await startApp('/workouts', (db) =>
+      addEntries(db, [entry(PULLUPS, daysAgo(1), { reps: 10 }), entry(PULLUPS, daysAgo(1), { reps: 11 })], 1),
+    );
+    await user.press(screen.getByRole('radio', { name: 'Pull-ups' }));
 
     expect(screen.getByText('The chart appears once there are results from at least two days.')).toBeOnTheScreen();
     expect(screen.queryByRole('image', { name: /^Chart of/ })).not.toBeOnTheScreen();

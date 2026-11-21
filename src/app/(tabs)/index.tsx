@@ -51,9 +51,10 @@ export default function HomeScreen() {
   };
 
   const oneRepMax = (record: PedestalRecord) => {
-    if (record.oneRepMaxKg === null) return null;
+    // A single rep with no extra load estimates nothing beyond itself.
+    if (record.oneRepMaxKg === null || !(record.oneRepMaxKg > 0)) return null;
     const weight = format.weight(record.oneRepMaxKg);
-    return t(record.exercise.kind === 'weight' ? 'home.oneRepMax' : 'home.oneRepMaxAdded', { weight });
+    return t(record.exercise.kind === 'weight' ? 'strength.oneRepMax' : 'strength.oneRepMaxAdded', { weight });
   };
 
   /** The goal of a record and how far along it is, for screen readers; nothing without a goal. */
@@ -162,6 +163,11 @@ export default function HomeScreen() {
                 {t(status.state === 'needsBodyWeight' ? 'status.needsBodyWeight' : 'status.needsPullups')}
               </AppText>
             )}
+            <Pressable accessibilityRole="link" hitSlop={spacing.sm} onPress={() => router.push('/how-it-works')}>
+              <AppText color="accent" strong variant="label">
+                {t('status.howItWorks')}
+              </AppText>
+            </Pressable>
           </Card>
 
           <Card tone="cardAlt">

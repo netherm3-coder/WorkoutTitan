@@ -1,5 +1,5 @@
 import { BENCH_PRESS, customExercise, PULLUPS, RUN, SHUTTLE } from '../exercises';
-import { progressSeries } from '../progress';
+import { journalDisciplines, progressSeries } from '../progress';
 import { entry, history, minutes, resetSequence, seconds } from './support';
 
 beforeEach(resetSequence);
@@ -109,5 +109,29 @@ describe('progressSeries', () => {
 
   it('has nothing to show without results', () => {
     expect(progressSeries(history([]))).toEqual([]);
+  });
+});
+
+describe('journalDisciplines', () => {
+  it('offers every discipline with an entry, the one logged last first, text results included', () => {
+    const found = journalDisciplines(
+      history(
+        [
+          entry(PULLUPS, '2026-01-01', { reps: 10 }),
+          entry(RUN, '2026-01-02', { distanceM: 5000, durationMs: minutes(25) }),
+          entry(NOTES, '2026-01-03', { text: 'легко' }),
+          entry(RUN, '2026-01-04', { distanceM: 3000, durationMs: minutes(14) }),
+          entry(PULLUPS, '2026-01-05', { reps: 11 }),
+        ],
+        { custom: [NOTES] },
+      ),
+    );
+
+    expect(found.map((item) => item.discipline)).toEqual(['pullups', 'run@3000', 'custom:notes', 'run@5000']);
+    expect(found[0]?.latest.date).toBe('2026-01-05');
+  });
+
+  it('leaves out entries of an exercise that no longer exists', () => {
+    expect(journalDisciplines(history([entry('custom:gone', '2026-01-01', { reps: 5 })]))).toEqual([]);
   });
 });

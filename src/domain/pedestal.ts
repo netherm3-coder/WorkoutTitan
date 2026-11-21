@@ -1,8 +1,8 @@
-import { bodyWeightAt } from './bodyWeight';
+import { bodyWeightAt, type WeightRecord } from './bodyWeight';
 import { daysBetween, type Day } from './dates';
 import type { WorkoutEntry } from './entry';
 import type { Exercise } from './exercises';
-import { rankEntries, type History, type RankedEntry } from './history';
+import { rankEntries, type History } from './history';
 import { headlineHigherIsBetter, headlineOf } from './score';
 import { oneRepMaxAddedKg, oneRepMaxKg } from './strength';
 
@@ -45,7 +45,7 @@ export function buildPedestal(history: History): Map<string, PedestalRecord> {
         entry: ranked.entry,
         score: ranked.score,
         peak,
-        oneRepMaxKg: oneRepMaxOf(ranked, history),
+        oneRepMaxKg: entryOneRepMaxKg(ranked.entry, ranked.exercise, history.weights),
       });
     } else if (peak !== current.peak) {
       pedestal.set(ranked.discipline, { ...current, peak });
@@ -106,14 +106,24 @@ function betterHeadline(current: number | null, candidate: number | null, exerci
   return headlineHigherIsBetter(exercise) ? Math.max(current, candidate) : Math.min(current, candidate);
 }
 
-function oneRepMaxOf({ entry, exercise }: RankedEntry, history: History): number | null {
+/**
+ * Estimated one-rep max of a set, in kilograms, as Record shows it beside its entries: extra
+ * load on top of the body weight of that day for a bodyweight exercise, total weight for a
+ * lift. `null` for other kinds, and for a bodyweight exercise until a body weight has been
+ * recorded. A set that would make one rep with no extra load gives 0.
+ */
+export function entryOneRepMaxKg(
+  entry: Pick<WorkoutEntry, 'date' | 'reps' | 'loadKg'>,
+  exercise: Exercise,
+  weights: readonly WeightRecord[],
+): number | null {
   if (entry.reps === null) return null;
 
   if (exercise.kind === 'weight') {
     return entry.loadKg === null ? null : oneRepMaxKg(entry.reps, entry.loadKg);
   }
   if (exercise.kind === 'bodyweight') {
-    const bodyWeightKg = bodyWeightAt(entry.date, history.weights);
+    const bodyWeightKg = bodyWeightAt(entry.date, weights);
     return bodyWeightKg === null ? null : oneRepMaxAddedKg(entry.reps, entry.loadKg ?? 0, bodyWeightKg);
   }
   return null;

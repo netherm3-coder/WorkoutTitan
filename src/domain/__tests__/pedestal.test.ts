@@ -1,6 +1,6 @@
 import { customExercise, BENCH_PRESS, PULLUPS, PUSHUPS, RUN, SHUTTLE } from '../exercises';
 import { chronological, rankEntries } from '../history';
-import { buildPedestal, daysStanding, improvementCounts, personalBestIds } from '../pedestal';
+import { buildPedestal, daysStanding, entryOneRepMaxKg, improvementCounts, personalBestIds } from '../pedestal';
 
 import { entry, history, minutes, resetSequence, seconds } from './support';
 
@@ -207,5 +207,38 @@ describe('daysStanding', () => {
     expect(daysStanding(record, '2026-11-12')).toBe(11);
     expect(daysStanding(record, '2026-11-01')).toBe(0);
     expect(daysStanding(record, '2026-10-20')).toBe(0);
+  });
+});
+
+describe('entryOneRepMaxKg', () => {
+  const weighed = [
+    { date: '2026-01-01', kg: 80 },
+    { date: '2026-03-01', kg: 70 },
+  ];
+
+  it('is the extra load of one rep of a bodyweight exercise, with the weight of that day', () => {
+    // (80 + 10) x (1 + 8 / 30) - 80 = 34
+    expect(entryOneRepMaxKg(entry(PULLUPS, '2026-02-01', { reps: 8, loadKg: 10 }), PULLUPS, weighed)).toBe(34);
+    // (70 + 10) x (1 + 8 / 30) - 70 = 31.3
+    expect(entryOneRepMaxKg(entry(PULLUPS, '2026-03-02', { reps: 8, loadKg: 10 }), PULLUPS, weighed)).toBe(31.3);
+  });
+
+  it('counts reps above ten as ten, as Record does', () => {
+    const twenty = entryOneRepMaxKg(entry(PUSHUPS, '2026-02-01', { reps: 20 }), PUSHUPS, weighed);
+    expect(twenty).toBe(entryOneRepMaxKg(entry(PUSHUPS, '2026-02-01', { reps: 10 }), PUSHUPS, weighed));
+    expect(twenty).toBe(26.7);
+  });
+
+  it('waits for a weigh-in rather than guessing one', () => {
+    expect(entryOneRepMaxKg(entry(PULLUPS, '2026-02-01', { reps: 8 }), PULLUPS, [])).toBeNull();
+  });
+
+  it('is the whole weight for a lift, with no body weight in it', () => {
+    expect(entryOneRepMaxKg(entry(BENCH_PRESS, '2026-02-01', { reps: 5, loadKg: 90 }), BENCH_PRESS, [])).toBe(105);
+  });
+
+  it('is nothing for a run or a text result', () => {
+    expect(entryOneRepMaxKg(entry(RUN, '2026-02-01', { distanceM: 5000, durationMs: minutes(25) }), RUN, weighed)).toBeNull();
+    expect(entryOneRepMaxKg(entry(NOTES, '2026-02-01', { text: 'легко' }), NOTES, weighed)).toBeNull();
   });
 });

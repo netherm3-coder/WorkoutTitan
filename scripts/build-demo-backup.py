@@ -88,11 +88,17 @@ def build(today: dt.date, language: str) -> dict:
             kind = session % 3
             session += 1
             if kind == 0:
-                for _ in range(2):
-                    history.log("pullups", day, reps=round(history.between(day, 8, 16.6, 1.2)))
-                history.log("dips", day, reps=round(history.between(day, 15, 27, 1.5)))
                 load = round(history.between(day, 60, 95, 1.5) / 2.5) * 2.5
                 history.log("benchPress", day, loadKg=load, reps=round(history.between(day, 8, 4, 0.6)))
+                history.log("dips", day, reps=round(history.between(day, 15, 27, 1.5)))
+                # Pull-ups last, so that they lead the journal's choice of disciplines.
+                for _ in range(2):
+                    history.log("pullups", day, reps=round(history.between(day, 8, 16.6, 1.2)))
+                # From the fourth month on, a heavy set with a belt as well; it stays the smaller
+                # part of the pull-ups, so their chart keeps counting reps.
+                belt = round(history.between(day, -10, 17.5, 1) / 2.5) * 2.5
+                if belt >= 5:
+                    history.log("pullups", day, reps=round(history.between(day, 6, 5, 0.4)), loadKg=belt)
             elif kind == 1:
                 history.log("pushups", day, reps=round(history.between(day, 30, 54, 2)))
                 history.log(
@@ -130,7 +136,18 @@ def build(today: dt.date, language: str) -> dict:
     measurements = []
     month = history.start
     while month <= today:
-        for part, first, last in (("waist", 88, 82.5), ("chest", 101, 104.5), ("bicep", 36, 38.5)):
+        # Every part on Record's body map, so that the map in the screenshots is full: the
+        # waist goes down while the rest grows a little.
+        for part, first, last in (
+            ("neck", 38, 39),
+            ("shoulders", 116, 120),
+            ("chest", 101, 104.5),
+            ("waist", 88, 82.5),
+            ("bicep", 36, 38.5),
+            ("forearm", 29, 30.5),
+            ("thigh", 57, 59),
+            ("calf", 37, 38),
+        ):
             measurements.append({"date": month.isoformat(), "part": part, "cm": round(history.between(month, first, last, 0.3), 1)})
         month += dt.timedelta(days=30)
 

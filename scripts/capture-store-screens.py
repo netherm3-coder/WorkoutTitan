@@ -8,7 +8,7 @@ The first argument is a served web export of the app (see "Web preview" in READM
 second is where the raw PNGs go. For each language the script opens the app in a phone-sized
 browser window (360x640 points at 3x, which gives 1080x1920), restores the demo history
 (store/demo-backup.<language>.json, from scripts/build-demo-backup.py) through the backup
-screen like a person would, and photographs six screens. scripts/build-store-images.py then
+screen like a person would, and photographs seven screens. scripts/build-store-images.py then
 puts captions on them.
 
 The web build draws the same React Native screens as the phone, with the same fonts and art; it
@@ -41,6 +41,9 @@ LANGUAGES = {
         "tabs": {"workouts": "Тренування", "body": "Тіло", "achievements": "Досягнення", "home": "Головна"},
         "camp": "Змінити вигляд табору",
         "campTitle": "Вигляд табору",
+        "pullups": "Підтягування",
+        "weightTrend": "Динаміка ваги",
+        "bodyMap": "Карта пропорцій",
     },
     "en": {
         "locale": "en-US",
@@ -55,6 +58,9 @@ LANGUAGES = {
         "tabs": {"workouts": "Workouts", "body": "Body", "achievements": "Awards", "home": "Home"},
         "camp": "Change how the camp looks",
         "campTitle": "Camp look",
+        "pullups": "Pull-ups",
+        "weightTrend": "Weight trend",
+        "bodyMap": "Body map",
     },
 }
 
@@ -68,6 +74,14 @@ def scroll(page: Page, points: int) -> None:
         page.mouse.move(180, 320)
         page.mouse.wheel(0, points)
         page.wait_for_timeout(700)
+
+
+def scroll_to(page: Page, heading: str) -> None:
+    """Scrolls until the card with this heading starts near the top of the screen."""
+    box = page.get_by_text(heading, exact=True).first.bounding_box()
+    if box is None:
+        raise RuntimeError(f"No card called {heading!r} on the screen")
+    scroll(page, round(box["y"]) - 40)
 
 
 def settle(page: Page) -> None:
@@ -117,17 +131,30 @@ def capture(base: str, out: Path) -> None:
             scroll(page, RECORDS_OFFSET)
             page.screenshot(path=folder / "2-records.png")
 
-            for number, tab in ((3, "workouts"), (4, "body"), (5, "achievements")):
-                page.get_by_role("tab", name=words["tabs"][tab]).click()
-                settle(page)
-                page.screenshot(path=folder / f"{number}-{tab}.png")
+            # The journal with the pull-ups chosen: their chart, then their sets with the 1RM.
+            page.get_by_role("tab", name=words["tabs"]["workouts"]).click()
+            page.get_by_role("radio", name=words["pullups"]).first.click()
+            settle(page)
+            page.screenshot(path=folder / "3-workouts.png")
+
+            # The body, from the weight chart down, and then the body map.
+            page.get_by_role("tab", name=words["tabs"]["body"]).click()
+            settle(page)
+            scroll_to(page, words["weightTrend"])
+            page.screenshot(path=folder / "4-body.png")
+            scroll_to(page, words["bodyMap"])
+            page.screenshot(path=folder / "5-bodymap.png")
+
+            page.get_by_role("tab", name=words["tabs"]["achievements"]).click()
+            settle(page)
+            page.screenshot(path=folder / "6-achievements.png")
 
             page.get_by_role("tab", name=words["tabs"]["home"]).click()
             scroll(page, -RECORDS_OFFSET)
             page.get_by_role("button", name=words["camp"]).click()
             page.get_by_role("heading", name=words["campTitle"]).wait_for()
             settle(page)
-            page.screenshot(path=folder / "6-camp.png")
+            page.screenshot(path=folder / "7-camp.png")
             context.close()
             print(f"{language}: {sorted(p.name for p in folder.glob('*.png'))}")
         browser.close()

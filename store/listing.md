@@ -5,7 +5,7 @@
 Картинки:
 
 - іконка: `store/icon-512.png` (512×512);
-- скріншоти телефона, по шість на мову, 1080×1920: `store/screenshots/uk/` і `store/screenshots/en/`;
+- скріншоти телефона, по сім на мову, 1080×1920: `store/screenshots/uk/` і `store/screenshots/en/`;
 - банер (feature graphic) 1024×500: `store/feature-graphic.uk.jpg` і `store/feature-graphic.en.jpg`.
 
 Як їх зроблено і як перезняти: [docs/release.md](../docs/release.md#скріншоти-й-банер).
